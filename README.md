@@ -1,2 +1,2 @@
-# craft-lisp
-None of your business Mason, nothing to see here
+# CraftLisp
+A lisp that uses the craf type system. It's a present for Mason.
