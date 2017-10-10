@@ -8,37 +8,112 @@ using namespace craft;
 using namespace craft::lisp;
 
 
+CRAFT_OBJECT_DEFINE(Cell)
+{
+  _.defaults();
+}
+
+CRAFT_OBJECT_DEFINE(Environment)
+{
+  _.defaults();
+}
+
+Cell::Cell() :
+  type(Symbol)
+  , env(instance<Environment>())
+{
+
+}
+
+Cell::Cell(cell_type type):
+  type(type)
+  , env(instance<Environment>())
+{
+
+}
+
+Cell::Cell(cell_type type, std::string const&  val):
+  type(type)
+  , val(val)
+  , env(nullptr)
+{
+
+}
+
+Cell::Cell(proc_type proc):
+  type(Proc)
+  , proc(proc)
+  , env(nullptr)
+{
+
+}
+
+Environment::Environment():
+  outer_(nullptr)
+{
+
+}
+
+Environment::Environment(Environment* outer):
+  outer_(outer)
+{
+
+}
+
+Environment::Environment(cells const& parms, cells const& args, Environment* outer):
+  outer_(outer)
+{
+  cellit a = args.begin();
+  for (cellit p = parms.begin(); p != parms.end(); ++p)
+      env_[p->val] = *a++;
+}
+
+map& Environment::find(std::string const& var)
+{
+    if (env_.find(var) != env_.end())
+        return env_; // the symbol exists in this environment
+    if (outer_)
+        return outer_->find(var); // attempt to find the symbol in some "outer" env
+    throw stdext::exception("Undefined Symbol {0}", var);
+}
+
+// return a reference to the cell associated with the given symbol 'var'
+Cell& Environment::operator[] (std::string const& var)
+{
+    return env_[var];
+}
+
 ////////////////////// built-in primitive procedures
 
-cell lisp::proc_add(const cells & c)
+Cell lisp::proc_add(const cells & c)
 {
     long n(atol(c[0].val.c_str()));
     for (cellit i = c.begin()+1; i != c.end(); ++i) n += atol(i->val.c_str());
-    return cell(Number, str(n));
+    return Cell(Number, str(n));
 }
 
-cell lisp::proc_sub(const cells & c)
+Cell lisp::proc_sub(const cells & c)
 {
     long n(atol(c[0].val.c_str()));
     for (cellit i = c.begin()+1; i != c.end(); ++i) n -= atol(i->val.c_str());
-    return cell(Number, str(n));
+    return Cell(Number, str(n));
 }
 
-cell lisp::proc_mul(const cells & c)
+Cell lisp::proc_mul(const cells & c)
 {
     long n(1);
     for (cellit i = c.begin(); i != c.end(); ++i) n *= atol(i->val.c_str());
-    return cell(Number, str(n));
+    return Cell(Number, str(n));
 }
 
-cell lisp::proc_div(const cells & c)
+Cell lisp::proc_div(const cells & c)
 {
     long n(atol(c[0].val.c_str()));
     for (cellit i = c.begin()+1; i != c.end(); ++i) n /= atol(i->val.c_str());
-    return cell(Number, str(n));
+    return Cell(Number, str(n));
 }
 
-cell lisp::proc_greater(const cells & c)
+Cell lisp::proc_greater(const cells & c)
 {
     long n(atol(c[0].val.c_str()));
     for (cellit i = c.begin()+1; i != c.end(); ++i)
@@ -47,7 +122,7 @@ cell lisp::proc_greater(const cells & c)
     return true_sym;
 }
 
-cell lisp::proc_less(const cells & c)
+Cell lisp::proc_less(const cells & c)
 {
     long n(atol(c[0].val.c_str()));
     for (cellit i = c.begin()+1; i != c.end(); ++i)
@@ -56,7 +131,7 @@ cell lisp::proc_less(const cells & c)
     return true_sym;
 }
 
-cell lisp::proc_less_equal(const cells & c)
+Cell lisp::proc_less_equal(const cells & c)
 {
     long n(atol(c[0].val.c_str()));
     for (cellit i = c.begin()+1; i != c.end(); ++i)
@@ -65,58 +140,58 @@ cell lisp::proc_less_equal(const cells & c)
     return true_sym;
 }
 
-cell lisp::proc_length(const cells & c) { return cell(Number, str(c[0].list.size())); }
-cell lisp::proc_nullp(const cells & c)  { return c[0].list.empty() ? true_sym : false_sym; }
-cell lisp::proc_car(const cells & c)    { return c[0].list[0]; }
+Cell lisp::proc_length(const cells & c) { return Cell(Number, str(c[0].list.size())); }
+Cell lisp::proc_nullp(const cells & c)  { return c[0].list.empty() ? true_sym : false_sym; }
+Cell lisp::proc_car(const cells & c)    { return c[0].list[0]; }
 
-cell lisp::proc_cdr(const cells & c)
+Cell lisp::proc_cdr(const cells & c)
 {
     if (c[0].list.size() < 2)
         return nil;
-    cell result(c[0]);
+    Cell result(c[0]);
     result.list.erase(result.list.begin());
     return result;
 }
 
-cell lisp::proc_append(const cells & c)
+Cell lisp::proc_append(const cells & c)
 {
-    cell result(List);
+    Cell result(List);
     result.list = c[0].list;
     for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i) result.list.push_back(*i);
     return result;
 }
 
-cell lisp::proc_cons(const cells & c)
+Cell lisp::proc_cons(const cells & c)
 {
-    cell result(List);
+    Cell result(List);
     result.list.push_back(c[0]);
     for (cellit i = c[1].list.begin(); i != c[1].list.end(); ++i) result.list.push_back(*i);
     return result;
 }
 
-cell lisp::proc_list(const cells & c)
+Cell lisp::proc_list(const cells & c)
 {
-    cell result(List); result.list = c;
+    Cell result(List); result.list = c;
     return result;
 }
 
 // define the bare minimum set of primintives necessary to pass the unit tests
-void lisp::add_globals(environment & env)
+void lisp::add_globals(instance<Environment> env)
 {
-    env["nil"] = nil;   env["#f"] = false_sym;  env["#t"] = true_sym;
-    env["append"] = cell(&proc_append);   env["car"]  = cell(&proc_car);
-    env["cdr"]    = cell(&proc_cdr);      env["cons"] = cell(&proc_cons);
-    env["length"] = cell(&proc_length);   env["list"] = cell(&proc_list);
-    env["null?"]  = cell(&proc_nullp);    env["+"]    = cell(&proc_add);
-    env["-"]      = cell(&proc_sub);      env["*"]    = cell(&proc_mul);
-    env["/"]      = cell(&proc_div);      env[">"]    = cell(&proc_greater);
-    env["<"]      = cell(&proc_less);     env["<="]   = cell(&proc_less_equal);
+    (*env)["nil"] = nil;   (*env)["#f"] = false_sym;  (*env)["#t"] = true_sym;
+    (*env)["append"] = Cell(&proc_append);   (*env)["car"]  = Cell(&proc_car);
+    (*env)["cdr"]    = Cell(&proc_cdr);      (*env)["cons"] = Cell(&proc_cons);
+    (*env)["length"] = Cell(&proc_length);   (*env)["list"] = Cell(&proc_list);
+    (*env)["null?"]  = Cell(&proc_nullp);    (*env)["+"]    = Cell(&proc_add);
+    (*env)["-"]      = Cell(&proc_sub);      (*env)["*"]    = Cell(&proc_mul);
+    (*env)["/"]      = Cell(&proc_div);      (*env)[">"]    = Cell(&proc_greater);
+    (*env)["<"]      = Cell(&proc_less);     (*env)["<="]   = Cell(&proc_less_equal);
 }
 
 
 ////////////////////// eval
 
-cell lisp::eval(cell x, environment * env)
+Cell lisp::eval(Cell x, instance<Environment> env)
 {
     if (x.type == Symbol)
         return env->find(x.val)[x.val];
@@ -148,9 +223,9 @@ cell lisp::eval(cell x, environment * env)
         }
     }
                                             // (proc exp*)
-    cell proc(eval(x.list[0], env));
+    Cell proc(eval(x.list[0], env));
     cells exps;
-    for (cell::iter exp = x.list.begin() + 1; exp != x.list.end(); ++exp)
+    for (Cell::iter exp = x.list.begin() + 1; exp != x.list.end(); ++exp)
         exps.push_back(eval(*exp, env));
     if (proc.type == Lambda) {
         // Create an environment for the execution of this lambda function
@@ -160,13 +235,13 @@ cell lisp::eval(cell x, environment * env)
         // *Although the environmet existed at the time the lambda was defined
         // it wasn't necessarily complete - it may have subsequently had
         // more symbols defined in that environment.
-        return eval(/*body*/proc.list[2], new environment(/*parms*/proc.list[1].list, /*args*/exps, proc.env));
+        instance<Environment> nenv = instance<Environment>::make(proc.list[1].list, exps, proc.env.get());
+        return eval(/*body*/proc.list[2], nenv.get());
     }
     else if (proc.type == Proc)
         return proc.proc(exps);
 
-    std::cout << "not a function\n";
-    exit(1);
+    throw stdext::exception("Not A Function");
 }
 
 
@@ -194,20 +269,20 @@ std::list<std::string> lisp::tokenize(const std::string & str)
 }
 
 // numbers become Numbers; every other token is a Symbol
-cell lisp::atom(const std::string & token)
+Cell lisp::atom(const std::string & token)
 {
     if (isdig(token[0]) || (token[0] == '-' && isdig(token[1])))
-        return cell(Number, token);
-    return cell(Symbol, token);
+        return Cell(Number, token);
+    return Cell(Symbol, token);
 }
 
 // return the Lisp expression in the given tokens
-cell lisp::read_from(std::list<std::string> & tokens)
+Cell lisp::read_from(std::list<std::string> & tokens)
 {
     const std::string token(tokens.front());
     tokens.pop_front();
     if (token == "(") {
-        cell c(List);
+        Cell c(List);
         while (tokens.front() != ")")
             c.list.push_back(read_from(tokens));
         tokens.pop_front();
@@ -218,18 +293,18 @@ cell lisp::read_from(std::list<std::string> & tokens)
 }
 
 // return the Lisp expression represented by the given string
-cell lisp::read(const std::string & s)
+Cell lisp::read(const std::string & s)
 {
     std::list<std::string> tokens(tokenize(s));
     return read_from(tokens);
 }
 
 // convert given cell to a Lisp-readable string
-std::string lisp::to_string(const cell & exp)
+std::string lisp::to_string(const Cell & exp)
 {
     if (exp.type == List) {
         std::string s("(");
-        for (cell::iter e = exp.list.begin(); e != exp.list.end(); ++e)
+        for (Cell::iter e = exp.list.begin(); e != exp.list.end(); ++e)
             s += to_string(*e) + ' ';
         if (s[s.size() - 1] == ' ')
             s.erase(s.size() - 1);
@@ -241,5 +316,3 @@ std::string lisp::to_string(const cell & exp)
         return "<Proc>";
     return exp.val;
 }
-
-

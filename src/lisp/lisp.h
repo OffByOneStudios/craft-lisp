@@ -1,4 +1,5 @@
 #pragma once
+#include "lisp/common.h"
 
 // #include "language/parser.h"
 // adapted https://gist.github.com/ofan/721464
@@ -12,94 +13,85 @@ namespace lisp
   inline bool isdig(char c) { return isdigit(static_cast<unsigned char>(c)) != 0; }
 
 
-  ////////////////////// cell
-
   enum cell_type { Symbol, Number, List, Proc, Lambda };
 
-  struct environment; // forward declaration; cell and environment reference each other
+  class Cell; // forward declaration; cell and environment reference each other
+  
+  typedef std::vector<Cell> cells;
+  typedef cells::const_iterator cellit;
+  typedef std::map<std::string, Cell> map;
+  
+  class Environment
+    : public virtual craft::types::Object
+  {
+      CRAFT_OBJECT_DECLARE(craft::lisp::Environment)
+  private:
+      // map a variable name onto a cell
+    
+
+      map env_; // inner symbol->cell mapping
+      Environment* outer_; // next adjacent outer env, or 0 if there are no further environments
+
+  public:
+      CRAFT_LISP_EXPORTED Environment();
+      CRAFT_LISP_EXPORTED Environment(Environment* outer);
+      CRAFT_LISP_EXPORTED Environment(cells const& parms, cells const& args, Environment* env);
+
+      CRAFT_LISP_EXPORTED map& find( std::string const& var);
+      CRAFT_LISP_EXPORTED Cell& operator[] (std::string const& var);
+  };
+  
 
   // a variant that can hold any kind of lisp value
-  struct cell {
-      typedef cell (*proc_type)(const std::vector<cell> &);
-      typedef std::vector<cell>::const_iterator iter;
-      typedef std::map<std::string, cell> map;
-      cell_type type; std::string val; std::vector<cell> list; proc_type proc; environment * env;
-      cell(cell_type type = Symbol) : type(type), env(0) {}
-      cell(cell_type type, const std::string & val) : type(type), val(val), env(0) {}
-      cell(proc_type proc) : type(Proc), proc(proc), env(0) {}
+  class Cell
+    : public virtual craft::types::Object
+  {
+    CRAFT_OBJECT_DECLARE(craft::lisp::Cell)
+  public:
+      typedef Cell (*proc_type)(std::vector<Cell> const&);
+      typedef std::vector<Cell>::const_iterator iter;
+      typedef std::map<std::string, Cell> map;
+
+      cell_type type;
+      std::string val;
+      std::vector<Cell> list;
+      proc_type proc;
+      instance<Environment> env;
+
+      CRAFT_LISP_EXPORTED Cell();
+
+      CRAFT_LISP_EXPORTED Cell(cell_type type);
+      CRAFT_LISP_EXPORTED Cell(cell_type type, const std::string & val);
+      CRAFT_LISP_EXPORTED Cell(proc_type proc);
   };
 
-  typedef std::vector<cell> cells;
-  typedef cells::const_iterator cellit;
+  const Cell false_sym(Symbol, "#f");
+  const Cell true_sym(Symbol, "#t"); // anything that isn't false_sym is true
+  const Cell nil(Symbol, "nil");
 
-  const cell false_sym(Symbol, "#f");
-  const cell true_sym(Symbol, "#t"); // anything that isn't false_sym is true
-  const cell nil(Symbol, "nil");
+  // Builtins
+  Cell proc_add(const cells & c);
+  Cell proc_sub(const cells & c);
+  Cell proc_mul(const cells & c);
+  Cell proc_div(const cells & c);
 
+  Cell proc_greater(const cells & c);
+  Cell proc_less(const cells & c);
+  Cell proc_less_equal(const cells & c);
 
-  ////////////////////// environment
+  Cell proc_length(const cells & c);
+  Cell proc_nullp(const cells & c);
+  Cell proc_car(const cells & c);
+  Cell proc_cdr(const cells & c);
+  Cell proc_append(const cells & c);
+  Cell proc_cons(const cells & c);
+  Cell proc_list(const cells & c);
 
-  // a dictionary that (a) associates symbols with cells, and
-  // (b) can chain to an "outer" dictionary
-  struct environment {
-      environment(environment * outer = 0) : outer_(outer) {}
-
-      environment(const cells & parms, const cells & args, environment * outer)
-      : outer_(outer)
-      {
-          cellit a = args.begin();
-          for (cellit p = parms.begin(); p != parms.end(); ++p)
-              env_[p->val] = *a++;
-      }
-
-      // map a variable name onto a cell
-      typedef std::map<std::string, cell> map;
-
-      // return a reference to the innermost environment where 'var' appears
-      map & find(const std::string & var)
-      {
-          if (env_.find(var) != env_.end())
-              return env_; // the symbol exists in this environment
-          if (outer_)
-              return outer_->find(var); // attempt to find the symbol in some "outer" env
-          std::cout << "unbound symbol '" << var << "'\n";
-          exit(1);
-      }
-
-      // return a reference to the cell associated with the given symbol 'var'
-      cell & operator[] (const std::string & var)
-      {
-          return env_[var];
-      }
-
-  private:
-      map env_; // inner symbol->cell mapping
-      environment * outer_; // next adjacent outer env, or 0 if there are no further environments
-  };
-  
-  // Scheme
-  cell proc_add(const cells & c);
-  cell proc_sub(const cells & c);
-  cell proc_mul(const cells & c);
-  cell proc_div(const cells & c);
-  
-  cell proc_greater(const cells & c);
-  cell proc_less(const cells & c);
-  cell proc_less_equal(const cells & c);
-
-  cell proc_length(const cells & c);
-  cell proc_nullp(const cells & c);
-  cell proc_car(const cells & c);
-  cell proc_cdr(const cells & c);
-  cell proc_append(const cells & c);
-  cell proc_cons(const cells & c);
-  cell proc_list(const cells & c);
-  
-  cell eval(cell x, environment * env);
+  Cell eval(Cell x, instance<Environment> env);
   std::list<std::string> tokenize(const std::string & str);
-  cell atom(const std::string & token);
-  cell read_from(std::list<std::string> & tokens);
-  cell read(const std::string & s);
-  std::string to_string(const cell & exp);
-  void add_globals(environment & env);
+  Cell atom(const std::string & token);
+  Cell read_from(std::list<std::string> & tokens);
+  Cell read(const std::string & s);
+  std::string to_string(const Cell & exp);
+  void add_globals(instance<Environment> env);
 }}

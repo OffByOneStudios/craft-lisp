@@ -25,19 +25,27 @@ go_bandit([](){
 });
 
 // the default read-eval-print-loop
-void repl(const std::string & prompt, environment * env)
+void repl(const std::string & prompt, instance<Environment> env)
 {
     for (;;) {
         std::cout << prompt;
         std::string line; std::getline(std::cin, line);
-        std::cout << lisp::to_string(eval(read(line), env)) << '\n';
+        try
+        {
+          std::cout << lisp::to_string(eval(read(line), env)) << '\n';
+        }
+        catch(stdext::exception e)
+        {
+          std::cout << e.what() << '\n';
+        }
     }
 }
 
 int main ()
 {
-    environment global_env; add_globals(global_env);
-    repl("90> ", &global_env);
+    instance<Environment> global_env = instance<Environment>::make();
+    add_globals(global_env);
+    repl("ISTL> ", global_env);
 }
 
 //int main(int argc, char const *argv[]) {
