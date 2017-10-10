@@ -13,7 +13,7 @@ namespace lisp
   inline bool isdig(char c) { return isdigit(static_cast<unsigned char>(c)) != 0; }
 
 
-  enum cell_type { Symbol, Number, List, Proc, Lambda };
+  enum cell_type { Symbol, Number, List, Proc, Lambda, Object };
 
   class Cell; // forward declaration; cell and environment reference each other
   

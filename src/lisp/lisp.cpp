@@ -279,6 +279,11 @@ Cell lisp::atom(const std::string & token)
 // return the Lisp expression in the given tokens
 Cell lisp::read_from(std::list<std::string> & tokens)
 {
+    if(!tokens.size())
+    {
+      throw stdext::exception("Empty Parse");
+    }
+    
     const std::string token(tokens.front());
     tokens.pop_front();
     if (token == "(") {
