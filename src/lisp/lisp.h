@@ -24,7 +24,7 @@ namespace lisp
   class Environment
     : public virtual craft::types::Object
   {
-      CRAFT_OBJECT_DECLARE(craft::lisp::Environment)
+	  CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Environment)
   private:
       // map a variable name onto a cell
     
@@ -46,7 +46,7 @@ namespace lisp
   class Cell
     : public virtual craft::types::Object
   {
-    CRAFT_OBJECT_DECLARE(craft::lisp::Cell)
+	  CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Cell)
   public:
       typedef Cell (*proc_type)(std::vector<Cell> const&);
       typedef std::vector<Cell>::const_iterator iter;
@@ -63,6 +63,8 @@ namespace lisp
       CRAFT_LISP_EXPORTED Cell(cell_type type);
       CRAFT_LISP_EXPORTED Cell(cell_type type, const std::string & val);
       CRAFT_LISP_EXPORTED Cell(proc_type proc);
+
+	  CRAFT_LISP_EXPORTED std::string to_string() const;
   };
 
   const Cell false_sym(Symbol, "#f");
@@ -87,11 +89,11 @@ namespace lisp
   Cell proc_cons(const cells & c);
   Cell proc_list(const cells & c);
 
-  Cell eval(Cell x, instance<Environment> env);
-  std::list<std::string> tokenize(const std::string & str);
-  Cell atom(const std::string & token);
-  Cell read_from(std::list<std::string> & tokens);
-  Cell read(const std::string & s);
-  std::string to_string(const Cell & exp);
-  void add_globals(instance<Environment> env);
+  CRAFT_LISP_EXPORTED Cell eval(Cell x, instance<Environment> env);
+  CRAFT_LISP_EXPORTED std::list<std::string> tokenize(const std::string & str);
+  CRAFT_LISP_EXPORTED Cell atom(const std::string & token);
+  CRAFT_LISP_EXPORTED Cell read_from(std::list<std::string> & tokens);
+  CRAFT_LISP_EXPORTED Cell read(const std::string & s);
+  
+  CRAFT_LISP_EXPORTED void add_globals(instance<Environment> env);
 }}

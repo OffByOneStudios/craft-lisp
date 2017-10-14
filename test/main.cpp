@@ -32,7 +32,7 @@ void repl(const std::string & prompt, instance<Environment> env)
         std::string line; std::getline(std::cin, line);
         try
         {
-          std::cout << lisp::to_string(eval(read(line), env)) << '\n';
+          std::cout << eval(read(line), env).to_string() << '\n';
         }
         catch(stdext::exception e)
         {

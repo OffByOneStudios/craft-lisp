@@ -83,6 +83,23 @@ Cell& Environment::operator[] (std::string const& var)
     return env_[var];
 }
 
+std::string craft::lisp::Cell::to_string() const
+{
+	if (type == List) {
+		std::string s("(");
+		for (Cell::iter e = list.begin(); e != list.end(); ++e)
+			s += e->to_string() + ' ';
+		if (s[s.size() - 1] == ' ')
+			s.erase(s.size() - 1);
+		return s + ')';
+	}
+	else if (type == Lambda)
+		return "<Lambda>";
+	else if (type == Proc)
+		return "<Proc>";
+	return val;
+}
+
 ////////////////////// built-in primitive procedures
 
 Cell lisp::proc_add(const cells & c)
@@ -302,22 +319,4 @@ Cell lisp::read(const std::string & s)
 {
     std::list<std::string> tokens(tokenize(s));
     return read_from(tokens);
-}
-
-// convert given cell to a Lisp-readable string
-std::string lisp::to_string(const Cell & exp)
-{
-    if (exp.type == List) {
-        std::string s("(");
-        for (Cell::iter e = exp.list.begin(); e != exp.list.end(); ++e)
-            s += to_string(*e) + ' ';
-        if (s[s.size() - 1] == ' ')
-            s.erase(s.size() - 1);
-        return s + ')';
-    }
-    else if (exp.type == Lambda)
-        return "<Lambda>";
-    else if (exp.type == Proc)
-        return "<Proc>";
-    return exp.val;
 }
