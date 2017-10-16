@@ -12,41 +12,16 @@ CRAFT_OBJECT_DEFINE(Environment)
 	_.defaults();
 }
 
-Environment::Environment()
+Environment::Environment(std::shared_ptr<spdlog::logger> logger)
 {
-	global = instance<Scope>::make(craft_instance_from_this(), instance<>());
+	_logger = logger;
 
-	auto add = instance<MultiMethod>::make();
-	add->attach(instance<BuiltinFunction>::make(
-		[](auto scope, auto args)
-		{
-			instance<int64_t> a(args[0]), b(args[1]);
-			return instance<int64_t>::make(*a + *b);
-		}
-	));
-	global->def("+", add);
+	global = make_library_globals(craft_instance_from_this());
+}
 
-	/*
-	auto car = instance<MultiMethod>::make();
-	car->attach(instance<BuiltinFunction>::make(
-		[](auto scope, auto args)
-		{
-			instance<int64_t> a(args[0].);
-			return instance<Sexpr>::make(*a)->car();
-		}
-	));
-	global->def("car", car);
-
-	auto cdr = instance<MultiMethod>::make();
-	cdr->attach(instance<BuiltinFunction>::make(
-		[](auto scope, auto args)
-		{
-			instance<int64_t> a(args[0]), b(args[1]);
-			return instance<int64_t>(*a + *b);
-		}
-	));
-	global->def("cdr", cdr);
-	*/
+std::shared_ptr<spdlog::logger> Environment::log()
+{
+	return _logger;
 }
 
 instance<Sexpr> Environment::read(std::string const& text)

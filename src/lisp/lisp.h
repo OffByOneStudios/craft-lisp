@@ -2,12 +2,15 @@
 #include "lisp/common.h"
 
 namespace craft {
-namespace lisp {
+namespace lisp
+{
 
 	class Scope;
 	class Environment;
 
 }}
+
+#include "types.hpp"
 
 #include "Keyword.h"
 #include "Symbol.h"
@@ -24,3 +27,4 @@ namespace lisp {
 #include "MultiMethod.h"
 #include "Macro.h"
 
+#include "lisp/library/libraries.h"
