@@ -46,7 +46,7 @@ void repl(const std::string & prompt, instance<Environment> env)
 int main ()
 {
 	types::system().init();
-    instance<Environment> global_env = instance<Environment>::make();
+    instance<Environment> global_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"));
     //add_globals(global_env);
     repl("CULT> ", global_env);
 }

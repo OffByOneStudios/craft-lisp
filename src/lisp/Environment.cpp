@@ -45,6 +45,10 @@ instance<> Environment::eval(instance<> cell, instance<Scope> scope)
 
 		head = eval(head, scope);
 
+		// -- Evaluate Special Forms --
+		if (head.typeId().isType<SpecialForm>())
+			return head.asType<SpecialForm>()->eval(scope, expr);
+
 		// -- Macro Expand --
 		bool was_macro_expanded = false;
 

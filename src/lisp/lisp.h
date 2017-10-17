@@ -10,8 +10,6 @@ namespace lisp
 
 }}
 
-#include "types.hpp"
-
 #include "Keyword.h"
 #include "Symbol.h"
 #include "Sexpr.h"
@@ -26,5 +24,6 @@ namespace lisp
 #include "BuiltinFunction.h"
 #include "MultiMethod.h"
 #include "Macro.h"
+#include "SpecialForm.h"
 
 #include "lisp/library/libraries.h"
