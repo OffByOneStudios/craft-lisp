@@ -6,6 +6,15 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
+bool special::helper::truth(instance<Scope> scope, instance<PSubroutine> truth, instance<> code)
+{
+	auto result = scope->environment()->eval(code, scope);
+	auto value = truth->call(truth, scope, { result });
+
+	assert(value.typeId().isType<bool>());
+
+	return *value.asType<bool>();
+}
 
 instance<Scope> lisp::make_library_globals(instance<Environment> env)
 {
@@ -23,35 +32,6 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	ret->def("truth", truth);
 
 	// -- Special Forms --
-	auto cond = instance<SpecialForm>::make(
-		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
-	{
-		// Setup special form
-		size_t size = sexpr->cells.size();
-		assert(size > 0);
-		size -= 1;
-
-		// Do loop of conditions:
-		auto truth_subroutine = scope->lookup("truth").asFeature<PSubroutine>();
-		size_t index;
-		for (index = 1; index < size; index += 2)
-		{
-			auto branch_result = scope->environment()->eval(sexpr->cells[index], scope);
-			auto truth_value = truth_subroutine->call(truth_subroutine, scope, { branch_result });
-			if (truth_value.typeId().isType<bool>() && *truth_value.asType<bool>())
-			{
-				return scope->environment()->eval(sexpr->cells[index + 1], scope);
-			}
-		}
-
-		// Check for last branch
-		if (index - 1 < size)
-			return scope->environment()->eval(sexpr->cells[index], scope);
-		else
-			return instance<>();
-	});
-	ret->def("cond", cond);
-
 	auto define = instance<SpecialForm>::make(
 		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
 	{
@@ -86,6 +66,54 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	});
 	ret->def("define", define);
 
+	auto cond = instance<SpecialForm>::make(
+		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
+	{
+		// Setup special form
+		size_t size = sexpr->cells.size();
+		assert(size > 0);
+		size -= 1;
+
+		// Do loop of conditions:
+		auto truth_subroutine = scope->lookup("truth").asFeature<PSubroutine>();
+		size_t index;
+		for (index = 1; index < size; index += 2)
+		{
+			if (special::helper::truth(scope, truth_subroutine, sexpr->cells[index]))
+				return scope->environment()->eval(sexpr->cells[index + 1], scope);
+		}
+
+		// Check for last branch
+		if (index - 1 < size)
+			return scope->environment()->eval(sexpr->cells[index], scope);
+		else
+			return instance<>();
+	});
+	ret->def("cond", cond);
+
+	auto _while = instance<SpecialForm>::make(
+		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
+	{
+		// Setup special form
+		size_t size = sexpr->cells.size();
+		assert(size == 3);
+		size -= 1;
+
+		auto condition = sexpr->cells[1];
+		auto body = sexpr->cells[2];
+
+		auto truth_subroutine = scope->lookup("truth").asFeature<PSubroutine>();
+
+		instance<> last_ret;
+		while (special::helper::truth(scope, truth_subroutine, condition))
+		{
+			last_ret = scope->environment()->eval(body, scope);
+		}
+
+		return last_ret;
+	});
+	ret->def("while", _while);
+
 	// -- Builtin Library --
 	auto add = instance<MultiMethod>::make();
 	add->attach(env, instance<BuiltinFunction>::make(
@@ -96,6 +124,16 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	}
 	));
 	ret->def("+", add);
+
+	auto sub = instance<MultiMethod>::make();
+	sub->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
+	{
+		instance<int64_t> a(args[0]), b(args[1]);
+		return instance<int64_t>::make(*a - *b);
+	}
+	));
+	ret->def("-", sub);
 
 	/*
 	auto car = instance<MultiMethod>::make();
