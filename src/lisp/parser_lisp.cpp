@@ -41,9 +41,9 @@ namespace lisp_grammar
 	struct keyword : seq< one< ':' >, lisp_ident > {};
 
 	struct number : seq< digit, star < lisp_ident_char > > {};
-	//struct string : identifier {};
+	struct string : if_must< one< '"' >, until< one< '"' >, star < utf8::not_one < '"' > > > > {};
 
-	struct atom : sor< number, keyword, symbol > {};
+	struct atom : sor< string, number, keyword, symbol > {};
 
 	// List type
 	struct sexpr : if_must< sexpr_open, until< sexpr_close, anything > >{};
@@ -114,6 +114,17 @@ namespace lisp_grammar
 			// TODO specialized parse function returning arbitrary percision number
 			// and/or deciding on the prefered type/size of the number
 			ps.top()->cells.push_back(types::type<int64_t>::typeId().getFeature<PParse>()->parse(in.string()));
+		}
+	};
+
+	template<>
+	struct lisp_action< string >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			std::string pstr = in.string();
+			ps.top()->cells.push_back(instance<std::string>::make(pstr.substr(1, pstr.size() - 2)));
 		}
 	};
 }
