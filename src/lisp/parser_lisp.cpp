@@ -40,7 +40,7 @@ namespace lisp_grammar
 	struct symbol : lisp_ident {};
 	struct keyword : seq< one< ':' >, lisp_ident > {};
 
-	struct number : seq< digit, star < lisp_ident_char > > {};
+	struct number : seq< opt< one < '-' > >, digit, star < lisp_ident_char > > {};
 	struct string : if_must< one< '"' >, until< one< '"' >, star < utf8::not_one < '"' > > > > {};
 
 	struct atom : sor< string, number, keyword, symbol > {};
