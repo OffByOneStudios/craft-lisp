@@ -9,7 +9,7 @@ namespace lisp
 	class Scope
 		: public virtual craft::types::Object
 	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(Scope);
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Scope);
 	private:
 
 		instance<Environment> _environment;

@@ -10,6 +10,8 @@ namespace lisp
 
 }}
 
+#include "types.h"
+
 #include "Keyword.h"
 #include "Symbol.h"
 #include "Sexpr.h"

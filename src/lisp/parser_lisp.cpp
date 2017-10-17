@@ -113,7 +113,7 @@ namespace lisp_grammar
 		{
 			// TODO specialized parse function returning arbitrary percision number
 			// and/or deciding on the prefered type/size of the number
-			ps.top()->cells.push_back(types::type<int64_t>::typeId().getFeature<PParse>()->parse(in.string()));
+			ps.top()->cells.push_back(craft::types::type<int64_t>::typeId().getFeature<PParse>()->parse(in.string()));
 		}
 	};
 

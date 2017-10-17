@@ -2,9 +2,8 @@
 #include "lisp/lisp.h"
 #include "lisp/Environment.h"
 
-using namespace craft;
-using namespace craft::types;
 using namespace craft::lisp;
+using namespace craft::lisp::types;
 
 
 CRAFT_OBJECT_DEFINE(Environment)
@@ -24,10 +23,18 @@ std::shared_ptr<spdlog::logger> Environment::log()
 	return _logger;
 }
 
+//
+// Parser
+//
+
 instance<Sexpr> Environment::read(std::string const& text)
 {
 	return parse_lisp(text);
 }
+
+//
+// Interpreter
+//
 
 instance<> Environment::eval(instance<> cell, instance<Scope> scope)
 {
@@ -81,4 +88,83 @@ instance<> Environment::eval(instance<> cell, instance<Scope> scope)
 	}
 	else
 		return cell;
+}
+
+//
+// Types
+//
+
+bool Environment::type_isChild(instance<> inst, types::TagId parent)
+{
+	auto type = inst.typeId();
+	if (type.isType<types::CraftType>())
+		return type_isChild(inst.asType<types::CraftType>()->type, parent);
+	if (type.isType<types::AbstractTag>())
+		return type_isChild(inst.asType<types::AbstractTag>()->tag, parent);
+
+	return type_isChild(type, parent);
+}
+bool Environment::type_isChild(TypeId type, types::TagId parent)
+{
+	if (parent == 0)
+		return false;
+	if (type == 0)
+		return false;
+
+	auto current = stdext::get_with_default(_type_typeParents, type, types::TagId(0));
+	return type_isChild(current, parent);
+}
+bool Environment::type_isChild(types::TagId current, types::TagId parent)
+{
+	while (current != 0)
+	{
+		if (current == parent)
+			return true;
+		current = stdext::get_with_default(_type_tagParents, current, types::TagId(0));
+	}
+
+	return false;
+}
+
+TagId Environment::type_getParent(instance<> inst)
+{
+	auto type = inst.typeId();
+	if (type.isType<types::CraftType>())
+		return type_getParent(inst.asType<types::CraftType>()->type);
+	if (type.isType<types::AbstractTag>())
+		return type_getParent(inst.asType<types::AbstractTag>()->tag);
+
+	return type_getParent(type);
+}
+TagId Environment::type_getParent(TypeId type)
+{
+	return stdext::get_with_default(_type_typeParents, type, types::TagId(0));
+}
+TagId Environment::type_getParent(TagId tag)
+{
+	return stdext::get_with_default(_type_tagParents, tag, types::TagId(0));
+}
+
+void Environment::type_setParent(instance<> inst, TagId parent)
+{
+	auto type = inst.typeId();
+	if (type.isType<types::CraftType>())
+		return type_setParent(inst.asType<types::CraftType>()->type, parent);
+	if (type.isType<types::AbstractTag>())
+		return type_setParent(inst.asType<types::AbstractTag>()->tag, parent);
+
+	return type_setParent(type, parent);
+}
+void Environment::type_setParent(TypeId type, TagId parent)
+{
+	_type_typeParents[type] = parent;
+}
+void Environment::type_setParent(TagId tag, TagId parent)
+{
+	_type_tagParents[tag] = parent;
+}
+
+std::string type_name(types::TagId tag)
+{
+	return "";
 }

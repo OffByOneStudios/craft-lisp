@@ -20,6 +20,17 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 {
 	auto ret = instance<Scope>::make(env, instance<>());
 
+	// -- Types --
+	auto Any = instance<types::Special>::make();
+	Any->kind = types::Special::Any;
+	ret->def("Any", Any);
+
+	auto Bottom = instance<types::Special>::make();
+	Bottom->kind = types::Special::Bottom;
+	ret->def("Bottom", Bottom);
+
+
+
 	// -- Compiler Specials --
 	auto truth = instance<MultiMethod>::make();
 	truth->attach(env, instance<BuiltinFunction>::make(

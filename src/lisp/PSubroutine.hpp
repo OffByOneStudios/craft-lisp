@@ -14,9 +14,9 @@ namespace lisp
 	*/
 
 	class PSubroutine abstract
-		: public types::Provider
+		: public craft::types::Provider
 	{
-		CRAFT_LISP_EXPORTED CRAFT_PROVIDER_DECLARE(PSubroutine, "lisp.subroutine", types::SingletonProviderManager);
+		CRAFT_LISP_EXPORTED CRAFT_PROVIDER_DECLARE(PSubroutine, "lisp.subroutine", craft::types::SingletonProviderManager);
 
 	public:
 		virtual instance<> call(instance<> in, instance<Scope> const&, std::vector<instance<>> const&) const = 0;
