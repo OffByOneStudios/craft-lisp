@@ -52,6 +52,40 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	});
 	ret->def("cond", cond);
 
+	auto define = instance<SpecialForm>::make(
+		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
+	{
+		assert(sexpr->cells.size() == 3);
+
+		auto name = sexpr->cells[1];
+		auto object = sexpr->cells[2];
+
+		std::string name_value;
+		if (name.typeId().isType<Symbol>())
+			name_value = name.asType<Symbol>()->value;
+		else if (name.typeId().isType<Keyword>())
+			name_value = name.asType<Keyword>()->value;
+		else
+		{
+			name = scope->environment()->eval(name, scope);
+
+			if (name.typeId().isType<Symbol>())
+				name_value = name.asType<Symbol>()->value;
+			else if (name.typeId().isType<Keyword>())
+				name_value = name.asType<Keyword>()->value;
+			else if (name.typeId().isType<std::string>())
+				name_value = *name.asType<std::string>();
+			else
+				name_value = name.toString();
+		}
+
+		object = scope->environment()->eval(object, scope);
+
+		scope->def(name_value, object);
+		return object;
+	});
+	ret->def("define", define);
+
 	// -- Builtin Library --
 	auto add = instance<MultiMethod>::make();
 	add->attach(env, instance<BuiltinFunction>::make(
