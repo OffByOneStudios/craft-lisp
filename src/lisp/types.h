@@ -8,14 +8,29 @@ namespace lisp
 	{
 		using namespace craft::types;
 
+		class AlgorithmSubtype;
+
 		struct TagId final
 			: stdext::IdValue<TagId, uint64_t>
 		{
 			using IdValue::IdValue;
 		};
 
+		class SType
+			: public types::Aspect
+		{
+			CRAFT_LISP_EXPORTED CRAFT_ASPECT_DECLARE(craft::lisp::types::SType, "lisp.type", types::FactoryAspectManager);
+		public:
+
+			virtual bool isConcrete() const = 0;
+			virtual bool isSubtypingSimple() const = 0;
+
+			virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const = 0;
+		};
+
 		class Special
 			: public virtual craft::types::Object
+			, Implements<SType>
 		{
 			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::Special);
 		public:
@@ -26,59 +41,107 @@ namespace lisp
 
 			inline static bool isAny(instance<> const& i) { return i.typeId().isType<Special>() && i.asType<Special>()->kind == Any; }
 			inline static bool isBottom(instance<> const& i) { return i.typeId().isType<Special>() && i.asType<Special>()->kind == Bottom; }
+
+		public:
+			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
+			CRAFT_LISP_EXPORTED virtual bool isSubtypingSimple() const override;
+
+			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
 		};
 
 		class CraftType
 			: public virtual craft::types::Object
+			, Implements<SType>
 		{
 			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::CraftType);
 		public:
 			TypeId type;
 
 			inline CraftType(TypeId id) : type(id) { }
+
+		public:
+			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
+			CRAFT_LISP_EXPORTED virtual bool isSubtypingSimple() const override;
+
+			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
 		};
 
 		class AbstractTag
 			: public virtual craft::types::Object
+			, Implements<SType>
 		{
 			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::AbstractTag);
 		public:
 			TagId tag;
 
 			inline AbstractTag(TagId id) : tag(id) { }
+
+		public:
+			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
+			CRAFT_LISP_EXPORTED virtual bool isSubtypingSimple() const override;
+
+			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
 		};
 
 		class Union
 			: public virtual craft::types::Object
+			, Implements<SType>
 		{
 			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::Union);
 		public:
 			std::vector<instance<>> variants;
+
+		public:
+			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
+			CRAFT_LISP_EXPORTED virtual bool isSubtypingSimple() const override;
+
+			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
 		};
 
 		class Tuple
 			: public virtual craft::types::Object
+			, Implements<SType>
 		{
 			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::Tuple);
 		public:
 			std::vector<instance<>> cells;
+
+		public:
+			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
+			CRAFT_LISP_EXPORTED virtual bool isSubtypingSimple() const override;
+
+			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
 		};
 
 		class TypeVar
 			: public virtual craft::types::Object
+			, Implements<SType>
 		{
 			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::TypeVar);
 		public:
 			std::string symbol;
+
+		public:
+			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
+			CRAFT_LISP_EXPORTED virtual bool isSubtypingSimple() const override;
+
+			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
 		};
 
 		class Exists
 			: public virtual craft::types::Object
+			, Implements<SType>
 		{
 			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::Exists);
 		public:
 			instance<TypeVar> typeVar;
 			instance<> subExpr;
+
+		public:
+			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
+			CRAFT_LISP_EXPORTED virtual bool isSubtypingSimple() const override;
+
+			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
 		};
 
 		/*
@@ -104,7 +167,7 @@ namespace lisp
 		private: // helpers
 
 			// 1 is true, 0 is undecided, -1 is false
-			static int _trivialSubtype(instance<Environment> env, instance<> left, instance<> right);
+			static int _trivialSubtype(instance<Environment> env, instance<SType> left, instance<SType> right);
 
 		private: // state
 			struct UnionState

@@ -7,8 +7,12 @@ using namespace craft::types;
 using namespace craft::lisp;
 using namespace craft::lisp::types;
 
+CRAFT_ASPECT_DEFINE(SType);
+
 CRAFT_OBJECT_DEFINE(Special)
 {
+	_.use<SType>().byCasting();
+
 	_.use<PStringer>().singleton<FunctionalStringer>(
 		[](instance<Special> i) -> std::string
 		{
@@ -21,6 +25,8 @@ CRAFT_OBJECT_DEFINE(Special)
 }
 CRAFT_OBJECT_DEFINE(CraftType)
 {
+	_.use<SType>().byCasting();
+
 	_.use<PStringer>().singleton<FunctionalStringer>(
 		[](instance<CraftType> i) -> std::string
 		{
@@ -31,26 +37,37 @@ CRAFT_OBJECT_DEFINE(CraftType)
 }
 CRAFT_OBJECT_DEFINE(AbstractTag)
 {
+	_.use<SType>().byCasting();
+
 	_.defaults();
 }
 
 CRAFT_OBJECT_DEFINE(Union)
 {
+	_.use<SType>().byCasting();
+
 	_.defaults();
 }
 CRAFT_OBJECT_DEFINE(Tuple)
 {
+	_.use<SType>().byCasting();
+
 	_.defaults();
 }
 
 CRAFT_OBJECT_DEFINE(TypeVar)
 {
+	_.use<SType>().byCasting();
+
 	_.defaults();
 }
 CRAFT_OBJECT_DEFINE(Exists)
 {
+	_.use<SType>().byCasting();
+
 	_.defaults();
 }
+
 
 instance<> lisp::type_of(instance<Environment> env, std::vector<instance<>> const& args)
 {
@@ -63,8 +80,179 @@ instance<> lisp::type_of(instance<Environment> env, std::vector<instance<>> cons
 	return ret;
 }
 
+
 /*
-Subtype
+	Type Special
+*/
+
+bool Special::isConcrete() const
+{
+	return false;
+}
+bool Special::isSubtypingSimple() const
+{
+	return true;
+}
+
+bool Special::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
+{
+	if (this->kind == Any) return true;
+	if (left.typeId().isType<Special>())
+	{
+		if (Special::isAny(left)) return false;
+		if (Special::isBottom(left)) return true;
+	}
+	if (this->kind == Bottom) return false;
+
+	assert(false && "");
+	return false;
+}
+
+
+/*
+	Type CraftType
+*/
+
+bool CraftType::isConcrete() const
+{
+	return true;
+}
+bool CraftType::isSubtypingSimple() const
+{
+	return true;
+}
+
+bool CraftType::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
+{
+	if (Special::isBottom(left)) return true;
+
+	if (left.typeId().isType<CraftType>())
+	{
+		return this->type == left.asType<CraftType>()->type;
+	}
+
+	assert(false && "");
+	return false;
+}
+
+
+/*
+Type AbstractTag
+*/
+
+bool AbstractTag::isConcrete() const
+{
+	return false;
+}
+bool AbstractTag::isSubtypingSimple() const
+{
+	return true;
+}
+
+bool AbstractTag::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
+{
+	if (Special::isBottom(left)) return true;
+
+	if (left.typeId().isType<CraftType>())
+	{
+		return env->type_isChild(left.asType<CraftType>()->type, tag);
+	}
+	else if (left.typeId().isType<AbstractTag>())
+	{
+		return env->type_isChild(left.asType<AbstractTag>()->tag, tag);
+	}
+
+	assert(false && "");
+	return false;
+}
+
+
+/*
+	Type Union
+*/
+
+bool Union::isConcrete() const
+{
+	return false;
+}
+bool Union::isSubtypingSimple() const
+{
+	return false;
+}
+
+bool Union::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
+{
+
+	assert(false && "");
+	return false;
+}
+
+
+/*
+	Type Tuple
+*/
+
+bool Tuple::isConcrete() const
+{
+	return false;
+}
+bool Tuple::isSubtypingSimple() const
+{
+	return false;
+}
+
+bool Tuple::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
+{
+
+	assert(false && "");
+	return false;
+}
+
+
+/*
+	Type TypeVar
+*/
+
+bool TypeVar::isConcrete() const
+{
+	return false;
+}
+bool TypeVar::isSubtypingSimple() const
+{
+	return false;
+}
+
+bool TypeVar::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
+{
+
+	assert(false && "");
+	return false;
+}
+
+
+/*
+	Type Exists
+*/
+
+bool Exists::isConcrete() const
+{
+	return false;
+}
+bool Exists::isSubtypingSimple() const
+{
+	return false;
+}
+
+bool Exists::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
+{
+
+	assert(false && "");
+	return false;
+}
+
+
+/*
+	Subtype
 */
 
 AlgorithmSubtype::AlgorithmSubtype(instance<Environment> env, instance<> left, instance<> right)
@@ -85,19 +273,20 @@ void AlgorithmSubtype::execute()
 	{
 		executed = true;
 		leftIsSubtype = trivial > 0;
+		return;
 	}
 
 	// Ok prepare algorithm...
+	assert(false);
 
 	// We finished yay!
 	executed = true;
 }
 
-int AlgorithmSubtype::_trivialSubtype(instance<Environment> env, instance<> left, instance<> right)
+int AlgorithmSubtype::_trivialSubtype(instance<Environment> env, instance<SType> left, instance<SType> right)
 {
 	// TODO:
 	// It should be possible to make types into an interface for this function
-	// * isSimpleType(); // this function is undecideable if either is false (sans any / bottom).
 	// * right->isSubtype(Environment, left);
 
 	//
@@ -107,49 +296,6 @@ int AlgorithmSubtype::_trivialSubtype(instance<Environment> env, instance<> left
 	if (Special::isAny(left)) return -1;
 	if (Special::isBottom(left)) return 1;
 	if (Special::isBottom(right)) return -1;
-
-	// Unions, type vars, and related requires stack
-	if (left.typeId().isType<Union>()) return 0;
-	if (right.typeId().isType<Union>()) return 0;
-	if (left.typeId().isType<TypeVar>()) return 0;
-	if (right.typeId().isType<TypeVar>()) return 0;
-	if (left.typeId().isType<Exists>()) return 0;
-	if (right.typeId().isType<Exists>()) return 0;
-
-	//
-	// Concrete Types
-	//
-	auto leftIsType = left.typeId().isType<CraftType>();
-	auto rightIsType = right.typeId().isType<CraftType>();
-
-	// 1 parametric combo (type)
-	if (leftIsType && rightIsType)
-	{
-		if (left.asType<CraftType>()->type == right.asType<CraftType>()->type)
-			return 1;
-		else
-			return -1;
-	}
-
-	//
-	// Tags
-	//
-	auto leftIsTag = left.typeId().isType<AbstractTag>();
-	auto rightIsTag = right.typeId().isType<AbstractTag>();
-
-	// 3 parametric combos (tag * type - (type))
-	if (rightIsTag)
-	{ // 2
-		if (leftIsTag)
-			return env->type_isChild(left.asType<AbstractTag>()->tag, right.asType<AbstractTag>()->tag) ? 1 : -1;
-		if (leftIsType)
-			return env->type_isChild(left.asType<CraftType>()->type, right.asType<AbstractTag>()->tag) ? 1 : -1;
-	}
-	if (leftIsTag)
-	{ // 1
-		if (rightIsType)
-			return -1;
-	}
 
 	//
 	// Tuples
@@ -167,7 +313,7 @@ int AlgorithmSubtype::_trivialSubtype(instance<Environment> env, instance<> left
 		if (leftSize != rightTuple->cells.size())
 			return -1;
 
-		int trivialTrue = 0;
+		size_t trivialTrue = 0;
 		for (int i = 0; i < leftSize; ++i)
 		{
 			auto trivial = _trivialSubtype(env, leftTuple->cells[i], rightTuple->cells[i]);
@@ -182,5 +328,8 @@ int AlgorithmSubtype::_trivialSubtype(instance<Environment> env, instance<> left
 	else if (right.typeId().isType<Tuple>())
 		return -1;  // Both must be tuples if either are (excluding unions)
 
-	return 0;
+	if (!left->isSubtypingSimple() || !right->isSubtypingSimple())
+		return 0;
+
+	return right->isSubtype(env, left, nullptr);
 }
