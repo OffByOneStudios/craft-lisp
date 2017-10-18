@@ -48,6 +48,36 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	});
 	ret->def("craft-type", craft_type);
 
+	auto Tuple = instance<BuiltinFunction>::make(
+		[](auto scope, auto args) -> instance<>
+	{
+		auto ret = instance<lisp::types::Tuple>::make();
+
+		for (auto it = args.begin(); it != args.end(); ++it)
+		{
+			assert(it->hasFeature<lisp::types::SType>());
+			ret->cells.push_back(*it);
+		}
+		
+		return ret;
+	});
+	ret->def("Tuple", Tuple);
+
+	auto Union = instance<BuiltinFunction>::make(
+		[](auto scope, auto args) -> instance<>
+	{
+		auto ret = instance<lisp::types::Union>::make();
+
+		for (auto it = args.begin(); it != args.end(); ++it)
+		{
+			assert(it->hasFeature<lisp::types::SType>());
+			ret->variants.push_back(*it);
+		}
+
+		return ret;
+	});
+	ret->def("Union", Union);
+
 	auto subtype = instance<MultiMethod>::make();
 	subtype->attach(env, instance<BuiltinFunction>::make(
 		[](instance<Scope> scope, auto args) -> instance<>

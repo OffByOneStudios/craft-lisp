@@ -331,5 +331,5 @@ int AlgorithmSubtype::_trivialSubtype(instance<Environment> env, instance<SType>
 	if (!left->isSubtypingSimple() || !right->isSubtypingSimple())
 		return 0;
 
-	return right->isSubtype(env, left, nullptr);
+	return right->isSubtype(env, left, nullptr) ? 1 : -1;
 }
