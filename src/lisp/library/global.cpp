@@ -29,7 +29,37 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	Bottom->kind = types::Special::Bottom;
 	ret->def("Bottom", Bottom);
 
+	auto craft_type = instance<BuiltinFunction>::make(
+		[](auto scope, auto args) -> instance<>
+	{
+		instance<> arg(args[0]);
+		std::string lookup;
+		
+		if (arg.typeId().isType<Keyword>())
+			lookup = arg.asType<Keyword>()->value;
+		else
+			lookup = arg.toString();
 
+		auto type = types::system().getManager<PIdentifier>()->index(lookup);
+		if (type == types::None)
+			return instance<>();
+
+		return instance<lisp::types::CraftType>::make(type);
+	});
+	ret->def("craft-type", craft_type);
+
+	auto subtype = instance<MultiMethod>::make();
+	subtype->attach(env, instance<BuiltinFunction>::make(
+		[](instance<Scope> scope, auto args) -> instance<>
+	{
+		instance<> a(args[0]), b(args[1]);
+
+		types::AlgorithmSubtype* algo = new types::AlgorithmSubtype(scope->environment(), a, b);
+
+		algo->execute();
+		return instance<bool>::make(algo->leftIsSubtype);
+	}));
+	ret->def("subtype", subtype);
 
 	// -- Compiler Specials --
 	auto truth = instance<MultiMethod>::make();
@@ -38,8 +68,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	{
 		instance<int64_t> a(args[0]);
 		return instance<bool>::make(*a != 0);
-	}
-	));
+	}));
 	ret->def("truth", truth);
 
 	// -- Special Forms --
@@ -132,8 +161,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	{
 		instance<int64_t> a(args[0]), b(args[1]);
 		return instance<int64_t>::make(*a + *b);
-	}
-	));
+	}));
 	ret->def("+", add);
 
 	auto sub = instance<MultiMethod>::make();
@@ -142,8 +170,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	{
 		instance<int64_t> a(args[0]), b(args[1]);
 		return instance<int64_t>::make(*a - *b);
-	}
-	));
+	}));
 	ret->def("-", sub);
 
 	/*
