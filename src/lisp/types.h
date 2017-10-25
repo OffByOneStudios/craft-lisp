@@ -20,6 +20,10 @@ namespace lisp
 			: public types::Aspect
 		{
 			CRAFT_LISP_EXPORTED CRAFT_ASPECT_DECLARE(craft::lisp::types::SType, "lisp.type", types::FactoryAspectManager);
+		protected:
+
+			CRAFT_LISP_EXPORTED static bool reinvokeSubtype(AlgorithmSubtype*, instance<Environment> env, instance<> left, instance<> right);
+
 		public:
 
 			virtual bool isConcrete() const = 0;
@@ -134,7 +138,10 @@ namespace lisp
 		{
 			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::Exists);
 		public:
+			// This typevar must be the referential equivelent of the one inside the expression
 			instance<TypeVar> typeVar;
+
+			// The body type expression
 			instance<> subExpr;
 
 		public:
@@ -164,17 +171,25 @@ namespace lisp
 			instance<> _left;
 			instance<> _right;
 
-		private: // helpers
+		protected:
+			friend class SType;
 
-			// 1 is true, 0 is undecided, -1 is false
-			static int _trivialSubtype(instance<Environment> env, instance<SType> left, instance<SType> right);
+			CRAFT_LISP_EXPORTED bool reinvoke(instance<SType> newLeft, instance<SType> newRight);
 
 		private: // state
 			struct UnionState
 			{
 				size_t depth;
-				bool more;
+				size_t more;
 				std::vector<size_t> choices;
+
+				inline void incrementChoice()
+				{
+					while (!choices.empty() && choices.back() == 0)
+						choices.pop_back();
+					if (!choices.empty())
+						choices[choices.size() - 1] -= 1;
+				}
 			};
 
 			struct TypeVarState
@@ -188,6 +203,12 @@ namespace lisp
 			UnionState _leftStack;
 			UnionState _rightStack;
 
+		private: // helpers
+
+			static bool _isSimple(instance<Environment> env, instance<SType> left, instance<SType> right);
+			static bool _trivialSubtype(instance<Environment> env, instance<SType> left, instance<SType> right, AlgorithmSubtype* algo = nullptr);
+			static instance<> _pickUnionType(instance<Union> union_, UnionState& state);
+
 		public: // result:
 			bool executed;
 			bool leftIsSubtype;
@@ -195,7 +216,7 @@ namespace lisp
 		public:
 			CRAFT_LISP_EXPORTED AlgorithmSubtype(instance<Environment> env, instance<> left, instance<> right);
 
-			CRAFT_LISP_EXPORTED void execute();
+			CRAFT_LISP_EXPORTED void execute_subtype();
 		};
 	}
 

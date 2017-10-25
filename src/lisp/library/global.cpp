@@ -1,4 +1,4 @@
-#include "lisp/common.h"
+﻿#include "lisp/common.h"
 #include "lisp/lisp.h"
 #include "lisp/library/libraries.h"
 
@@ -29,9 +29,24 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	Bottom->kind = types::Special::Bottom;
 	ret->def("Bottom", Bottom);
 
+	auto String = instance<lisp::types::CraftType>::make(types::type<std::string>::typeId());
+	ret->def("String", String);
+
+	auto Bool = instance<lisp::types::CraftType>::make(types::type<bool>::typeId());
+	ret->def("Bool", Bool);
+
 	auto craft_type = instance<BuiltinFunction>::make(
 		[](auto scope, auto args) -> instance<>
 	{
+		auto pidentifier = types::system().getManager<PIdentifier>();
+
+		if (args.size() == 0)
+		{
+			for (auto tid : pidentifier->supportedTypes())
+				scope->environment()->log()->info(tid.toString());
+			return instance<>();
+		}
+
 		instance<> arg(args[0]);
 		std::string lookup;
 		
@@ -40,7 +55,8 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		else
 			lookup = arg.toString();
 
-		auto type = types::system().getManager<PIdentifier>()->index(lookup);
+		auto type = pidentifier->index(lookup);
+
 		if (type == types::None)
 			return instance<>();
 
@@ -86,10 +102,11 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 		types::AlgorithmSubtype* algo = new types::AlgorithmSubtype(scope->environment(), a, b);
 
-		algo->execute();
+		algo->execute_subtype();
 		return instance<bool>::make(algo->leftIsSubtype);
 	}));
-	ret->def("subtype", subtype);
+	ret->def("subtype?", subtype);
+	ret->def("\u227C", subtype); 
 
 	// -- Compiler Specials --
 	auto truth = instance<MultiMethod>::make();
@@ -100,6 +117,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		return instance<bool>::make(*a != 0);
 	}));
 	ret->def("truth", truth);
+	ret->def("?", truth);
 
 	// -- Special Forms --
 	auto define = instance<SpecialForm>::make(
@@ -184,6 +202,25 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	});
 	ret->def("while", _while);
 
+	auto lambda = instance<SpecialForm>::make(
+		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
+	{
+		// Setup special form
+		size_t size = sexpr->cells.size();
+		assert(size == 3);
+		size -= 1;
+
+		auto binding = sexpr->cells[1];
+		auto body = sexpr->cells[2];
+
+		auto function = instance<Function>::make();
+		function->setBinding(binding);
+		function->setBody(body);
+
+		return function;
+	});
+	ret->def("lambda", lambda);
+
 	// -- Builtin Library --
 	auto add = instance<MultiMethod>::make();
 	add->attach(env, instance<BuiltinFunction>::make(
@@ -202,6 +239,31 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		return instance<int64_t>::make(*a - *b);
 	}));
 	ret->def("-", sub);
+
+	auto eval_file = instance<MultiMethod>::make();
+	eval_file->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
+	{
+		return instance<>();
+	}));
+	ret->def("eval-file", eval_file);
+
+	auto MultiMethod_ = instance<MultiMethod>::make();
+	MultiMethod_->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
+	{
+		return instance<MultiMethod>::make();
+	}));
+	ret->def("MultiMethod", MultiMethod_);
+
+	auto attach = instance<lisp::MultiMethod>::make();
+	attach->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
+	{
+		instance<MultiMethod> a(args[0]); instance<> b(args[1]);
+		return instance<lisp::MultiMethod>::make();
+	}));
+	ret->def("attach", attach);
 
 	/*
 	auto car = instance<MultiMethod>::make();

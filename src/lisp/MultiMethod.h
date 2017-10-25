@@ -19,15 +19,21 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::MultiMethod);
 	private:
 
-		// TODO dispatch tree
-		instance<> _only;
+		struct _Dispatch
+		{
+			instance<types::SType> type;
+			size_t index;
+		};
+
+		std::vector<instance<>> _subMethods;
+		std::vector<_Dispatch> _dispatchChain;
 
 	public:
 		CRAFT_LISP_EXPORTED MultiMethod();
 
 		CRAFT_LISP_EXPORTED instance<> call(instance<Scope> const& scope, std::vector<instance<>> const&);
 
-		CRAFT_LISP_EXPORTED instance<> dispatch(instance<Environment> env);
+		CRAFT_LISP_EXPORTED instance<> dispatch(instance<Environment> env, instance<types::SType> type);
 		CRAFT_LISP_EXPORTED void attach(instance<Environment> env, instance<>);
 	};
 

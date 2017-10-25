@@ -68,6 +68,17 @@ CRAFT_OBJECT_DEFINE(Exists)
 	_.defaults();
 }
 
+bool SType::reinvokeSubtype(AlgorithmSubtype* algo, instance<Environment> env, instance<> left, instance<> right)
+{
+	if (algo == nullptr)
+	{
+		return AlgorithmSubtype::_trivialSubtype(env, left, right);
+	}
+	else
+	{
+		return algo->reinvoke(left, right);
+	}
+}
 
 instance<> lisp::type_of(instance<Environment> env, std::vector<instance<>> const& args)
 {
@@ -166,6 +177,39 @@ bool AbstractTag::isSubtype(instance<Environment> env, instance<> left, Algorith
 	return false;
 }
 
+/*
+	Type Tuple
+*/
+
+bool Tuple::isConcrete() const
+{
+	return false;
+}
+bool Tuple::isSubtypingSimple() const
+{
+	return std::all_of(cells.begin(), cells.end(), [](instance<SType> i) -> bool { return i->isSubtypingSimple(); });
+}
+
+bool Tuple::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
+{
+	if (left.typeId().isType<Tuple>())
+	{
+		auto leftTuple = left.asType<Tuple>();
+		auto leftSize = leftTuple->cells.size();
+
+		if (leftSize != cells.size())
+			return false;
+
+		for (int i = 0; i < leftSize; ++i)
+		{
+			if (!reinvokeSubtype(algo, env, leftTuple->cells[i], cells[i]))
+				return false;
+		}
+
+		return true;
+	}
+	return false;
+}
 
 /*
 	Type Union
@@ -181,27 +225,6 @@ bool Union::isSubtypingSimple() const
 }
 
 bool Union::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
-{
-
-	assert(false && "");
-	return false;
-}
-
-
-/*
-	Type Tuple
-*/
-
-bool Tuple::isConcrete() const
-{
-	return false;
-}
-bool Tuple::isSubtypingSimple() const
-{
-	return false;
-}
-
-bool Tuple::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
 {
 
 	assert(false && "");
@@ -255,6 +278,9 @@ bool Exists::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubt
 	Subtype
 */
 
+// This algorithm could be refactored into a stack of where it is in each tree
+// And then a simple double dispatch mechanism to compare types
+
 AlgorithmSubtype::AlgorithmSubtype(instance<Environment> env, instance<> left, instance<> right)
 {
 	_env = env;
@@ -264,72 +290,115 @@ AlgorithmSubtype::AlgorithmSubtype(instance<Environment> env, instance<> left, i
 	executed = false;
 }
 
-void AlgorithmSubtype::execute()
+bool AlgorithmSubtype::_isSimple(instance<Environment> env, instance<SType> left, instance<SType> right)
+{
+	return left->isSubtypingSimple() && right->isSubtypingSimple();
+}
+bool AlgorithmSubtype::_trivialSubtype(instance<Environment> env, instance<SType> left, instance<SType> right, AlgorithmSubtype* algo)
+{
+	//
+	// Specials
+	//
+	if (Special::isAny(right)) return true;
+	if (Special::isAny(left)) return false;
+	if (Special::isBottom(left)) return true;
+	if (Special::isBottom(right)) return false;
+
+	//
+	// Core typing
+	//
+	return right->isSubtype(env, left, algo);
+}
+
+instance<> AlgorithmSubtype::_pickUnionType(instance<Union> union_, UnionState& state)
+{
+	if (!(state.depth < state.choices.size()))
+	{
+		// If we haven't gotten this deep before push it to the state stack.
+		state.choices.push_back(union_->variants.size() - 1);
+	}
+
+	auto choice = state.choices[state.depth];
+	state.depth++;
+
+	return union_->variants[choice];
+}
+
+bool AlgorithmSubtype::reinvoke(instance<SType> newLeft, instance<SType> newRight)
+{
+	if (newLeft.typeId().isType<Union>())
+	{
+		newLeft = _pickUnionType(newLeft.asType<Union>(), _leftStack);
+
+		return reinvoke(newLeft, newRight);
+	}
+	else if (newRight.typeId().isType<Union>())
+	{
+		newRight = _pickUnionType(newRight.asType<Union>(), _rightStack);
+
+		return reinvoke(newLeft, newRight);
+	}
+	else
+	{
+		return _trivialSubtype(_env, newLeft, newRight, this);
+	}
+}
+
+void AlgorithmSubtype::execute_subtype()
 {
 	// Trivial checks first
-	auto trivial = _trivialSubtype(_env, _left, _right);
-
-	if (trivial != 0)
+	if (_isSimple(_env, _left, _right))
 	{
 		executed = true;
-		leftIsSubtype = trivial > 0;
+		leftIsSubtype = _trivialSubtype(_env, _left, _right);
 		return;
 	}
 
 	// Ok prepare algorithm...
-	assert(false);
+	_typeVars.clear();
+
+	// For each left hand union choice there must be a matching right hand that accepts.
+	// If there is none then it's a failure.
+	// For right hand choices we we search until we find what we are looking for.
+	// I suspect the existential queries will require this behviour...
+
+	// This function will be both loops.
+
+	// And do it
+	_leftStack.choices.clear();
+	do
+	{ // Outer forall loop that checks each left hand side for acceptance
+		bool found = false;
+		_rightStack.choices.clear();
+
+		do
+		{ // Inner exists loop that checks any right hand side for existence
+			_leftStack.depth = 0;
+			_rightStack.depth = 0;
+
+			// check for breaks
+			if (reinvoke(_left, _right))
+			{
+				found = true;
+				break;
+			}
+
+			_rightStack.incrementChoice();
+
+		} while (!_rightStack.choices.empty());
+
+		if (!found)
+		{
+			executed = true;
+			leftIsSubtype = false;
+			return;
+		}
+
+		_leftStack.incrementChoice();
+	}
+	while (!_leftStack.choices.empty());
 
 	// We finished yay!
 	executed = true;
-}
-
-int AlgorithmSubtype::_trivialSubtype(instance<Environment> env, instance<SType> left, instance<SType> right)
-{
-	// TODO:
-	// It should be possible to make types into an interface for this function
-	// * right->isSubtype(Environment, left);
-
-	//
-	// Specials
-	//
-	if (Special::isAny(right)) return 1;
-	if (Special::isAny(left)) return -1;
-	if (Special::isBottom(left)) return 1;
-	if (Special::isBottom(right)) return -1;
-
-	//
-	// Tuples
-	//
-	if (left.typeId().isType<Tuple>())
-	{
-		if (!right.typeId().isType<Tuple>())
-			return -1; // Both must be tuples if either are (excluding unions)
-
-		auto leftTuple = left.asType<Tuple>();
-		auto rightTuple = right.asType<Tuple>();
-
-		auto leftSize = leftTuple->cells.size();
-
-		if (leftSize != rightTuple->cells.size())
-			return -1;
-
-		size_t trivialTrue = 0;
-		for (int i = 0; i < leftSize; ++i)
-		{
-			auto trivial = _trivialSubtype(env, leftTuple->cells[i], rightTuple->cells[i]);
-			if (trivial == 0) continue;
-			else if (trivial > 0) trivialTrue += 1;
-			else if (trivial < 0) return -1; // Any false pair ruins it all
-		}
-
-		if (trivialTrue = leftSize)
-			return 1; // True if all pairs are true
-	}
-	else if (right.typeId().isType<Tuple>())
-		return -1;  // Both must be tuples if either are (excluding unions)
-
-	if (!left->isSubtypingSimple() || !right->isSubtypingSimple())
-		return 0;
-
-	return right->isSubtype(env, left, nullptr) ? 1 : -1;
+	leftIsSubtype = true;
 }

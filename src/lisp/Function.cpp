@@ -14,9 +14,9 @@ CRAFT_OBJECT_DEFINE(Function)
 	_.defaults();
 }
 
-Function::Function(instance<Sexpr> body)
+Function::Function()
 {
-	_body = body;
+
 }
 
 instance<> Function::call(instance<Scope> const& scope, std::vector<instance<>> const& args)
@@ -24,4 +24,14 @@ instance<> Function::call(instance<Scope> const& scope, std::vector<instance<>> 
 	// TODO bind args into scope using binding sexpr
 
 	return scope->environment()->eval(_body, scope);
+}
+
+void Function::setBody(instance<Sexpr> body)
+{
+	_body = body;
+}
+
+void Function::setBinding(instance<Sexpr> binding)
+{
+	_binding = binding;
 }
