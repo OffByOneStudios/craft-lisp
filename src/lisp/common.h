@@ -1,6 +1,6 @@
 #pragma once
 
-#include "defines.h"
+#include "lisp/defines.h"
 
 // C++
 #include <string>

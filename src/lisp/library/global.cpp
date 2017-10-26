@@ -49,7 +49,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 		instance<> arg(args[0]);
 		std::string lookup;
-		
+
 		if (arg.typeId().isType<Keyword>())
 			lookup = arg.asType<Keyword>()->value;
 		else
@@ -71,10 +71,10 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 		for (auto it = args.begin(); it != args.end(); ++it)
 		{
-			assert(it->hasFeature<lisp::types::SType>());
+			//assert(it->hasFeature<::craft::lisp::types::SType>());
 			ret->cells.push_back(*it);
 		}
-		
+
 		return ret;
 	});
 	ret->def("Tuple", Tuple);
@@ -86,7 +86,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 		for (auto it = args.begin(); it != args.end(); ++it)
 		{
-			assert(it->hasFeature<lisp::types::SType>());
+			//assert(it->hasFeature<lisp::types::SType>());
 			ret->variants.push_back(*it);
 		}
 
@@ -106,7 +106,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		return instance<bool>::make(algo->leftIsSubtype);
 	}));
 	ret->def("subtype?", subtype);
-	ret->def("\u227C", subtype); 
+	ret->def("\u227C", subtype);
 
 	// -- Compiler Specials --
 	auto truth = instance<MultiMethod>::make();
