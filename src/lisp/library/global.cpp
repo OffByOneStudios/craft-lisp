@@ -6,6 +6,10 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
+
+typedef instance<Scope> iScope;
+typedef std::vector<instance<>> tArgs;
+
 bool special::helper::truth(instance<Scope> scope, instance<PSubroutine> truth, instance<> code)
 {
 	auto result = scope->environment()->eval(code, scope);
@@ -36,7 +40,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	ret->def("Bool", Bool);
 
 	auto craft_type = instance<BuiltinFunction>::make(
-		[](auto scope, auto args) -> instance<>
+		[](iScope scope, tArgs args) -> instance<>
 	{
 		auto pidentifier = types::system().getManager<PIdentifier>();
 
@@ -242,9 +246,31 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 	auto eval_file = instance<MultiMethod>::make();
 	eval_file->attach(env, instance<BuiltinFunction>::make(
-		[](auto scope, auto args)
+		[](iScope scope, auto args)
 	{
-		return instance<>();
+		try
+		{
+			auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
+			auto ext = path::extname(s);
+			if (ext != "cult")
+			{
+				throw stdext::exception("Scripts must be of extension .cult");
+			}
+			auto script = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
+
+			auto env = scope->environment();
+			auto cell = env->read(script);
+			for (auto c : cell->cells)
+			{
+				env->eval(c, scope);
+			}
+
+			return instance<>();
+		}
+		catch (stdext::exception e)
+		{
+			return (instance<>)instance<std::string>::make(e.what());
+		}
 	}));
 	ret->def("eval-file", eval_file);
 

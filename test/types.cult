@@ -1,0 +1,4 @@
+(define String (craft-type :std.string))
+(define Bool (craft-type :bool))
+(define Int64 (craft-type :int64))
+(define UInt64 (craft-type :uint64))
