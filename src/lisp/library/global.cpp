@@ -39,6 +39,12 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	auto Bool = instance<lisp::types::CraftType>::make(types::type<bool>::typeId());
 	ret->def("Bool", Bool);
 
+	auto Int = instance<lisp::types::CraftType>::make(types::type<int64_t>::typeId());
+	ret->def("Int", Int);
+
+	auto Float64 = instance<lisp::types::CraftType>::make(types::type<double>::typeId());
+	ret->def("Float64", Float64);
+
 	auto craft_type = instance<BuiltinFunction>::make(
 		[](iScope scope, tArgs args) -> instance<>
 	{
@@ -156,7 +162,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		scope->def(name_value, object);
 		return object;
 	});
-	ret->def("define", define);
+	ret->def("def", define);
 
 	auto cond = instance<SpecialForm>::make(
 		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
@@ -244,35 +250,42 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	}));
 	ret->def("-", sub);
 
-	auto eval_file = instance<MultiMethod>::make();
-	eval_file->attach(env, instance<BuiltinFunction>::make(
+	auto cwd = instance<MultiMethod>::make();
+	cwd->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
+	{
+		return instance<std::string>::make(path::absolute());
+	}));
+	ret->def("cwd", cwd);
+
+	auto file_text = instance<MultiMethod>::make();
+	file_text->attach(env, instance<BuiltinFunction>::make(
 		[](iScope scope, auto args)
 	{
-		try
-		{
-			auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
-			auto ext = path::extname(s);
-			if (ext != "cult")
-			{
-				throw stdext::exception("Scripts must be of extension .cult");
-			}
-			auto script = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
+		auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
+		auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
 
-			auto env = scope->environment();
-			auto cell = env->read(script);
-			for (auto c : cell->cells)
-			{
-				env->eval(c, scope);
-			}
-
-			return instance<>();
-		}
-		catch (stdext::exception e)
-		{
-			return (instance<>)instance<std::string>::make(e.what());
-		}
+		return instance<std::string>::make(text);
 	}));
-	ret->def("eval-file", eval_file);
+	ret->def("file/text", file_text);
+
+	auto file_eval = instance<MultiMethod>::make();
+	file_eval->attach(env, instance<BuiltinFunction>::make(
+		[](iScope scope, auto args)
+	{
+		auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
+		auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
+
+		auto env = scope->environment();
+		auto cell = env->read(text);
+		for (auto c : cell->cells)
+		{
+			env->eval(c, scope);
+		}
+
+		return instance<>();
+	}));
+	ret->def("file/eval", file_eval);
 
 	auto MultiMethod_ = instance<MultiMethod>::make();
 	MultiMethod_->attach(env, instance<BuiltinFunction>::make(

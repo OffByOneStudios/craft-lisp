@@ -24,38 +24,8 @@ go_bandit([](){
   });
 });
 
-// the default read-eval-print-loop
-void repl(const std::string & prompt, instance<Environment> env)
-{
-    for (;;)
-	{
-        std::cout << prompt;
-        std::string line; std::getline(std::cin, line);
-        try
-        {
-			instance<Sexpr> top_level = env->read(line);
-			std::cout << env->eval(top_level->cells[0], env->global).toString() << '\n';
-        }
-        catch(std::exception const& e)
-        {
-			std::cout << e.what() << '\n';
-        }
-    }
+int main(int argc, char const *argv[]) {
+	auto logger = spdlog::stdout_color_mt("console");
+	return bandit::run(argc, (char**)argv);
 }
-
-int main ()
-{
-	::craft::types::system().init();
-    instance<Environment> global_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"));
-    //add_globals(global_env);
-    repl("CULT> ", global_env);
-}
-
-//int main(int argc, char const *argv[]) {
-//  auto logger = spdlog::stdout_color_mt("console");
-//  craft::instance<std::string> s = craft::instance<std::string>::make(std::string("pLaceholder"));
-//  std::string input("(concat 'answer (plus 2 (times 2 3)))");
-//  craft::features::languages::lisp::Evaluate(input, s, logger);
-//  //return bandit::run(argc, (char**)argv);
-//}
 
