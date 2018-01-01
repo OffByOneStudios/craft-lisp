@@ -9,7 +9,7 @@ Has the following abstract hierarchy:
 * `(Iterable I)`
   * `(Iterator I)`
 
-All `Iterator`s are `Iterable`s. An `Iterator` stores the current iteration state and can be use to iterator through a collection. An `Iterable` can create an `Iterator`.
+All `Iterator`s are `Iterable`s. An `Iterator` stores the current iteration state and can be use to iterate through a collection. An `Iterable` can create an `Iterator`.
 
 * [Julia](https://docs.julialang.org/en/latest/manual/interfaces/#man-interface-iteration-1)
 
@@ -23,8 +23,10 @@ Must have:
 
 Must have
 
-* `current (iterator Iterator,) Iterator`.
+* `current (iterator (Iterator I),) I`.
 * `next (iterator Iterator,) Bool`.
+
+Iterator implementations include generator functions, pointer pairs, and container+index pairs.
 
 ## Methods
 
@@ -42,13 +44,13 @@ Rejected Alternate Names: `spread`, `furl`.
 
 Builds an iterable by transforming each element of the source element and concatenating them.
 
-`fan (source (Iterable I), expander (Func (I) (Iter R))) (Iterable R)`
+`fan (source (Iterable I), expander (Func (I) (Iterable R))) (Iterable R)`
 
 ### `filter`
 
 Rejected Alternate Names: `where`, `cond` (overload), `if`, `sift`.
 
-Builds an iterable by filtering elements of another iterable that are fulfill a predicate.
+Builds an iterable by filtering elements of another iterable that fulfill a predicate.
 
 `filter (source (Iterable I), predicate (Func (I) Boolean)) (Iterable I)`
 

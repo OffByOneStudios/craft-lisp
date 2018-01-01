@@ -2,6 +2,8 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
 
+//
+// globals.h
 namespace craft {
 namespace lisp {
 
@@ -18,4 +20,11 @@ namespace lisp {
 
 	instance<Scope> make_library_globals(instance<Environment> env);
 
+
 }}
+
+//
+// C++ interfaces for libraries
+//
+
+#include "lisp/library/iteration.h"
