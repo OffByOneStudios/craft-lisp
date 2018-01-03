@@ -5,24 +5,27 @@
 namespace craft {
 namespace lisp
 {
-
-	class Scope
+	class Module
 		: public virtual craft::types::Object
 		, public types::Implements<SScope>
 	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Scope);
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Module);
 	private:
 
 		instance<Environment> _environment;
-		instance<SScope> _parent;
+		instance<Namespace> _ns;
+		std::string _filepath;
 
 		std::map<std::string, instance<Binding>> _lookup;
 
 	public:
 
-		CRAFT_LISP_EXPORTED Scope(instance<Environment> env, instance<SScope> parent);
+		CRAFT_LISP_EXPORTED Module(instance<Namespace> ns, std::string path);
 
-		CRAFT_LISP_EXPORTED instance<SScope> parent() const;
+		CRAFT_LISP_EXPORTED static instance<Module> makeLiveModule(instance<Environment> env);
+
+		CRAFT_LISP_EXPORTED std::string filepath() const;
+		CRAFT_LISP_EXPORTED instance<Namespace> namespace_() const;
 
 	public:
 		//

@@ -1,36 +1,33 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
-#include "lisp/Scope.h"
+#include "lisp/Namespace.h"
 
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Scope)
+CRAFT_OBJECT_DEFINE(Namespace)
 {
-	_.use<SScope>().byCasting();
-
 	_.defaults();
+
+	_.use<SScope>().byCasting();
 }
 
 
-Scope::Scope(instance<Environment> env, instance<SScope> parent)
+Namespace::Namespace(instance<Environment> env)
 {
 	_environment = env;
-	_parent = parent;
+
+	define(instance<Binding>::make("*ns*", craft_instance_from_this()));
 }
 
-instance<Environment> Scope::environment() const
+instance<Environment> Namespace::environment() const
 {
 	return _environment;
 }
-instance<SScope> Scope::parent() const
-{
-	return _parent;
-}
 
-instance<Binding> Scope::lookup(std::string const& s)
+instance<Binding> Namespace::lookup(std::string const& s)
 {
 	auto it = _lookup.find(s);
 	if (it == _lookup.end())
@@ -39,7 +36,8 @@ instance<Binding> Scope::lookup(std::string const& s)
 	return it->second;
 }
 
-void Scope::define(instance<Binding> binding)
+void Namespace::define(instance<Binding> binding)
 {
 	_lookup[binding->name()] = binding;
 }
+

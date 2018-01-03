@@ -17,7 +17,7 @@ Macro::Macro(f_macro macro)
 	_macro = macro;
 }
 
-instance<> Macro::expand(instance<Scope> const& scope, std::vector<instance<>> const& forms)
+instance<> Macro::expand(instance<SScope> const& scope, std::vector<instance<>> const& forms)
 {
 	return _macro(scope, forms);
 }

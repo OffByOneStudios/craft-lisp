@@ -11,7 +11,7 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Macro);
 	public:
-		typedef std::function<instance<>(instance<Scope>, std::vector<instance<>> const&)> f_macro;
+		typedef std::function<instance<>(instance<SScope>, std::vector<instance<>> const&)> f_macro;
 
 	private:
 
@@ -21,7 +21,7 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED Macro(f_macro);
 
-		CRAFT_LISP_EXPORTED instance<> expand(instance<Scope> const& scope, std::vector<instance<>> const& forms);
+		CRAFT_LISP_EXPORTED instance<> expand(instance<SScope> const& scope, std::vector<instance<>> const& forms);
 	};
 
 }}

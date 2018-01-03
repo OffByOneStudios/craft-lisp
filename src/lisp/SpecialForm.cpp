@@ -17,7 +17,7 @@ SpecialForm::SpecialForm(f_eval eval)
 	_eval = eval;
 }
 
-instance<> SpecialForm::eval(instance<Scope> scope, instance<Sexpr> sexpr)
+instance<> SpecialForm::eval(instance<SScope> scope, instance<Sexpr> sexpr)
 {
 	return _eval(scope, sexpr);
 }

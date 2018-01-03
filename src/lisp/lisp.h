@@ -15,10 +15,14 @@ namespace lisp
 #include "Keyword.h"
 #include "Symbol.h"
 #include "Sexpr.h"
+#include "Binding.h"
 
 #include "parser.h"
 
+#include "SScope.hpp"
 #include "Scope.h"
+#include "Namespace.h"
+#include "Module.h"
 #include "Environment.h"
 
 #include "PSubroutine.hpp"

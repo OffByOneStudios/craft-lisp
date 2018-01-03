@@ -14,11 +14,40 @@ namespace lisp {
 	{
 		namespace helper
 		{
-			bool truth(instance<Scope> scope, instance<PSubroutine> truth, instance<> code);
+			bool truth(instance<SScope> scope, instance<PSubroutine> truth, instance<> code);
 		}
 	}
 
-	instance<Scope> make_library_globals(instance<Environment> env);
+	/*
+	Namespace for special forms
+	*/
+	namespace library
+	{
+		namespace helper
+		{
+			/* Try to get a string from a symbol like object (e.g. strings, symbols, keywords).
+			
+			*/
+			std::string symbol(instance<>);
+
+			/* Throw an exception if a given argument is not of the expected type
+
+			*/
+			template <typename T>
+			inline instance<T> expect(instance<> inst)
+			{
+				if (!inst)
+					return inst;
+
+				if (inst.typeId().isType<T>())
+					return inst;
+
+				throw stdext::exception("Expected {0} got {1}", types::type<T>::typeId().toString(), inst.typeId().toString());
+			}
+		}
+	}
+
+	instance<Module> make_library_globals(instance<Namespace> ns);
 
 
 }}

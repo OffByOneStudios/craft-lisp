@@ -19,7 +19,7 @@ MultiMethod::MultiMethod()
 
 }
 
-instance<> MultiMethod::call(instance<Scope> const& scope, std::vector<instance<>> const& args)
+instance<> MultiMethod::call(instance<SScope> const& scope, std::vector<instance<>> const& args)
 {
 	auto env = scope->environment();
 	auto subroutine = dispatch(env, type_of(env, args));

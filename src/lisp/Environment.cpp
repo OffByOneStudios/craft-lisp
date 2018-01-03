@@ -15,7 +15,11 @@ Environment::Environment(std::shared_ptr<spdlog::logger> logger)
 {
 	_logger = logger;
 
-	global = make_library_globals(craft_instance_from_this());
+	ns_cult = instance<Namespace>::make(craft_instance_from_this());
+	global = make_library_globals(ns_cult);
+
+	ns_user = instance<Namespace>::make(craft_instance_from_this());
+	global = make_library_globals(ns_user);
 }
 
 std::shared_ptr<spdlog::logger> Environment::log()
@@ -36,10 +40,10 @@ instance<Sexpr> Environment::read(std::string const& text)
 // Interpreter
 //
 
-instance<> Environment::eval(instance<> cell, instance<Scope> scope)
+instance<> Environment::eval(instance<> cell, instance<SScope> scope)
 {
 	if (cell.typeId().isType<Symbol>())
-		return scope->lookup(cell.asType<Symbol>()->value);
+		return scope->lookup(cell.asType<Symbol>()->value)->value();
 	else if (cell.typeId().isType<Sexpr>())
 	{
 		instance<Sexpr> expr = cell;

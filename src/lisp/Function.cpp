@@ -19,7 +19,7 @@ Function::Function()
 
 }
 
-instance<> Function::call(instance<Scope> const& scope, std::vector<instance<>> const& args)
+instance<> Function::call(instance<SScope> const& scope, std::vector<instance<>> const& args)
 {
 	// TODO bind args into scope using binding sexpr
 

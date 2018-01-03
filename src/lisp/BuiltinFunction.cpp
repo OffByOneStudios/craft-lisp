@@ -19,7 +19,7 @@ BuiltinFunction::BuiltinFunction(f_call call)
 	_call = call;
 }
 
-instance<> BuiltinFunction::call(instance<Scope> const& scope, std::vector<instance<>> const& args)
+instance<> BuiltinFunction::call(instance<SScope> const& scope, std::vector<instance<>> const& args)
 {
 	return _call(scope, args);
 }

@@ -11,7 +11,7 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::BuiltinFunction);
 	public:
-		typedef std::function<instance<>(instance<Scope> scope, std::vector<instance<>> const&)> f_call;
+		typedef std::function<instance<>(instance<SScope> scope, std::vector<instance<>> const&)> f_call;
 
 	private:
 
@@ -21,7 +21,7 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED BuiltinFunction(f_call);
 
-		CRAFT_LISP_EXPORTED instance<> call(instance<Scope> const& scope, std::vector<instance<>> const&);
+		CRAFT_LISP_EXPORTED instance<> call(instance<SScope> const& scope, std::vector<instance<>> const&);
 	};
 
 }}

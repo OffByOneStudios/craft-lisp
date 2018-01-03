@@ -20,7 +20,9 @@ namespace lisp
 
 	public:
 
-		instance<Scope> global;
+		instance<Module> global;
+		instance<Namespace> ns_cult;
+		instance<Namespace> ns_user;
 
 	public:
 
@@ -33,7 +35,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<Sexpr> read(std::string const& text);
 
 		// Interpreter Access
-		CRAFT_LISP_EXPORTED instance<> eval(instance<>, instance<Scope>);
+		CRAFT_LISP_EXPORTED instance<> eval(instance<>, instance<SScope>);
 
 		// Type System
 		CRAFT_LISP_EXPORTED bool type_isChild(instance<>, types::TagId);

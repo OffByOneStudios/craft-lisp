@@ -1,0 +1,2 @@
+(define foo 15)
+(define bar "hello")

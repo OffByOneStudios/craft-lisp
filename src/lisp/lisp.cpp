@@ -6,3 +6,4 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 CRAFT_PROVIDER_DEFINE(PSubroutine);
+CRAFT_ASPECT_DEFINE(SScope);

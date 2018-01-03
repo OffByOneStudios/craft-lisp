@@ -5,12 +5,10 @@
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
+using namespace craft::lisp::library::helper;
 
 
-typedef instance<Scope> iScope;
-typedef std::vector<instance<>> tArgs;
-
-bool special::helper::truth(instance<Scope> scope, instance<PSubroutine> truth, instance<> code)
+bool special::helper::truth(instance<SScope> scope, instance<PSubroutine> truth, instance<> code)
 {
 	auto result = scope->environment()->eval(code, scope);
 	auto value = truth->call(truth, scope, { result });
@@ -20,33 +18,46 @@ bool special::helper::truth(instance<Scope> scope, instance<PSubroutine> truth, 
 	return *value.asType<bool>();
 }
 
-instance<Scope> lisp::make_library_globals(instance<Environment> env)
+std::string library::helper::symbol(instance<> s)
 {
-	auto ret = instance<Scope>::make(env, instance<>());
+	if (s.typeId().isType<Symbol>())
+		return s.asType<Symbol>()->value;
+	else if (s.typeId().isType<Keyword>())
+		return s.asType<Keyword>()->value;
+	else if (s.typeId().isType<std::string>())
+		return *s.asType<std::string>();
+	else
+		throw stdext::exception("The given {0} cannot be used as a symbol", s.typeId().toString());
+}
+
+instance<Module> lisp::make_library_globals(instance<Namespace> ns)
+{
+	auto env = ns->environment();
+	auto ret = instance<Module>::make(ns, "builtin://globals");
 
 	// -- Types --
 	auto Any = instance<types::Special>::make();
 	Any->kind = types::Special::Any;
-	ret->def("Any", Any);
+	ret->define(instance<Binding>::make("Any", Any));
 
 	auto Bottom = instance<types::Special>::make();
 	Bottom->kind = types::Special::Bottom;
-	ret->def("Bottom", Bottom);
+	ret->define(instance<Binding>::make("Bottom", Bottom));
 
 	auto String = instance<lisp::types::CraftType>::make(types::type<std::string>::typeId());
-	ret->def("String", String);
+	ret->define(instance<Binding>::make("String", String));
 
 	auto Bool = instance<lisp::types::CraftType>::make(types::type<bool>::typeId());
-	ret->def("Bool", Bool);
+	ret->define(instance<Binding>::make("Bool", Bool));
 
 	auto Int = instance<lisp::types::CraftType>::make(types::type<int64_t>::typeId());
-	ret->def("Int", Int);
+	ret->define(instance<Binding>::make("Int", Int));
 
 	auto Float64 = instance<lisp::types::CraftType>::make(types::type<double>::typeId());
-	ret->def("Float64", Float64);
+	ret->define(instance<Binding>::make("Float64", Float64));
 
 	auto craft_type = instance<BuiltinFunction>::make(
-		[](iScope scope, tArgs args) -> instance<>
+		[](instance<SScope> scope, std::vector<instance<>> args) -> instance<>
 	{
 		auto pidentifier = types::system().getManager<PIdentifier>();
 
@@ -57,13 +68,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 			return instance<>();
 		}
 
-		instance<> arg(args[0]);
-		std::string lookup;
-
-		if (arg.typeId().isType<Keyword>())
-			lookup = arg.asType<Keyword>()->value;
-		else
-			lookup = arg.toString();
+		auto lookup = symbol(args[0]);
 
 		auto type = pidentifier->index(lookup);
 
@@ -72,7 +77,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 		return instance<lisp::types::CraftType>::make(type);
 	});
-	ret->def("craft-type", craft_type);
+	ret->define(instance<Binding>::make("craft-type", craft_type));
 
 	auto Tuple = instance<BuiltinFunction>::make(
 		[](auto scope, auto args) -> instance<>
@@ -87,7 +92,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 		return ret;
 	});
-	ret->def("Tuple", Tuple);
+	ret->define(instance<Binding>::make("Tuple", Tuple));
 
 	auto Union = instance<BuiltinFunction>::make(
 		[](auto scope, auto args) -> instance<>
@@ -102,11 +107,11 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 		return ret;
 	});
-	ret->def("Union", Union);
+	ret->define(instance<Binding>::make("Union", Union));
 
 	auto subtype = instance<MultiMethod>::make();
 	subtype->attach(env, instance<BuiltinFunction>::make(
-		[](instance<Scope> scope, auto args) -> instance<>
+		[](instance<SScope> scope, std::vector<instance<>> const& args) -> instance<>
 	{
 		instance<> a(args[0]), b(args[1]);
 
@@ -115,23 +120,23 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		algo->execute_subtype();
 		return instance<bool>::make(algo->leftIsSubtype);
 	}));
-	ret->def("subtype?", subtype);
-	ret->def("\u227C", subtype);
+	ret->define(instance<Binding>::make("subtype?", subtype));
+	ret->define(instance<Binding>::make("\u227C", subtype));
 
 	// -- Compiler Specials --
 	auto truth = instance<MultiMethod>::make();
 	truth->attach(env, instance<BuiltinFunction>::make(
-		[](auto scope, auto args)
+		[](auto scope, std::vector<instance<>> const& args)
 	{
 		instance<int64_t> a(args[0]);
 		return instance<bool>::make(*a != 0);
 	}));
-	ret->def("truth", truth);
-	ret->def("?", truth);
+	ret->define(instance<Binding>::make("truth", truth));
+	ret->define(instance<Binding>::make("?", truth));
 
 	// -- Special Forms --
 	auto define = instance<SpecialForm>::make(
-		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
+		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
 	{
 		assert(sexpr->cells.size() == 3);
 
@@ -139,33 +144,27 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		auto object = sexpr->cells[2];
 
 		std::string name_value;
-		if (name.typeId().isType<Symbol>())
-			name_value = name.asType<Symbol>()->value;
-		else if (name.typeId().isType<Keyword>())
-			name_value = name.asType<Keyword>()->value;
-		else
+
+		if (name.typeId().isType<Sexpr>())
 		{
 			name = scope->environment()->eval(name, scope);
 
-			if (name.typeId().isType<Symbol>())
-				name_value = name.asType<Symbol>()->value;
-			else if (name.typeId().isType<Keyword>())
-				name_value = name.asType<Keyword>()->value;
-			else if (name.typeId().isType<std::string>())
-				name_value = *name.asType<std::string>();
-			else
-				name_value = name.toString();
+			name_value = symbol(name);
+		}
+		else
+		{
+			name_value = symbol(name);
 		}
 
 		object = scope->environment()->eval(object, scope);
 
-		scope->def(name_value, object);
+		scope->define(instance<Binding>::make(name_value, object));
 		return object;
 	});
-	ret->def("def", define);
+	ret->define(instance<Binding>::make("define", define));
 
 	auto cond = instance<SpecialForm>::make(
-		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
+		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
 	{
 		// Setup special form
 		size_t size = sexpr->cells.size();
@@ -173,7 +172,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		size -= 1;
 
 		// Do loop of conditions:
-		auto truth_subroutine = scope->lookup("truth").asFeature<PSubroutine>();
+		auto truth_subroutine = scope->lookup("truth")->value().asFeature<PSubroutine>();
 		size_t index;
 		for (index = 1; index < size; index += 2)
 		{
@@ -187,10 +186,10 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		else
 			return instance<>();
 	});
-	ret->def("cond", cond);
+	ret->define(instance<Binding>::make("cond", cond));
 
 	auto _while = instance<SpecialForm>::make(
-		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
+		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
 	{
 		// Setup special form
 		size_t size = sexpr->cells.size();
@@ -200,7 +199,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		auto condition = sexpr->cells[1];
 		auto body = sexpr->cells[2];
 
-		auto truth_subroutine = scope->lookup("truth").asFeature<PSubroutine>();
+		auto truth_subroutine = scope->lookup("truth")->value().asFeature<PSubroutine>();
 
 		instance<> last_ret;
 		while (special::helper::truth(scope, truth_subroutine, condition))
@@ -210,10 +209,10 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 		return last_ret;
 	});
-	ret->def("while", _while);
+	ret->define(instance<Binding>::make("while", _while));
 
 	auto lambda = instance<SpecialForm>::make(
-		[](instance<Scope> scope, instance<Sexpr> sexpr) -> instance<>
+		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
 	{
 		// Setup special form
 		size_t size = sexpr->cells.size();
@@ -229,26 +228,57 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 
 		return function;
 	});
-	ret->def("lambda", lambda);
+	ret->define(instance<Binding>::make("lambda", lambda));
 
 	// -- Builtin Library --
+	auto lookup = instance<MultiMethod>::make();
+	lookup->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
+	{
+		instance<SScope> lookup_scope(args[0]);
+		auto lookup_name = symbol(args[1]);
+
+		auto binding = lookup_scope->lookup(lookup_name);
+		if (binding)
+			return binding->value();
+
+		return instance<>();
+	}));
+	ret->define(instance<Binding>::make("lookup", lookup));
+
+	auto lookup_meta = instance<MultiMethod>::make();
+	lookup_meta->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
+	{
+		instance<SScope> lookup_scope(args[0]);
+		auto lookup_name = symbol(args[1]);
+		auto lookup_meta = symbol(args[2]);
+
+		auto binding = lookup_scope->lookup(lookup_name);
+		if (binding)
+			return binding->getMeta(lookup_meta);
+
+		return instance<>();
+	}));
+	ret->define(instance<Binding>::make("lookup/meta", lookup_meta));
+
 	auto add = instance<MultiMethod>::make();
 	add->attach(env, instance<BuiltinFunction>::make(
 		[](auto scope, auto args)
 	{
-		instance<int64_t> a(args[0]), b(args[1]);
+		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
 		return instance<int64_t>::make(*a + *b);
 	}));
-	ret->def("+", add);
+	ret->define(instance<Binding>::make("+", add));
 
 	auto sub = instance<MultiMethod>::make();
 	sub->attach(env, instance<BuiltinFunction>::make(
 		[](auto scope, auto args)
 	{
-		instance<int64_t> a(args[0]), b(args[1]);
+		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
 		return instance<int64_t>::make(*a - *b);
 	}));
-	ret->def("-", sub);
+	ret->define(instance<Binding>::make("-", sub));
 
 	auto cwd = instance<MultiMethod>::make();
 	cwd->attach(env, instance<BuiltinFunction>::make(
@@ -256,36 +286,38 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	{
 		return instance<std::string>::make(path::absolute());
 	}));
-	ret->def("cwd", cwd);
+	ret->define(instance<Binding>::make("cwd", cwd));
 
 	auto file_text = instance<MultiMethod>::make();
 	file_text->attach(env, instance<BuiltinFunction>::make(
-		[](iScope scope, auto args)
+		[](instance<SScope> scope, auto args)
 	{
 		auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
 		auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
 
 		return instance<std::string>::make(text);
 	}));
-	ret->def("file/text", file_text);
+	ret->define(instance<Binding>::make("file/text", file_text));
 
 	auto file_eval = instance<MultiMethod>::make();
 	file_eval->attach(env, instance<BuiltinFunction>::make(
-		[](iScope scope, auto args)
+		[=](instance<SScope> scope, auto args)
 	{
 		auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
 		auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
 
 		auto env = scope->environment();
+		auto module = instance<Module>::make(ns, fmt::format("file://{0}", s));
+
 		auto cell = env->read(text);
 		for (auto c : cell->cells)
 		{
-			env->eval(c, scope);
+			env->eval(c, module);
 		}
 
-		return instance<>();
+		return module;
 	}));
-	ret->def("file/eval", file_eval);
+	ret->define(instance<Binding>::make("file/eval", file_eval));
 
 	auto MultiMethod_ = instance<MultiMethod>::make();
 	MultiMethod_->attach(env, instance<BuiltinFunction>::make(
@@ -293,7 +325,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 	{
 		return instance<MultiMethod>::make();
 	}));
-	ret->def("MultiMethod", MultiMethod_);
+	ret->define(instance<Binding>::make("MultiMethod", MultiMethod_));
 
 	auto attach = instance<lisp::MultiMethod>::make();
 	attach->attach(env, instance<BuiltinFunction>::make(
@@ -302,7 +334,7 @@ instance<Scope> lisp::make_library_globals(instance<Environment> env)
 		instance<MultiMethod> a(args[0]); instance<> b(args[1]);
 		return instance<lisp::MultiMethod>::make();
 	}));
-	ret->def("attach", attach);
+	ret->define(instance<Binding>::make("attach", attach));
 
 	/*
 	auto car = instance<MultiMethod>::make();
