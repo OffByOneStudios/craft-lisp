@@ -280,6 +280,15 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	}));
 	ret->define(instance<Binding>::make("-", sub));
 
+	auto mul = instance<MultiMethod>::make();
+	mul->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
+	{
+		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
+		return instance<int64_t>::make(*a * *b);
+	}));
+	ret->define(instance<Binding>::make("*", mul));
+
 	auto cwd = instance<MultiMethod>::make();
 	cwd->attach(env, instance<BuiltinFunction>::make(
 		[](auto scope, auto args)
