@@ -26,6 +26,8 @@ namespace lisp
 #include "Module.h"
 #include "Environment.h"
 
+#include "Variable.h"
+
 #include "Function.h"
 #include "BuiltinFunction.h"
 #include "MultiMethod.h"

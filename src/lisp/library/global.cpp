@@ -346,6 +346,9 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	}));
 	ret->define(instance<Binding>::make("file/eval", file_eval));
 
+	//
+	// MultiMethod
+	//
 	auto MultiMethod_ = instance<MultiMethod>::make();
 	MultiMethod_->attach(env, instance<BuiltinFunction>::make(
 		[](auto scope, auto args)
@@ -363,27 +366,38 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	}));
 	ret->define(instance<Binding>::make("attach", attach));
 
-	/*
-	auto car = instance<MultiMethod>::make();
-	car->attach(instance<BuiltinFunction>::make(
-	[](auto scope, auto args)
+	//
+	// Variable
+	//
+	auto Variable_ = instance<MultiMethod>::make();
+	Variable_->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
 	{
-	instance<int64_t> a(args[0].);
-	return instance<Sexpr>::make(*a)->car();
-	}
-	));
-	global->def("car", car);
+		if (args.size() > 0)
+			return instance<Variable>::make(args[0]);
+		return instance<Variable>::make();
+	}));
+	ret->define(instance<Binding>::make("Variable", Variable_));
 
-	auto cdr = instance<MultiMethod>::make();
-	cdr->attach(instance<BuiltinFunction>::make(
-	[](auto scope, auto args)
+	auto get = instance<lisp::MultiMethod>::make();
+	get->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
 	{
-	instance<int64_t> a(args[0]), b(args[1]);
-	return instance<int64_t>(*a + *b);
-	}
-	));
-	global->def("cdr", cdr);
-	*/
+		instance<Variable> var(args[0]);
+		return var->get();
+	}));
+	ret->define(instance<Binding>::make("get", get));
+
+	auto set = instance<lisp::MultiMethod>::make();
+	set->attach(env, instance<BuiltinFunction>::make(
+		[](auto scope, auto args)
+	{
+		instance<Variable> var(args[0]); instance<> value(args[1]);
+		var->set(value);
+
+		return instance<>();
+	}));
+	ret->define(instance<Binding>::make("set", set));
 
 	return ret;
 }
