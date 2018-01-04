@@ -18,6 +18,13 @@ Binding::Binding(std::string name, instance<> value)
 	_value = value;
 }
 
+instance<> Binding::eval(instance<SScope> scope)
+{
+	_value = scope->environment()->eval(scope, _value);
+
+	return _value;
+}
+
 void Binding::addMeta(std::string metaKey, instance<> value)
 {
 	_meta[metaKey] = value;

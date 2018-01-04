@@ -12,9 +12,15 @@ CRAFT_OBJECT_DEFINE(SpecialForm)
 	_.defaults();
 }
 
-SpecialForm::SpecialForm(f_eval eval)
+SpecialForm::SpecialForm(f_read read, f_eval eval)
 {
+	_read = read;
 	_eval = eval;
+}
+
+instance<> SpecialForm::read(instance<SScope> scope, instance<> head, instance<Sexpr> sexpr)
+{
+	return _read(scope, head, sexpr);
 }
 
 instance<> SpecialForm::eval(instance<SScope> scope, instance<Sexpr> sexpr)

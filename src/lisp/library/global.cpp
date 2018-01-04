@@ -10,7 +10,7 @@ using namespace craft::lisp::library::helper;
 
 bool special::helper::truth(instance<SScope> scope, instance<PSubroutine> truth, instance<> code)
 {
-	auto result = scope->environment()->eval(code, scope);
+	auto result = scope->environment()->eval(scope, code);
 	auto value = truth->call(truth, scope, { result });
 
 	assert(value.typeId().isType<bool>());
@@ -136,9 +136,10 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 	// -- Special Forms --
 	auto define = instance<SpecialForm>::make(
-		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
+		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
 	{
-		assert(sexpr->cells.size() == 3);
+		if (sexpr->cells.size() != 3)
+			throw stdext::exception("malformed: (define <symbol> <expr>)");
 
 		auto name = sexpr->cells[1];
 		auto object = sexpr->cells[2];
@@ -146,24 +147,38 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		std::string name_value;
 
 		if (name.typeId().isType<Sexpr>())
-		{
-			name = scope->environment()->eval(name, scope);
+			name = scope->environment()->eval(scope, name);
 
-			name_value = symbol(name);
-		}
-		else
-		{
-			name_value = symbol(name);
-		}
+		name_value = symbol(name);
 
-		object = scope->environment()->eval(object, scope);
+		object = scope->environment()->read(scope, object);
 
-		scope->define(instance<Binding>::make(name_value, object));
-		return object;
+		auto binding = instance<Binding>::make(name_value, object);
+		scope->define(binding);
+
+		auto ret = instance<Sexpr>::make();
+		ret->cells.push_back(head);
+		ret->cells.push_back(binding);
+		return ret;
+	},
+		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
+	{
+		if (sexpr->cells.size() != 2 || !sexpr->cells[1].typeId().isType<Binding>())
+			throw stdext::exception("Malformed define evaluated.");
+
+		instance<Binding> binding = sexpr->cells[1];
+
+		binding->eval(scope);
+
+		return binding->value();
 	});
 	ret->define(instance<Binding>::make("define", define));
 
 	auto cond = instance<SpecialForm>::make(
+		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
+	{
+		return scope->environment()->read_rest(scope, head, sexpr);
+	},
 		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
 	{
 		// Setup special form
@@ -177,18 +192,22 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		for (index = 1; index < size; index += 2)
 		{
 			if (special::helper::truth(scope, truth_subroutine, sexpr->cells[index]))
-				return scope->environment()->eval(sexpr->cells[index + 1], scope);
+				return scope->environment()->eval(scope, sexpr->cells[index + 1]);
 		}
 
 		// Check for last branch
 		if (index - 1 < size)
-			return scope->environment()->eval(sexpr->cells[index], scope);
+			return scope->environment()->eval(scope, sexpr->cells[index]);
 		else
 			return instance<>();
 	});
 	ret->define(instance<Binding>::make("cond", cond));
 
 	auto _while = instance<SpecialForm>::make(
+		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
+	{
+		return scope->environment()->read_rest(scope, head, sexpr);
+	},
 		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
 	{
 		// Setup special form
@@ -204,7 +223,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		instance<> last_ret;
 		while (special::helper::truth(scope, truth_subroutine, condition))
 		{
-			last_ret = scope->environment()->eval(body, scope);
+			last_ret = scope->environment()->eval(scope, body);
 		}
 
 		return last_ret;
@@ -212,7 +231,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	ret->define(instance<Binding>::make("while", _while));
 
 	auto lambda = instance<SpecialForm>::make(
-		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
+		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
 	{
 		// Setup special form
 		size_t size = sexpr->cells.size();
@@ -224,9 +243,15 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 		auto function = instance<Function>::make();
 		function->setBinding(binding);
+
+		body = scope->environment()->read(scope, body);
 		function->setBody(body);
 
 		return function;
+	},
+		[](instance<SScope> scope, instance<Sexpr> sexpr) -> instance<>
+	{
+		throw stdext::exception("eval'ed lambda");
 	});
 	ret->define(instance<Binding>::make("lambda", lambda));
 

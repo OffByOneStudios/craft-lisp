@@ -20,8 +20,8 @@ void repl(const std::string & prompt, instance<Environment> env)
 		std::string line; std::getline(std::cin, line);
 		try
 		{
-			instance<Sexpr> top_level = env->read(line);
-			std::cout << env->eval(top_level->cells[0], env->global).toString() << '\n';
+			instance<Sexpr> top_level = env->read(env->ns_user, line);
+			std::cout << env->eval(env->ns_user, top_level->cells[0]).toString() << '\n';
 		}
 		catch (std::exception const& e)
 		{

@@ -18,6 +18,8 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED Binding(std::string name, instance<> value);
 
+		CRAFT_LISP_EXPORTED instance<> eval(instance<SScope> scope);
+
 		inline std::string name() const { return _name; }
 		inline instance<> value() const { return _value; }
 

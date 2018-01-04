@@ -31,22 +31,30 @@ std::shared_ptr<spdlog::logger> Environment::log()
 // Parser
 //
 
-instance<Sexpr> Environment::read(std::string const& text)
+instance<Sexpr> Environment::parse(instance<SScope> scope, std::string const& text)
 {
 	return parse_lisp(text);
 }
 
-//
-// Interpreter
-//
-
-instance<> Environment::eval(instance<> cell, instance<SScope> scope)
+instance<> Environment::read(instance<SScope> scope, std::string const& text)
 {
-	if (cell.typeId().isType<Symbol>())
-		return scope->lookup(cell.asType<Symbol>()->value)->value();
-	else if (cell.typeId().isType<Sexpr>())
+	auto ast = parse(scope, text);
+
+	auto result = instance<Sexpr>::make();
+	for (auto cell : ast->cells)
 	{
-		instance<Sexpr> expr = cell;
+		result->cells.push_back(this->read(scope, cell));
+	}
+	return result;
+}
+
+instance<> Environment::read(instance<SScope> scope, instance<> ast)
+{
+	if (ast.typeId().isType<Symbol>())
+		return scope->lookup(ast.asType<Symbol>()->value);
+	else if (ast.typeId().isType<Sexpr>())
+	{
+		instance<Sexpr> expr = ast;
 
 		if (expr->cells.size() == 0)
 			throw stdext::exception("Unquoted empty list.");
@@ -54,26 +62,78 @@ instance<> Environment::eval(instance<> cell, instance<SScope> scope)
 		// -- Evaluate Head --
 		instance<> head = expr->car();
 
-		head = eval(head, scope);
+		head = read(scope, head);
+
+		instance<> inspect_head = head;
+		if (head.typeId().isType<Binding>())
+			inspect_head = head.asType<Binding>()->value();
+
+		// -- Evaluate Special Forms --
+		if (inspect_head.typeId().isType<SpecialForm>())
+			return inspect_head.asType<SpecialForm>()->read(scope, inspect_head, expr);
+
+		// -- Macro Expand --
+		if (inspect_head.typeId().isType<Macro>())
+		{
+			ast = inspect_head.asType<Macro>()->expand(scope, expr->cells);
+			return read(scope, ast);
+		}
+
+		return read_rest(scope, head, ast);
+	}
+	else
+		return ast;
+}
+
+instance<Sexpr> Environment::read_rest(instance<SScope> scope, instance<> head, instance<Sexpr> ast)
+{
+	instance<Sexpr> ret = instance<Sexpr>::make();
+
+	ret->cells.push_back(head);
+	for (auto cell : ast->cdr())
+		ret->cells.push_back(this->read(scope, cell));
+
+	return ret;
+}
+
+//
+// Interpreter
+//
+
+instance<> Environment::eval(instance<SScope> scope, std::string const& text)
+{
+	auto ast = this->parse(scope, text);
+
+	instance<> last_value;
+	for (auto cell : ast->cells)
+	{
+		auto code = this->read(scope, cell);
+		last_value = this->eval(scope, code);
+	}
+	return last_value;
+}
+
+instance<> Environment::eval(instance<SScope> scope, instance<> code)
+{
+	if (code.typeId().isType<Binding>())
+		return code.asType<Binding>()->value();
+	else if (code.typeId().isType<Sexpr>())
+	{
+		instance<Sexpr> expr = code;
+
+		if (expr->cells.size() == 0)
+			throw stdext::exception("Unquoted empty list.");
+
+		// -- Evaluate Head --
+		instance<> head = expr->car();
+
+		head = eval(scope, head);
 
 		// -- Evaluate Special Forms --
 		if (head.typeId().isType<SpecialForm>())
 			return head.asType<SpecialForm>()->eval(scope, expr);
 
-		// -- Macro Expand --
-		bool was_macro_expanded = false;
-
-		if (head.typeId().isType<Macro>())
-		{
-			head = head.asType<Macro>()->expand(scope, expr->cells);
-			was_macro_expanded = true;
-		}
-
-		// Evaluate expansion
-		if (was_macro_expanded)
-			return eval(expr, scope);
-
-		// -- Evaluate Arguments --
+		// -- Evaluate Subroutine --
 		if (!head.hasFeature<PSubroutine>())
 		{
 			throw stdext::exception("Cannot call `{0}`", head.toString());
@@ -84,14 +144,14 @@ instance<> Environment::eval(instance<> cell, instance<SScope> scope)
 
 		for (auto it = expr->cells.begin() + 1, end = expr->cells.end(); it != end; ++it)
 		{
-			sub_expr_values.push_back(eval(*it, scope));
+			sub_expr_values.push_back(eval(scope, *it));
 		}
 
 		// -- Call --
 		return head.getFeature<PSubroutine>()->call(head, scope, sub_expr_values);
 	}
 	else
-		return cell;
+		return code;
 }
 
 //

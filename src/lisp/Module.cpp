@@ -62,9 +62,9 @@ void Module::load()
 
 	auto env = _ns->environment();
 
-	auto cell = env->read(text);
+	instance<Sexpr> cell = env->read(craft_instance_from_this(), text);
 	for (auto c : cell->cells)
 	{
-		env->eval(c, craft_instance_from_this());
+		env->eval(craft_instance_from_this(), c);
 	}
 }

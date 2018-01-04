@@ -4,11 +4,13 @@
 namespace craft {
 namespace lisp
 {
-
-	class Scope;
 	class Environment;
 
+	class Binding;
 }}
+
+#include "SScope.hpp"
+#include "PSubroutine.hpp"
 
 #include "types.h"
 
@@ -19,13 +21,11 @@ namespace lisp
 
 #include "parser.h"
 
-#include "SScope.hpp"
 #include "Scope.h"
 #include "Namespace.h"
 #include "Module.h"
 #include "Environment.h"
 
-#include "PSubroutine.hpp"
 #include "Function.h"
 #include "BuiltinFunction.h"
 #include "MultiMethod.h"

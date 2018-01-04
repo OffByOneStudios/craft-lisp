@@ -23,7 +23,7 @@ instance<> Function::call(instance<SScope> const& scope, std::vector<instance<>>
 {
 	// TODO bind args into scope using binding sexpr
 
-	return scope->environment()->eval(_body, scope);
+	return scope->environment()->eval(scope, _body);
 }
 
 void Function::setBody(instance<Sexpr> body)
