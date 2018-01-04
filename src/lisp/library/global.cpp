@@ -313,16 +313,9 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		[=](instance<SScope> scope, auto args)
 	{
 		auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
-		auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
-
-		auto env = scope->environment();
 		auto module = instance<Module>::make(ns, fmt::format("file://{0}", s));
 
-		auto cell = env->read(text);
-		for (auto c : cell->cells)
-		{
-			env->eval(c, module);
-		}
+		module->load();
 
 		return module;
 	}));

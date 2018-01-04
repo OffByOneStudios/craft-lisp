@@ -28,7 +28,7 @@ namespace lisp_grammar
 	struct line_comment : until< eolf > {};
 	struct sexpr_comment : if_must< at< sexpr_open >, disable< sexpr > > {};
 
-	struct comment : if_must< one< ';' >, sor< sexpr_comment/*, line_comment*/ > > {};
+	struct comment : if_must< one< ';' >, sor< sexpr_comment, line_comment > > {};
 
 	// Nothing combination
 	struct nothing : sor< space, comment > {};

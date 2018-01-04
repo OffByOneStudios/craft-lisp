@@ -14,7 +14,7 @@ namespace lisp {
 	{
 		namespace helper
 		{
-			bool truth(instance<SScope> scope, instance<PSubroutine> truth, instance<> code);
+			CRAFT_LISP_EXPORTED bool truth(instance<SScope> scope, instance<PSubroutine> truth, instance<> code);
 		}
 	}
 
@@ -28,7 +28,7 @@ namespace lisp {
 			/* Try to get a string from a symbol like object (e.g. strings, symbols, keywords).
 			
 			*/
-			std::string symbol(instance<>);
+			CRAFT_LISP_EXPORTED std::string symbol(instance<>);
 
 			/* Throw an exception if a given argument is not of the expected type
 

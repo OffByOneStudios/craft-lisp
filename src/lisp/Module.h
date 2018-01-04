@@ -27,6 +27,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED std::string filepath() const;
 		CRAFT_LISP_EXPORTED instance<Namespace> namespace_() const;
 
+		CRAFT_LISP_EXPORTED void load();
+
 	public:
 		//
 		// SScope

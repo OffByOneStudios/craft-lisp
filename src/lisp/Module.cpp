@@ -55,3 +55,16 @@ void Module::define(instance<Binding> binding)
 	_lookup[binding->name()] = binding;
 	_ns->define(binding);
 }
+
+void Module::load()
+{
+	auto text = craft::fs::read<std::string>(_filepath, &craft::fs::string_read).get();
+
+	auto env = _ns->environment();
+
+	auto cell = env->read(text);
+	for (auto c : cell->cells)
+	{
+		env->eval(c, craft_instance_from_this());
+	}
+}
