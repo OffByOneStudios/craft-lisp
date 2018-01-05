@@ -30,6 +30,58 @@ std::string library::helper::symbol(instance<> s)
 		throw stdext::exception("The given {0} cannot be used as a symbol", s.typeId().toString());
 }
 
+instance<SubroutineSignature> library::helper::binding_expr_to_signature(instance<SScope> scope, instance<Sexpr> expr)
+{
+	// (foo bar baz)
+	// ((foo Int) bar (baz (Union String Int)))
+	// (foo Int, bar, baz (Union String Int))
+	// TODO:
+	// * optional
+	//   ? ((foo Int) (bar Int 8))
+	//   ? ((foo Int) (bar Int :optional))
+	// * keyword arugments
+	//   ? ((foo Int) (:bar Int) (:baz 8))
+	// * collections
+	//   ? ((foo Int) (args :args))
+	//   ? ((foo Int) (args :args) (kwargs :keywords))
+
+	auto ret = instance<SubroutineSignature>::make();
+
+	for (auto cell : expr->cells)
+	{
+		auto arg = instance<Argument>::make();
+
+		if (cell.typeId().isType<Sexpr>())
+		{
+			auto arg_expr = cell.asType<Sexpr>();
+
+			if (arg_expr->cells.size() > 0)
+				arg->name = symbol(arg_expr->car());
+			if (arg_expr->cells.size() > 1)
+			{
+				// TODO build type expression
+				auto next = scope->environment()->read(scope, arg_expr->cells[1]);
+
+				if (next.typeId().isType<Binding>())
+				{
+					next = next.asType<Binding>()->value();
+					if (next.typeId().isType<lisp::types::CraftType>())
+						arg->type = next.asType<lisp::types::CraftType>()->type;
+				}
+			}
+		}
+		else
+		{
+			arg->name = symbol(cell);
+		}
+
+		ret->arguments.push_back(arg);
+	}
+
+	ret->complete();
+	return ret;
+}
+
 instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 {
 	auto env = ns->environment();
@@ -55,6 +107,15 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 	auto Float64 = instance<lisp::types::CraftType>::make(types::type<double>::typeId());
 	ret->define(instance<Binding>::make("Float64", Float64));
+
+	auto Symbol_ = instance<lisp::types::CraftType>::make(types::type<lisp::Symbol>::typeId());
+	ret->define(instance<Binding>::make("Symbol", Symbol_));
+
+	auto Keyword_ = instance<lisp::types::CraftType>::make(types::type<lisp::Keyword>::typeId());
+	ret->define(instance<Binding>::make("Keyword", Keyword_));
+
+	auto Sexpr_ = instance<lisp::types::CraftType>::make(types::type<lisp::Sexpr>::typeId());
+	ret->define(instance<Binding>::make("Sexpr", Sexpr_));
 
 	auto craft_type = instance<BuiltinFunction>::make(
 		[](instance<SScope> scope, std::vector<instance<>> args) -> instance<>
@@ -242,9 +303,14 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		auto body = sexpr->cells[2];
 
 		auto function = instance<Function>::make();
-		function->setBinding(binding);
 
-		body = scope->environment()->read(scope, body);
+		auto signature = library::helper::binding_expr_to_signature(scope, binding);
+
+		function->setSignature(signature);
+
+		auto func_scope = signature->read_frame(scope);
+		body = func_scope->environment()->read(func_scope, body);
+
 		function->setBody(body);
 
 		return function;

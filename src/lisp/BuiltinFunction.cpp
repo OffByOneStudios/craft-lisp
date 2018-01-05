@@ -19,7 +19,16 @@ BuiltinFunction::BuiltinFunction(f_call call)
 	_call = call;
 }
 
+instance<SubroutineSignature> BuiltinFunction::signature()
+{
+	return _signature;
+}
 instance<> BuiltinFunction::call(instance<SScope> const& scope, std::vector<instance<>> const& args)
 {
 	return _call(scope, args);
+}
+
+void BuiltinFunction::setSignature(instance<SubroutineSignature> signature)
+{
+	_signature = signature;
 }

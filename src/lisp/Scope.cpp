@@ -15,11 +15,18 @@ CRAFT_OBJECT_DEFINE(Scope)
 }
 
 
-Scope::Scope(instance<Environment> env, instance<SScope> parent)
+Scope::Scope(instance<Environment> env)
 {
 	_environment = env;
+	_parent = instance<>();
+}
+
+Scope::Scope(instance<SScope> parent)
+{
+	_environment = parent->environment();
 	_parent = parent;
 }
+
 
 instance<Environment> Scope::environment() const
 {
@@ -34,7 +41,12 @@ instance<Binding> Scope::lookup(std::string const& s)
 {
 	auto it = _lookup.find(s);
 	if (it == _lookup.end())
-		throw stdext::exception("Lookup failed, `{0}` not in scope.", s);
+	{
+		if (_parent)
+			return _parent->lookup(s);
+		else
+			throw stdext::exception("Lookup failed, `{0}` not in scope.", s);
+	}
 
 	return it->second;
 }

@@ -6,6 +6,7 @@ namespace lisp
 {
 	class Environment;
 
+	class SubroutineSignature;
 	class Binding;
 }}
 
@@ -28,6 +29,7 @@ namespace lisp
 
 #include "Variable.h"
 
+#include "SubroutineSignature.h"
 #include "Function.h"
 #include "BuiltinFunction.h"
 #include "MultiMethod.h"

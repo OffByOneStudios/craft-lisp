@@ -19,6 +19,10 @@ MultiMethod::MultiMethod()
 
 }
 
+instance<SubroutineSignature> MultiMethod::signature()
+{
+	return _signature;
+}
 instance<> MultiMethod::call(instance<SScope> const& scope, std::vector<instance<>> const& args)
 {
 	auto env = scope->environment();
@@ -60,4 +64,6 @@ void MultiMethod::attach(instance<Environment> env, instance<> in)
 
 	_subMethods.push_back(in);
 	//_dispatchChain.push_back(in);
+
+	_signature = instance<SubroutineSignature>::make();
 }

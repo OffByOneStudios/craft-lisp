@@ -5,7 +5,6 @@
 namespace craft {
 namespace lisp
 {
-
 	class BuiltinFunction final
 		: public virtual craft::types::Object
 	{
@@ -15,13 +14,17 @@ namespace lisp
 
 	private:
 
+		instance<SubroutineSignature> _signature;
 		f_call _call;
 
 	public:
 
 		CRAFT_LISP_EXPORTED BuiltinFunction(f_call);
 
+		CRAFT_LISP_EXPORTED instance<SubroutineSignature> signature();
 		CRAFT_LISP_EXPORTED instance<> call(instance<SScope> const& scope, std::vector<instance<>> const&);
+
+		CRAFT_LISP_EXPORTED void setSignature(instance<SubroutineSignature> signature);
 	};
 
 }}

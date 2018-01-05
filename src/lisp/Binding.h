@@ -23,6 +23,8 @@ namespace lisp
 		inline std::string name() const { return _name; }
 		inline instance<> value() const { return _value; }
 
+		inline void setValue(instance<> value) { _value = value; }
+
 		CRAFT_LISP_EXPORTED void addMeta(std::string metaKey, instance<> value);
 		CRAFT_LISP_EXPORTED instance<> getMeta(std::string metaKey, types::TypeId type = types::None);
 

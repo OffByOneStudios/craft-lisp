@@ -20,7 +20,8 @@ namespace lisp
 
 	public:
 
-		CRAFT_LISP_EXPORTED Scope(instance<Environment> env, instance<SScope> parent);
+		CRAFT_LISP_EXPORTED Scope(instance<Environment> env);
+		CRAFT_LISP_EXPORTED Scope(instance<SScope> parent);
 
 		CRAFT_LISP_EXPORTED instance<SScope> parent() const;
 

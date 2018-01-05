@@ -19,6 +19,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::MultiMethod);
 	private:
 
+		instance<SubroutineSignature> _signature;
+
 		struct _Dispatch
 		{
 			instance<types::SType> type;
@@ -31,6 +33,7 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED MultiMethod();
 
+		CRAFT_LISP_EXPORTED instance<SubroutineSignature> signature();
 		CRAFT_LISP_EXPORTED instance<> call(instance<SScope> const& scope, std::vector<instance<>> const&);
 
 		CRAFT_LISP_EXPORTED instance<> dispatch(instance<Environment> env, instance<types::SType> type);

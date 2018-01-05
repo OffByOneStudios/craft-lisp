@@ -19,11 +19,16 @@ Function::Function()
 
 }
 
+instance<SubroutineSignature> Function::signature()
+{
+	return _signature;
+}
+
 instance<> Function::call(instance<SScope> const& scope, std::vector<instance<>> const& args)
 {
-	// TODO bind args into scope using binding sexpr
+	auto call_scope = _signature->eval_frame(scope, args);
 
-	return scope->environment()->eval(scope, _body);
+	return call_scope->environment()->eval(call_scope, _body);
 }
 
 void Function::setBody(instance<Sexpr> body)
@@ -31,7 +36,7 @@ void Function::setBody(instance<Sexpr> body)
 	_body = body;
 }
 
-void Function::setBinding(instance<Sexpr> binding)
+void Function::setSignature(instance<SubroutineSignature> signature)
 {
-	_binding = binding;
+	_signature = signature;
 }

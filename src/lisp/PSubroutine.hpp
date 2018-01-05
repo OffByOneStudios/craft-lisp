@@ -19,7 +19,9 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_PROVIDER_DECLARE(PSubroutine, "lisp.subroutine", craft::types::SingletonProviderManager);
 
 	public:
-		virtual instance<> call(instance<> in, instance<SScope> const&, std::vector<instance<>> const&) const = 0;
+		virtual instance<SubroutineSignature> signature(instance<> subroutine) const = 0;
+
+		virtual instance<> call(instance<> subroutine, instance<SScope> const&, std::vector<instance<>> const&) const = 0;
 	};
 
 	/******************************************************************************
@@ -31,9 +33,16 @@ namespace lisp
 		: public types::Implements<PSubroutine>::For<T>
 	{
 	public:
-		inline virtual instance<> call(instance<> in, instance<SScope> const& scope, std::vector<instance<>> const& args) const override
+		inline virtual instance<SubroutineSignature> signature(instance<> subroutine) const override
 		{
-			instance<T> ret = in;
+			instance<T> ret = subroutine;
+
+			return ret->signature();
+		}
+
+		inline virtual instance<> call(instance<> subroutine, instance<SScope> const& scope, std::vector<instance<>> const& args) const override
+		{
+			instance<T> ret = subroutine;
 
 			return ret->call(scope, args);
 		}

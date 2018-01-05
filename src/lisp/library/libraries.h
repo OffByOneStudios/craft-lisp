@@ -44,6 +44,13 @@ namespace lisp {
 
 				throw stdext::exception("Expected {0} got {1}", types::type<T>::typeId().toString(), inst.typeId().toString());
 			}
+
+			/* Takes an sexpr represting a function binding, and returns a signature
+
+			a "macro"
+
+			*/
+			CRAFT_LISP_EXPORTED instance<SubroutineSignature> binding_expr_to_signature(instance<SScope> scope, instance<Sexpr>);
 		}
 	}
 
