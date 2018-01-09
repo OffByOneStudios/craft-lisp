@@ -16,7 +16,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::SpecialForm)
 	public:
 		typedef std::function<instance<>(instance<SScope> scope, instance<> head, instance<Sexpr> sexpr)> f_read;
-		typedef std::function<instance<>(instance<SScope> scope, instance<Sexpr> sexpr)> f_eval;
+		typedef std::function<instance<>(instance<SFrame> frame, instance<Sexpr> sexpr)> f_eval;
 
 	private:
 
@@ -28,7 +28,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED SpecialForm(f_read, f_eval);
 
 		CRAFT_LISP_EXPORTED instance<> read(instance<SScope> scope, instance<> head, instance<Sexpr> sexpr);
-		CRAFT_LISP_EXPORTED instance<> eval(instance<SScope> scope, instance<Sexpr> sexpr);
+		CRAFT_LISP_EXPORTED instance<> eval(instance<SFrame> frame, instance<Sexpr> sexpr);
 	};
 
 }}

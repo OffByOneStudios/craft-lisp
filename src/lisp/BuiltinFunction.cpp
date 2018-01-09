@@ -23,9 +23,13 @@ instance<SubroutineSignature> BuiltinFunction::signature()
 {
 	return _signature;
 }
-instance<> BuiltinFunction::call(instance<SScope> const& scope, std::vector<instance<>> const& args)
+instance<SFrame> BuiltinFunction::call_frame(instance<SFrame> parent)
 {
-	return _call(scope, args);
+	return parent;
+}
+instance<> BuiltinFunction::call(instance<SFrame> const& frame, std::vector<instance<>> const& args)
+{
+	return _call(frame, args);
 }
 
 void BuiltinFunction::setSignature(instance<SubroutineSignature> signature)

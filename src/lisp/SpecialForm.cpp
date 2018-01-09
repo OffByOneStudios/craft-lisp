@@ -23,7 +23,7 @@ instance<> SpecialForm::read(instance<SScope> scope, instance<> head, instance<S
 	return _read(scope, head, sexpr);
 }
 
-instance<> SpecialForm::eval(instance<SScope> scope, instance<Sexpr> sexpr)
+instance<> SpecialForm::eval(instance<SFrame> frame, instance<Sexpr> sexpr)
 {
-	return _eval(scope, sexpr);
+	return _eval(frame, sexpr);
 }

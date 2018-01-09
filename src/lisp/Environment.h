@@ -36,10 +36,11 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> read(instance<SScope> scope, std::string const& text);
 		CRAFT_LISP_EXPORTED instance<> read(instance<SScope> scope, instance<> ast);
 		CRAFT_LISP_EXPORTED instance<Sexpr> read_rest(instance<SScope> scope, instance<> head, instance<Sexpr> ast);
+		CRAFT_LISP_EXPORTED instance<> read_eval(instance<SScope> scope, instance<> code);
 
 		// Interpreter Access
-		CRAFT_LISP_EXPORTED instance<> eval(instance<SScope> scope, std::string const& text);
-		CRAFT_LISP_EXPORTED instance<> eval(instance<SScope> scope, instance<> code);
+		CRAFT_LISP_EXPORTED instance<> eval(instance<SFrame> frame, std::string const& text);
+		CRAFT_LISP_EXPORTED instance<> eval(instance<SFrame> frame, instance<> code);
 
 		// Type System
 		CRAFT_LISP_EXPORTED bool type_isChild(instance<>, types::TagId);

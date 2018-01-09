@@ -80,22 +80,29 @@ void SubroutineSignature::complete()
 
 instance<SScope> SubroutineSignature::read_frame(instance<SScope> const& scope)
 {
-	auto new_scope = instance<Scope>::make(scope);
+	assert(_scope.isNull()); // A function should never be read more than once without rebuilding it.
+
+	auto new_scope = instance<Block>::make(scope);
 
 	for (auto signature : arguments)
 	{
-		new_scope->define(instance<Binding>::make(signature->name, instance<>()));
+		signature->binding = new_scope->define(signature->name, instance<>());
 	}
 
 	_scope = new_scope;
 	return new_scope;
 }
 
-instance<SScope> SubroutineSignature::eval_frame(instance<SScope> const& scope, std::vector<instance<>> const& args)
+instance<SFrame> SubroutineSignature::push_frame(instance<SFrame> const& parent)
+{
+	return instance<Frame>::make(parent, _scope);
+}
+
+instance<SFrame> SubroutineSignature::set_frame(instance<SFrame> const& frame, std::vector<instance<>> const& args)
 {
 	check(args);
 
-	auto new_scope = _scope;
+	instance<Frame> call_frame = frame;
 
 	size_t i = 0;
 	for (auto actual : args)
@@ -108,12 +115,19 @@ instance<SScope> SubroutineSignature::eval_frame(instance<SScope> const& scope, 
 		else
 		{
 			auto signature = arguments[i];
-			new_scope->lookup(signature->name)->setValue(actual);
+
+			if (signature->binding.typeId().isType<BlockBinding>())
+			{
+				auto signature_blockBinding = signature->binding.asType<BlockBinding>();
+				call_frame->set(signature_blockBinding->position(), actual);
+			}
+			else
+				throw stdext::exception("Can only call functions using blocks.");
 		}
 		i += 1;
 	}
 
-	return new_scope;
+	return call_frame;
 }
 
 void SubroutineSignature::check(std::vector<instance<>> const& args)

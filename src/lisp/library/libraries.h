@@ -14,7 +14,7 @@ namespace lisp {
 	{
 		namespace helper
 		{
-			CRAFT_LISP_EXPORTED bool truth(instance<SScope> scope, instance<PSubroutine> truth, instance<> code);
+			CRAFT_LISP_EXPORTED bool truth(instance<SFrame> frame, instance<PSubroutine> truth, instance<> code);
 		}
 	}
 

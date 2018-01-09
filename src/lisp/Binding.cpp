@@ -9,19 +9,45 @@ using namespace craft::lisp;
 
 CRAFT_OBJECT_DEFINE(Binding)
 {
+	_.use<SBinding>().byCasting();
+
 	_.defaults();
 }
 
-Binding::Binding(std::string name, instance<> value)
+Binding::Binding(std::string name, instance<> expression)
 {
 	_name = name;
-	_value = value;
+	_expression = expression;
 }
 
-instance<> Binding::eval(instance<SScope> scope)
+std::string Binding::name() const
 {
-	_value = scope->environment()->eval(scope, _value);
+	return _name;
+}
 
+instance<> Binding::expression()
+{
+	return _expression;
+}
+
+void Binding::setValue(instance<> value)
+{
+	_value = value;
+}
+instance<> Binding::value()
+{
+	return _value;
+}
+
+instance<> Binding::eval(instance<SFrame> frame)
+{
+	_value = frame->environment()->eval(frame, _expression);
+
+	return _value;
+}
+
+instance<> Binding::getValue(instance<SFrame> frame) const
+{
 	return _value;
 }
 

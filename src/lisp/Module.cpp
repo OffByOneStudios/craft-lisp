@@ -25,20 +25,25 @@ Module::Module(instance<Namespace> ns, std::string filepath)
 	_filepath = filepath;
 }
 
-instance<Environment> Module::environment() const
-{
-	return _environment;
-}
 std::string Module::filepath() const
 {
 	return _filepath;
+}
+
+instance<Environment> Module::environment() const
+{
+	return _environment;
 }
 instance<Namespace> Module::namespace_() const
 {
 	return _ns;
 }
+instance<SScope> Module::parent() const
+{
+	return _ns;
+}
 
-instance<Binding> Module::lookup(std::string const& s)
+instance<SBinding> Module::lookup(std::string const& s)
 {
 	auto it = _lookup.find(s);
 	if (it == _lookup.end())
@@ -49,11 +54,22 @@ instance<Binding> Module::lookup(std::string const& s)
 	return it->second;
 }
 
-void Module::define(instance<Binding> binding)
+instance<SBinding> Module::define(std::string name, instance<> value)
 {
+	auto binding = instance<Binding>::make(name, value);
 	binding->addMeta("module", craft_instance_from_this());
 	_lookup[binding->name()] = binding;
 	_ns->define(binding);
+	return binding;
+}
+
+instance<SBinding> Module::define_eval(std::string name, instance<> value)
+{
+	auto res = define(name, value);
+
+	res.asType<Binding>()->setValue(value);
+
+	return res;
 }
 
 void Module::load()

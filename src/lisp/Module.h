@@ -16,7 +16,7 @@ namespace lisp
 		instance<Namespace> _ns;
 		std::string _filepath;
 
-		std::map<std::string, instance<Binding>> _lookup;
+		std::map<std::string, instance<SBinding>> _lookup;
 
 	public:
 
@@ -25,17 +25,24 @@ namespace lisp
 		CRAFT_LISP_EXPORTED static instance<Module> makeLiveModule(instance<Environment> env);
 
 		CRAFT_LISP_EXPORTED std::string filepath() const;
-		CRAFT_LISP_EXPORTED instance<Namespace> namespace_() const;
 
 		CRAFT_LISP_EXPORTED void load();
+
+	public:
+		/* Helper function for people writing modules in C++
+		
+		*/
+		CRAFT_LISP_EXPORTED instance<SBinding> define_eval(std::string name, instance<> value);
 
 	public:
 		//
 		// SScope
 		//
 		CRAFT_LISP_EXPORTED virtual instance<Environment> environment() const override;
-		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(std::string const&) override;
-		CRAFT_LISP_EXPORTED virtual void define(instance<Binding>) override;
+		CRAFT_LISP_EXPORTED virtual instance<Namespace> namespace_() const override;
+		CRAFT_LISP_EXPORTED virtual instance<SScope> parent() const override;
+		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) override;
+		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) override;
 	};
 
 }}

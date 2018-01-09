@@ -32,12 +32,16 @@ instance<Environment> Scope::environment() const
 {
 	return _environment;
 }
+instance<Namespace> Scope::namespace_() const
+{
+	return _parent->namespace_();
+}
 instance<SScope> Scope::parent() const
 {
 	return _parent;
 }
 
-instance<Binding> Scope::lookup(std::string const& s)
+instance<SBinding> Scope::lookup(std::string const& s)
 {
 	auto it = _lookup.find(s);
 	if (it == _lookup.end())
@@ -51,7 +55,9 @@ instance<Binding> Scope::lookup(std::string const& s)
 	return it->second;
 }
 
-void Scope::define(instance<Binding> binding)
+instance<SBinding> Scope::define(std::string name, instance<> value)
 {
+	auto binding = instance<Binding>::make(name, value);
 	_lookup[binding->name()] = binding;
+	return binding;
 }

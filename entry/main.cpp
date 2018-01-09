@@ -21,7 +21,12 @@ void repl(const std::string & prompt, instance<Environment> env)
 		try
 		{
 			instance<Sexpr> top_level = env->read(env->ns_user, line);
-			std::cout << env->eval(env->ns_user, top_level->cells[0]).toString() << '\n';
+
+			if (!top_level->cells.empty())
+			{
+				auto exec = instance<Execution>::make(env, env->ns_user);
+				std::cout << env->eval(instance<Frame>::make(exec), top_level->cells[0]).toString() << '\n';
+			}
 		}
 		catch (std::exception const& e)
 		{

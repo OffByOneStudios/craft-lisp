@@ -10,7 +10,7 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::BuiltinFunction);
 	public:
-		typedef std::function<instance<>(instance<SScope> scope, std::vector<instance<>> const&)> f_call;
+		typedef std::function<instance<>(instance<SFrame> frame, std::vector<instance<>> const&)> f_call;
 
 	private:
 
@@ -22,7 +22,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED BuiltinFunction(f_call);
 
 		CRAFT_LISP_EXPORTED instance<SubroutineSignature> signature();
-		CRAFT_LISP_EXPORTED instance<> call(instance<SScope> const& scope, std::vector<instance<>> const&);
+		CRAFT_LISP_EXPORTED instance<SFrame> call_frame(instance<SFrame> parent);
+		CRAFT_LISP_EXPORTED instance<> call(instance<SFrame> const& scope, std::vector<instance<>> const&);
 
 		CRAFT_LISP_EXPORTED void setSignature(instance<SubroutineSignature> signature);
 	};

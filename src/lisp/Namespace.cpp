@@ -9,9 +9,9 @@ using namespace craft::lisp;
 
 CRAFT_OBJECT_DEFINE(Namespace)
 {
-	_.defaults();
-
 	_.use<SScope>().byCasting();
+
+	_.defaults();
 }
 
 
@@ -26,8 +26,16 @@ instance<Environment> Namespace::environment() const
 {
 	return _environment;
 }
+instance<Namespace> Namespace::namespace_() const
+{
+	return craft_instance_from_this();
+}
+instance<SScope> Namespace::parent() const
+{
+	return instance<SScope>();
+}
 
-instance<Binding> Namespace::lookup(std::string const& s)
+instance<SBinding> Namespace::lookup(std::string const& s)
 {
 	auto it = _lookup.find(s);
 	if (it == _lookup.end())
@@ -36,8 +44,14 @@ instance<Binding> Namespace::lookup(std::string const& s)
 	return it->second;
 }
 
-void Namespace::define(instance<Binding> binding)
+instance<SBinding> Namespace::define(std::string name, instance<> value)
+{
+	return define(instance<Binding>::make(name, value));
+}
+
+instance<SBinding> Namespace::define(instance<SBinding> binding)
 {
 	_lookup[binding->name()] = binding;
+	return binding;
 }
 

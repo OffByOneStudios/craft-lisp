@@ -23,6 +23,7 @@ namespace lisp
 
 		Flags flags;
 
+		instance<SBinding> binding;
 	public:
 		CRAFT_LISP_EXPORTED Argument();
 	};
@@ -52,8 +53,11 @@ namespace lisp
 		*/
 		CRAFT_LISP_EXPORTED void complete();
 
+		inline instance<SScope> scope() const { return _scope; }
+
 		CRAFT_LISP_EXPORTED instance<SScope> read_frame(instance<SScope> const& scope);
-		CRAFT_LISP_EXPORTED instance<SScope> eval_frame(instance<SScope> const& scope, std::vector<instance<>> const& args);
+		CRAFT_LISP_EXPORTED instance<SFrame> push_frame(instance<SFrame> const& parent);
+		CRAFT_LISP_EXPORTED instance<SFrame> set_frame(instance<SFrame> const& frame, std::vector<instance<>> const& args);
 
 		/* Checks arguments to see if they are valid for this signature. (throws)
 		*/

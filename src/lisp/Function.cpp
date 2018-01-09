@@ -24,11 +24,15 @@ instance<SubroutineSignature> Function::signature()
 	return _signature;
 }
 
-instance<> Function::call(instance<SScope> const& scope, std::vector<instance<>> const& args)
+instance<SFrame> Function::call_frame(instance<SFrame> parent)
 {
-	auto call_scope = _signature->eval_frame(scope, args);
+	return _signature->push_frame(parent);
+}
 
-	return call_scope->environment()->eval(call_scope, _body);
+instance<> Function::call(instance<SFrame> const& call_frame, std::vector<instance<>> const& args)
+{
+	_signature->set_frame(call_frame, args);
+	return call_frame->environment()->eval(call_frame, _body);
 }
 
 void Function::setBody(instance<Sexpr> body)

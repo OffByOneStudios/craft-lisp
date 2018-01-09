@@ -5,24 +5,22 @@
 namespace craft {
 namespace lisp
 {
-	class Binding
+	class BlockBinding
 		: public virtual craft::types::Object
 		, public types::Implements<SBinding>
 	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Binding);
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::BlockBinding);
 	private:
+		size_t _pos;
 		std::string _name;
 		instance<> _expression;
-		instance<> _value;
 
 		std::map<std::string, instance<>> _meta;
 
 	public:
-		CRAFT_LISP_EXPORTED Binding(std::string name, instance<> expression);
+		CRAFT_LISP_EXPORTED BlockBinding(size_t pos, std::string name, instance<> expression = instance<>());
 
-		CRAFT_LISP_EXPORTED instance<> expression();
-		CRAFT_LISP_EXPORTED void setValue(instance<> value);
-		CRAFT_LISP_EXPORTED instance<> value();
+		CRAFT_LISP_EXPORTED size_t position() const;
 
 		CRAFT_LISP_EXPORTED void addMeta(std::string metaKey, instance<> value);
 

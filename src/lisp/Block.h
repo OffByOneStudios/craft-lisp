@@ -5,23 +5,22 @@
 namespace craft {
 namespace lisp
 {
-
-	class Scope
+	class Block
 		: public virtual craft::types::Object
 		, public types::Implements<SScope>
 	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Scope);
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Block);
 	private:
 
 		instance<Environment> _environment;
 		instance<SScope> _parent;
 
-		std::map<std::string, instance<SBinding>> _lookup;
+		std::vector<instance<BlockBinding>> _bindings;
+		std::map<std::string, size_t> _lookup;
 
 	public:
+		CRAFT_LISP_EXPORTED Block(instance<SScope> parent);
 
-		CRAFT_LISP_EXPORTED Scope(instance<Environment> env);
-		CRAFT_LISP_EXPORTED Scope(instance<SScope> parent);
 
 	public:
 		//
@@ -33,5 +32,4 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) override;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) override;
 	};
-
 }}

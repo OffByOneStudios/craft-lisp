@@ -4,13 +4,20 @@
 namespace craft {
 namespace lisp
 {
+	class SScope;
+	class SFrame;
+
+	class Namespace;
+	class Execution;
 	class Environment;
 
 	class SubroutineSignature;
 	class Binding;
 }}
 
+#include "SBinding.hpp"
 #include "SScope.hpp"
+#include "SFrame.hpp"
 #include "PSubroutine.hpp"
 
 #include "types.h"
@@ -23,14 +30,21 @@ namespace lisp
 #include "parser.h"
 
 #include "Scope.h"
+#include "Frame.h"
 #include "Namespace.h"
 #include "Module.h"
+#include "Execution.h"
 #include "Environment.h"
+
+#include "BlockBinding.h"
+#include "ClosureBinding.h"
+#include "Block.h"
 
 #include "Variable.h"
 
 #include "SubroutineSignature.h"
 #include "Function.h"
+#include "Closure.h"
 #include "BuiltinFunction.h"
 #include "MultiMethod.h"
 #include "Macro.h"

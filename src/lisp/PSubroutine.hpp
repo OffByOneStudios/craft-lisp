@@ -6,11 +6,16 @@ namespace craft {
 namespace lisp
 {
 	/******************************************************************************
-	** PClone
+	** PSubroutine
 	******************************************************************************/
 
-	/* T:
-	Provides an interface for naming things, and reversing those names into actual objects.
+	/* Provides an interface for executable objects.
+
+	Should cover:
+	  * How the object should be executed.
+	  * The signature and side effects of the execution.
+	  * Access to the raw call.
+	  * Helpers for building the stack frame information.
 	*/
 
 	class PSubroutine abstract
@@ -21,11 +26,12 @@ namespace lisp
 	public:
 		virtual instance<SubroutineSignature> signature(instance<> subroutine) const = 0;
 
-		virtual instance<> call(instance<> subroutine, instance<SScope> const&, std::vector<instance<>> const&) const = 0;
+		virtual instance<SFrame> call_frame(instance<> subroutine, instance<SFrame> const& parent) const = 0;
+		virtual instance<> call(instance<> subroutine, instance<SFrame> const& call_frame, std::vector<instance<>> const&) const = 0;
 	};
 
 	/******************************************************************************
-	** DefaultCopyConstructor
+	** AutoSubroutine
 	******************************************************************************/
 
 	template <typename T>
@@ -40,11 +46,18 @@ namespace lisp
 			return ret->signature();
 		}
 
-		inline virtual instance<> call(instance<> subroutine, instance<SScope> const& scope, std::vector<instance<>> const& args) const override
+		inline virtual instance<SFrame> call_frame(instance<> subroutine, instance<SFrame> const& parent) const override
 		{
 			instance<T> ret = subroutine;
 
-			return ret->call(scope, args);
+			return ret->call_frame(parent);
+		}
+
+		inline virtual instance<> call(instance<> subroutine, instance<SFrame> const& context, std::vector<instance<>> const& args) const override
+		{
+			instance<T> ret = subroutine;
+
+			return ret->call(context, args);
 		}
 	};
 }}

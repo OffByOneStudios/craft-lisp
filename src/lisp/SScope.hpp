@@ -12,9 +12,12 @@ namespace lisp
 
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<Environment> environment() const = 0;
+		CRAFT_LISP_EXPORTED virtual instance<Namespace> namespace_() const = 0;
 
-		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(std::string const&) = 0;
-		CRAFT_LISP_EXPORTED virtual void define(instance<Binding>) = 0;
+		CRAFT_LISP_EXPORTED virtual instance<SScope> parent() const = 0;
+
+		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) = 0;
+		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) = 0;
 	};
 
 }}

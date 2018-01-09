@@ -23,15 +23,24 @@ instance<SubroutineSignature> MultiMethod::signature()
 {
 	return _signature;
 }
-instance<> MultiMethod::call(instance<SScope> const& scope, std::vector<instance<>> const& args)
+
+instance<SFrame> MultiMethod::call_frame(instance<SFrame> parent)
 {
-	auto env = scope->environment();
+	return parent;
+}
+
+instance<> MultiMethod::call(instance<SFrame> const& frame, std::vector<instance<>> const& args)
+{
+	auto env = frame->environment();
 	auto subroutine = dispatch(env, type_of(env, args));
 
 	if (!subroutine)
 		throw stdext::exception("Dispatch failed.");
 
-	return subroutine.getFeature<PSubroutine>()->call(subroutine, scope, args);
+	auto provider = subroutine.getFeature<PSubroutine>();
+	auto call_frame = provider->call_frame(subroutine, frame);
+
+	return subroutine.getFeature<PSubroutine>()->call(subroutine, call_frame, args);
 }
 
 instance<> MultiMethod::dispatch(instance<Environment> env, instance<lisp::types::SType> type)

@@ -66,7 +66,7 @@ instance<> Environment::read(instance<SScope> scope, instance<> ast)
 
 		instance<> inspect_head = head;
 		if (head.typeId().isType<Binding>())
-			inspect_head = head.asType<Binding>()->value();
+			inspect_head = head.asType<Binding>()->expression();
 
 		// -- Evaluate Special Forms --
 		if (inspect_head.typeId().isType<SpecialForm>())
@@ -95,28 +95,36 @@ instance<Sexpr> Environment::read_rest(instance<SScope> scope, instance<> head, 
 
 	return ret;
 }
+instance<> Environment::read_eval(instance<SScope> scope, instance<> code)
+{
+	auto execution = instance<Execution>::make(craft_instance_from_this(), scope->namespace_());
+	auto frame = instance<Frame>::make(execution);
+	return eval(frame, code);
+}
 
 //
 // Interpreter
 //
 
-instance<> Environment::eval(instance<SScope> scope, std::string const& text)
+instance<> Environment::eval(instance<SFrame> frame, std::string const& text)
 {
+	instance<SScope> scope = frame->execution()->namespace_();
+
 	auto ast = this->parse(scope, text);
 
 	instance<> last_value;
 	for (auto cell : ast->cells)
 	{
 		auto code = this->read(scope, cell);
-		last_value = this->eval(scope, code);
+		last_value = this->eval(frame, code);
 	}
 	return last_value;
 }
 
-instance<> Environment::eval(instance<SScope> scope, instance<> code)
+instance<> Environment::eval(instance<SFrame> frame, instance<> code)
 {
-	if (code.typeId().isType<Binding>())
-		return code.asType<Binding>()->value();
+	if (code.typeId().hasFeature<SBinding>())
+		return code.asFeature<SBinding>()->getValue(frame);
 	else if (code.typeId().isType<Sexpr>())
 	{
 		instance<Sexpr> expr = code;
@@ -127,11 +135,11 @@ instance<> Environment::eval(instance<SScope> scope, instance<> code)
 		// -- Evaluate Head --
 		instance<> head = expr->car();
 
-		head = eval(scope, head);
+		head = eval(frame, head);
 
 		// -- Evaluate Special Forms --
 		if (head.typeId().isType<SpecialForm>())
-			return head.asType<SpecialForm>()->eval(scope, expr);
+			return head.asType<SpecialForm>()->eval(frame, expr);
 
 		// -- Evaluate Subroutine --
 		if (!head.hasFeature<PSubroutine>())
@@ -139,16 +147,19 @@ instance<> Environment::eval(instance<SScope> scope, instance<> code)
 			throw stdext::exception("Cannot call `{0}`", head.toString());
 		}
 
+		auto subroutine_provider = head.getFeature<PSubroutine>();
+
 		std::vector<instance<>> sub_expr_values;
 		sub_expr_values.reserve(expr->cells.size() - 1);
 
 		for (auto it = expr->cells.begin() + 1, end = expr->cells.end(); it != end; ++it)
 		{
-			sub_expr_values.push_back(eval(scope, *it));
+			sub_expr_values.push_back(eval(frame, *it));
 		}
 
 		// -- Call --
-		return head.getFeature<PSubroutine>()->call(head, scope, sub_expr_values);
+		frame = subroutine_provider->call_frame(head, frame);
+		return subroutine_provider->call(head, frame, sub_expr_values);
 	}
 	else
 		return code;

@@ -5,26 +5,23 @@
 namespace craft {
 namespace lisp
 {
-	class Binding
+	class ClosureBinding
 		: public virtual craft::types::Object
 		, public types::Implements<SBinding>
 	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Binding);
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::ClosureBinding);
 	private:
-		std::string _name;
-		instance<> _expression;
-		instance<> _value;
-
-		std::map<std::string, instance<>> _meta;
+		instance<BlockBinding> _base;
+		size_t _lexical_pos;
 
 	public:
-		CRAFT_LISP_EXPORTED Binding(std::string name, instance<> expression);
+		CRAFT_LISP_EXPORTED ClosureBinding(instance<BlockBinding> base, size_t lexical_pos = 0);
 
-		CRAFT_LISP_EXPORTED instance<> expression();
-		CRAFT_LISP_EXPORTED void setValue(instance<> value);
-		CRAFT_LISP_EXPORTED instance<> value();
+		CRAFT_LISP_EXPORTED size_t positionLexical() const;
+		CRAFT_LISP_EXPORTED size_t positionFrame() const;
 
-		CRAFT_LISP_EXPORTED void addMeta(std::string metaKey, instance<> value);
+		CRAFT_LISP_EXPORTED void incrementClosure();
+		CRAFT_LISP_EXPORTED void setClosure(size_t lexical_pos);
 
 		//
 		// SBinding
