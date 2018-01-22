@@ -10,6 +10,7 @@ using namespace craft::lisp;
 CRAFT_OBJECT_DEFINE(Sexpr)
 {
 	_.use<PClone>().singleton<DefaultCopyConstructor>();
+	_.use<PParse>().singleton<FunctionalParse>(&Sexpr::_fromString);
 	_.use<PStringer>().singleton<FunctionalStringer>(&Sexpr::_toString);
 
 	_.defaults();
@@ -18,6 +19,10 @@ CRAFT_OBJECT_DEFINE(Sexpr)
 std::string Sexpr::_toString(instance<> inst)
 {
 	return inst.asType<Sexpr>()->toString();
+}
+instance<> Sexpr::_fromString(std::string s)
+{
+	return parse_lisp(s);
 }
 
 std::string Sexpr::toString() const

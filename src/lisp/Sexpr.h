@@ -13,6 +13,7 @@ namespace lisp
 	private:
 
 		static std::string _toString(instance<>);
+		static instance<> _fromString(std::string);
 
 	public:
 		// TODO make this an actual immutable list
