@@ -36,16 +36,35 @@ instance<Sexpr> Environment::parse(instance<SScope> scope, std::string const& te
 	return parse_lisp(text);
 }
 
-instance<> Environment::read(instance<SScope> scope, std::string const& text)
+instance<> Environment::parse_read(instance<SScope> scope, instance<Sexpr> ast)
 {
-	auto ast = parse(scope, text);
-
 	auto result = instance<Sexpr>::make();
 	for (auto cell : ast->cells)
 	{
 		result->cells.push_back(this->read(scope, cell));
 	}
 	return result;
+}
+instance<> Environment::parse_eval(instance<SScope> scope, instance<Sexpr> ast)
+{
+	instance<Sexpr> top_level = parse_read(scope, ast);
+
+	auto execution = instance<Execution>::make(craft_instance_from_this(), scope->namespace_());
+	auto frame = instance<Frame>::make(execution);
+
+	instance<> result;
+	for (auto cell : top_level->cells)
+	{
+		result = this->eval(frame, cell);
+	}
+	return result;
+}
+
+instance<> Environment::read(instance<SScope> scope, std::string const& text)
+{
+	auto ast = parse(scope, text);
+
+	return parse_read(scope, ast);
 }
 
 instance<> Environment::read(instance<SScope> scope, instance<> ast)
@@ -105,6 +124,18 @@ instance<> Environment::read_eval(instance<SScope> scope, instance<> code)
 //
 // Interpreter
 //
+
+instance<> Environment::eval(std::string const& text)
+{
+	auto exec = instance<Execution>::make(craft_instance_from_this(), ns_user);
+	return eval(instance<Frame>::make(exec), text);
+}
+
+instance<> Environment::eval(instance<> code)
+{
+	auto exec = instance<Execution>::make(craft_instance_from_this(), ns_user);
+	return eval(instance<Frame>::make(exec), code);
+}
 
 instance<> Environment::eval(instance<SFrame> frame, std::string const& text)
 {
