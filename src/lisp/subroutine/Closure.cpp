@@ -1,6 +1,6 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
-#include "lisp/Closure.h"
+#include "Closure.h"
 
 using namespace craft;
 using namespace craft::types;

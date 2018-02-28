@@ -1,6 +1,6 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
-#include "lisp/Macro.h"
+#include "Macro.h"
 
 using namespace craft;
 using namespace craft::types;

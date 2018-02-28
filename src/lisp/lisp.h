@@ -42,12 +42,12 @@ namespace lisp
 
 #include "Variable.h"
 
-#include "SubroutineSignature.h"
-#include "Function.h"
-#include "Closure.h"
-#include "BuiltinFunction.h"
-#include "MultiMethod.h"
-#include "Macro.h"
-#include "SpecialForm.h"
+#include "subroutine/SubroutineSignature.h"
+#include "subroutine/Function.h"
+#include "subroutine/Closure.h"
+#include "subroutine/BuiltinFunction.h"
+#include "subroutine/MultiMethod.h"
+#include "subroutine/Macro.h"
+#include "subroutine/SpecialForm.h"
 
 #include "lisp/library/libraries.h"
