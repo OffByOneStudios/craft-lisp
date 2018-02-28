@@ -203,9 +203,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		auto name = sexpr->cells[1];
 		auto object = sexpr->cells[2];
 
-		std::string name_value;
-
-		name_value = symbol(name);
+		std::string name_value = symbol(name);
 
 		object = scope->environment()->read(scope, object);
 
@@ -282,7 +280,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	});
 	ret->define_eval("while", _while);
 
-	auto lambda = instance<SpecialForm>::make(
+	auto fn = instance<SpecialForm>::make(
 		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
 	{
 		// Setup special form
@@ -312,13 +310,13 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		[](instance<SFrame> frame, instance<Sexpr> sexpr) -> instance<>
 	{
 		if (sexpr->cells.size() != 2 || !sexpr->cells[1].typeId().isType<Function>())
-			throw stdext::exception("Malformed lambda evaluated.");
+			throw stdext::exception("Malformed fn evaluated.");
 
 		auto function = sexpr->cells[1];
 
 		return instance<Closure>::make(frame, function);
 	});
-	ret->define_eval("lambda", lambda);
+	ret->define_eval("fn", fn);
 
 	// -- Builtin Library --
 	auto lookup = instance<MultiMethod>::make();
