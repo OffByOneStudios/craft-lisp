@@ -181,7 +181,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 	auto subtype = instance<MultiMethod>::make();
 	subtype->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromTypes<types::SType, types::SType>(),
+		SubroutineSignature::makeFromArgsAndReturn<types::SType, types::SType, bool>(),
 		[](instance<SFrame> frame, std::vector<instance<>> const& args) -> instance<>
 	{
 		instance<> a(args[0]), b(args[1]);
@@ -361,14 +361,14 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 	auto add = instance<MultiMethod>::make();
 	add->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromTypes<int64_t, int64_t>(),
+		SubroutineSignature::makeFromArgsAndReturn<int64_t, int64_t, int64_t>(),
 		[](auto frame, auto args)
 	{
 		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
 		return instance<int64_t>::make(*a + *b);
 	}));
 	add->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromTypes<double, double>(),
+		SubroutineSignature::makeFromArgsAndReturn<double, double, double>(),
 		[](auto frame, auto args)
 	{
 		instance<double> a(expect<double>(args[0])), b(expect<double>(args[1]));
@@ -495,6 +495,23 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		return instance<>();
 	}));
 	ret->define_eval("set", set);
+
+	//
+	// Introspection
+	//
+
+	/*
+	auto report = instance<MultiMethod>::make();
+	report->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<Function>(),
+		[](auto frame, auto args)
+	{
+		instance<Function> a(expect<Function>(args[0]));
+
+		return instance<std::string>::make(a->report());
+	}));
+	ret->define_eval("report", report);
+	*/
 
 	return ret;
 }

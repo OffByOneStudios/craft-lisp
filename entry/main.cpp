@@ -14,14 +14,38 @@ using namespace craft::lisp;
 // the default read-eval-print-loop
 void repl(const std::string & prompt, instance<Environment> env)
 {
+	std::string long_line = "";
+
 	for (;;)
 	{
-		std::cout << prompt;
-		std::string line; std::getline(std::cin, line);
+		if (long_line.empty())
+			std::cout << prompt;
+		else
+			std::cout << std::string(prompt.size(), '.');
+
+		std::string line;
+		std::getline(std::cin, line);
+		long_line += line;
+
+		instance<Sexpr> top_level;
 		try
 		{
-			instance<Sexpr> top_level = env->read(env->ns_user, line);
+			top_level = env->read(env->ns_user, long_line);
+		}
+		catch (std::exception const& e)
+		{
+			std::cout << e.what() << '\n';
 
+			if (line.empty())
+				long_line = "";
+
+			continue;
+		}
+
+		long_line = "";
+
+		try
+		{
 			if (!top_level->cells.empty())
 			{
 				auto exec = instance<Execution>::make(env, env->ns_user);

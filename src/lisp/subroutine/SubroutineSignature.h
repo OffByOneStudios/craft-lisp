@@ -37,7 +37,7 @@ namespace lisp
 
 	public:
 		std::vector<instance<Argument>> arguments;
-		types::TypeId returnType;
+		instance<types::SType> returnType;
 
 		size_t required;
 		size_t singular;
@@ -88,10 +88,21 @@ namespace lisp
 		}
 
 		template<typename... TArgs>
-		inline static instance<SubroutineSignature> makeFromTypes()
+		inline static instance<SubroutineSignature> makeFromArgs()
 		{
 			auto res = instance<SubroutineSignature>::make();
 			res->arguments = { sigArgument<TArgs>()... };
+			res->complete();
+			return res;
+		}
+
+		template<typename... TArgs>
+		inline static instance<SubroutineSignature> makeFromArgsAndReturn()
+		{
+			auto res = instance<SubroutineSignature>::make();
+			res->arguments = { sigArgument<TArgs>()... };
+			res->returnType = (res->arguments.end() - 1)->get()->type;
+			res->arguments.pop_back();
 			res->complete();
 			return res;
 		}
