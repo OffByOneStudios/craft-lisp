@@ -11,6 +11,8 @@ namespace lisp
 
 		We implement our own type system objects here for constructing dispatch arguments. The type
 		system does not yet provide all of the features we require...
+
+		TODO implement using value equality if those are given as our dispatch types
 	*/
 
 	class MultiMethod
@@ -37,7 +39,29 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<SFrame> call_frame(instance<SFrame> parent);
 		CRAFT_LISP_EXPORTED instance<> call(instance<SFrame> const& frame, std::vector<instance<>> const&);
 
-		CRAFT_LISP_EXPORTED instance<> dispatch(instance<Environment> env, instance<types::SType> type);
+		CRAFT_LISP_EXPORTED size_t subroutineCount();
+
+		// Provides a configuration and results working memory
+		struct Dispatch
+		{
+			enum class Config
+			{
+				Default = 0,
+				FastFail = 1,
+			};
+
+			Config config;
+
+			instance<> subroutine;
+			std::vector<instance<>> possible_subroutine;
+
+			Dispatch()
+			{
+				config = Config::FastFail;
+			}
+		};
+
+		CRAFT_LISP_EXPORTED void dispatch(instance<Environment> env, instance<types::SType> type, Dispatch* dispatch);
 		CRAFT_LISP_EXPORTED void attach(instance<Environment> env, instance<>);
 	};
 

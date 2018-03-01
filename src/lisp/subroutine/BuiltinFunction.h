@@ -20,6 +20,7 @@ namespace lisp
 	public:
 
 		CRAFT_LISP_EXPORTED BuiltinFunction(f_call);
+		CRAFT_LISP_EXPORTED BuiltinFunction(instance<SubroutineSignature>, f_call);
 
 		CRAFT_LISP_EXPORTED instance<SubroutineSignature> signature();
 		CRAFT_LISP_EXPORTED instance<SFrame> call_frame(instance<SFrame> parent);

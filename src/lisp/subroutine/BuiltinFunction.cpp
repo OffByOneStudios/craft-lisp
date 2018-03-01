@@ -17,6 +17,13 @@ CRAFT_OBJECT_DEFINE(BuiltinFunction)
 BuiltinFunction::BuiltinFunction(f_call call)
 {
 	_call = call;
+	_signature = SubroutineSignature::makeCollectArgs();
+}
+
+BuiltinFunction::BuiltinFunction(instance<SubroutineSignature> sig, f_call call)
+{
+	_signature = sig;
+	_call = call;
 }
 
 instance<SubroutineSignature> BuiltinFunction::signature()

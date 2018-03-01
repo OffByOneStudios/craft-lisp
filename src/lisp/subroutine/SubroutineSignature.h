@@ -11,7 +11,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Argument);
 	public:
 		std::string name;
-		types::TypeId type;
+		instance<types::SType> type;
 
 		enum Flags : uint64_t
 		{
@@ -47,6 +47,12 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED SubroutineSignature();
 
+		/* The lisp type of this signature
+		
+		For now just the product of the argument types
+		*/
+		CRAFT_LISP_EXPORTED instance<types::SType> asType();
+
 		/* Completes the signature helper data.
 
 		Also checks for invalid signatures (throws)
@@ -61,6 +67,47 @@ namespace lisp
 
 		/* Checks arguments to see if they are valid for this signature. (throws)
 		*/
-		CRAFT_LISP_EXPORTED void check(std::vector<instance<>> const& args);
+		CRAFT_LISP_EXPORTED void check(instance<Environment> env, std::vector<instance<>> const& args);
+
+	public:
+
+		template<typename T>
+		inline static instance<types::SType> sigType()
+		{
+			if (craft::type<T>::isFeature)
+				return instance<types::CraftFeature>::make(type<T>::featureId());
+			return instance<types::CraftType>::make(type<T>::typeId());
+		}
+
+		template<typename T>
+		inline static instance<Argument> sigArgument()
+		{
+			auto res = instance<Argument>::make();
+			res->type = sigType<T>();
+			return res;
+		}
+
+		template<typename... TArgs>
+		inline static instance<SubroutineSignature> makeFromTypes()
+		{
+			auto res = instance<SubroutineSignature>::make();
+			res->arguments = { sigArgument<TArgs>()... };
+			res->complete();
+			return res;
+		}
+
+		inline static instance<SubroutineSignature> makeCollectArgs()
+		{
+			auto res = instance<SubroutineSignature>::make();
+
+			auto arg = instance<Argument>::make();
+			arg->type = instance<types::Special>::make();
+			arg->type.asType<types::Special>()->kind = types::Special::Any;
+			arg->flags = Argument::Flags::VariadicCollect;
+			res->arguments.push_back(arg);
+
+			res->complete();
+			return res;
+		}
 	};
 }}

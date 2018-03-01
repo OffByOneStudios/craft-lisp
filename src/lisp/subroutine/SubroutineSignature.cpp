@@ -27,6 +27,19 @@ SubroutineSignature::SubroutineSignature()
 
 }
 
+instance<lisp::types::SType> SubroutineSignature::asType()
+{
+	auto tuple = instance<lisp::types::Tuple>::make();
+	tuple->cells.reserve(this->required);
+
+	for (auto i = 0; i < required; ++i)
+	{
+		tuple->cells.push_back(arguments[i]->type);
+	}
+
+	return tuple;
+}
+
 void SubroutineSignature::complete()
 {
 	this->required = 0;
@@ -100,7 +113,7 @@ instance<SFrame> SubroutineSignature::push_frame(instance<SFrame> const& parent)
 
 instance<SFrame> SubroutineSignature::set_frame(instance<SFrame> const& frame, std::vector<instance<>> const& args)
 {
-	check(args);
+	check(frame->environment(), args);
 
 	instance<Frame> call_frame = frame;
 
@@ -130,7 +143,7 @@ instance<SFrame> SubroutineSignature::set_frame(instance<SFrame> const& frame, s
 	return call_frame;
 }
 
-void SubroutineSignature::check(std::vector<instance<>> const& args)
+void SubroutineSignature::check(instance<Environment> env, std::vector<instance<>> const& args)
 {
 	if (args.size() < required)
 		throw stdext::exception("signature: requires at least {0} arguments, given {1}.", required, args.size());
@@ -141,8 +154,7 @@ void SubroutineSignature::check(std::vector<instance<>> const& args)
 		auto actual = args[i];
 		auto signature = arguments[i];
 
-		if (signature->type != types::None
-			&& signature->type != actual.typeId())
+		if (!types::is_subtype(env, instance<types::CraftType>::make(actual.typeId()), signature->type))
 			throw stdext::exception("signature: argument {0} is not type {1}", i, signature->type.toString());
 	}
 
@@ -153,8 +165,7 @@ void SubroutineSignature::check(std::vector<instance<>> const& args)
 		auto actual = args[i];
 		auto signature = arguments[i];
 
-		if (signature->type != types::None
-			&& signature->type != actual.typeId())
+		if (!types::is_subtype(env, instance<types::CraftType>::make(actual.typeId()), signature->type))
 			throw stdext::exception("signature: argument {0} is not type {1}", i, signature->type.toString());
 	}
 
@@ -166,8 +177,7 @@ void SubroutineSignature::check(std::vector<instance<>> const& args)
 			auto actual = args[i];
 			auto signature = variadic;
 
-			if (signature->type != types::None
-				&& signature->type != actual.typeId())
+			if (!types::is_subtype(env, instance<types::CraftType>::make(actual.typeId()), signature->type))
 				throw stdext::exception("signature: argument {0} is not type {1}", i, signature->type.toString());
 		}
 	}

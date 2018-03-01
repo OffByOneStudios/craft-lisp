@@ -35,6 +35,18 @@ CRAFT_OBJECT_DEFINE(CraftType)
 
 	_.defaults();
 }
+CRAFT_OBJECT_DEFINE(CraftFeature)
+{
+	_.use<SType>().byCasting();
+
+	_.use<PStringer>().singleton<FunctionalStringer>(
+		[](instance<CraftFeature> i) -> std::string
+	{
+		return i->feature.toString(true);
+	});
+
+	_.defaults();
+}
 CRAFT_OBJECT_DEFINE(AbstractTag)
 {
 	_.use<SType>().byCasting();
@@ -148,7 +160,38 @@ bool CraftType::isSubtype(instance<Environment> env, instance<> left, AlgorithmS
 
 
 /*
-Type AbstractTag
+	Type CraftType
+*/
+
+bool CraftFeature::isConcrete() const
+{
+	return false;
+}
+bool CraftFeature::isSubtypingSimple() const
+{
+	return true;
+}
+
+bool CraftFeature::isSubtype(instance<Environment> env, instance<> left, AlgorithmSubtype* algo) const
+{
+	if (Special::isBottom(left)) return true;
+
+	if (left.typeId().isType<CraftFeature>())
+	{
+		return this->feature == left.asType<CraftFeature>()->feature;
+	}
+	if (left.typeId().isType<CraftType>())
+	{
+		return system().typeHasFeature(left.asType<CraftType>()->type, feature);
+	}
+
+	assert(false && "");
+	return false;
+}
+
+
+/*
+	Type AbstractTag
 */
 
 bool AbstractTag::isConcrete() const
@@ -401,4 +444,11 @@ void AlgorithmSubtype::execute_subtype()
 	// We finished yay!
 	executed = true;
 	leftIsSubtype = true;
+}
+
+bool lisp::types::is_subtype(instance<Environment> env, instance<SType> left, instance<SType> right)
+{
+	lisp::types::AlgorithmSubtype subtype(env, left, right);
+	subtype.execute_subtype();
+	return subtype.leftIsSubtype;
 }

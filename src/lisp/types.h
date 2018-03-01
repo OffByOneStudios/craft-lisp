@@ -70,6 +70,23 @@ namespace lisp
 			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
 		};
 
+		class CraftFeature
+			: public virtual craft::types::Object
+			, Implements<SType>
+		{
+			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::CraftFeature);
+		public:
+			FeatureId feature;
+
+			inline CraftFeature(FeatureId id) : feature(id) { }
+
+		public:
+			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
+			CRAFT_LISP_EXPORTED virtual bool isSubtypingSimple() const override;
+
+			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
+		};
+
 		class AbstractTag
 			: public virtual craft::types::Object
 			, Implements<SType>
@@ -218,6 +235,8 @@ namespace lisp
 
 			CRAFT_LISP_EXPORTED void execute_subtype();
 		};
+
+		CRAFT_LISP_EXPORTED bool is_subtype(instance<Environment> env, instance<types::SType> left, instance<types::SType> right);
 	}
 
 	/* Makes a type expression that represents a sequence of live vars

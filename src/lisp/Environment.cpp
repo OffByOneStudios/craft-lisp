@@ -15,6 +15,10 @@ Environment::Environment(std::shared_ptr<spdlog::logger> logger)
 {
 	_logger = logger;
 
+	auto any = instance<types::Special>::make();
+	any->kind = types::Special::Any;
+	_any = any;
+
 	ns_cult = instance<Namespace>::make(craft_instance_from_this());
 	global = make_library_globals(ns_cult);
 
@@ -199,6 +203,10 @@ instance<> Environment::eval(instance<SFrame> frame, instance<> code)
 //
 // Types
 //
+instance<types::SType> Environment::type_any()
+{
+	return _any;
+}
 
 bool Environment::type_isChild(instance<> inst, types::TagId parent)
 {

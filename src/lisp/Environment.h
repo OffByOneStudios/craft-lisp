@@ -13,6 +13,7 @@ namespace lisp
 	private:
 
 		std::shared_ptr<spdlog::logger> _logger;
+		instance<types::SType> _any;
 
 		// abstract type hierarchy
 		std::map<types::TagId, types::TagId> _type_tagParents;
@@ -48,6 +49,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> eval(instance<SFrame> frame, instance<> code);
 
 		// Type System
+		CRAFT_LISP_EXPORTED instance<types::SType> type_any();
+
 		CRAFT_LISP_EXPORTED bool type_isChild(instance<>, types::TagId);
 		CRAFT_LISP_EXPORTED bool type_isChild(types::TypeId, types::TagId);
 		CRAFT_LISP_EXPORTED bool type_isChild(types::TagId, types::TagId);

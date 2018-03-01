@@ -41,6 +41,10 @@ instance<SubroutineSignature> library::helper::binding_expr_to_signature(instanc
 	//   ? ((foo Int) (bar Int :optional))
 	// * keyword arugments
 	//   ? ((foo Int) (:bar Int) (:baz 8))
+	//   ? ((foo Int) (:keyword bar Int) (:keyword baz 8))
+	// * return type
+	//   ? ((foo Int) (bar Int 8) (:baz 8) Int)
+	//   ? ((foo Int) (bar Int 8) (:baz 8) (:returns Int))
 	// * collections
 	//   ? ((foo Int) (args :args))
 	//   ? ((foo Int) (args :args) (kwargs :keywords))
@@ -57,15 +61,22 @@ instance<SubroutineSignature> library::helper::binding_expr_to_signature(instanc
 			auto arg_expr = cell.asType<Sexpr>();
 
 			if (arg_expr->cells.size() > 0)
+			{
 				arg->name = symbol(arg_expr->car());
+			}
 			if (arg_expr->cells.size() > 1)
 			{
 				// TODO build type expression
 				auto next = env->read(scope, arg_expr->cells[1]);
 				next = env->read_eval(scope, next);
 
-				if (next.typeId().isType<lisp::types::CraftType>())
-					arg->type = next.asType<lisp::types::CraftType>()->type;
+				if (!next.hasFeature<types::SType>())
+					throw stdext::exception("Signature expected type object.");
+				arg->type = next;
+			}
+			else
+			{
+				arg->type = env->type_any();
 			}
 		}
 		else
@@ -170,14 +181,12 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 	auto subtype = instance<MultiMethod>::make();
 	subtype->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromTypes<types::SType, types::SType>(),
 		[](instance<SFrame> frame, std::vector<instance<>> const& args) -> instance<>
 	{
 		instance<> a(args[0]), b(args[1]);
 
-		types::AlgorithmSubtype* algo = new types::AlgorithmSubtype(frame->environment(), a, b);
-
-		algo->execute_subtype();
-		return instance<bool>::make(algo->leftIsSubtype);
+		return instance<bool>::make(types::is_subtype(frame->environment(), a, b));
 	}));
 	ret->define_eval("subtype?", subtype);
 	ret->define_eval("\u227C", subtype);
@@ -352,10 +361,18 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 	auto add = instance<MultiMethod>::make();
 	add->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromTypes<int64_t, int64_t>(),
 		[](auto frame, auto args)
 	{
 		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
 		return instance<int64_t>::make(*a + *b);
+	}));
+	add->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromTypes<double, double>(),
+		[](auto frame, auto args)
+	{
+		instance<double> a(expect<double>(args[0])), b(expect<double>(args[1]));
+		return instance<double>::make(*a + *b);
 	}));
 	ret->define_eval("+", add);
 
@@ -401,7 +418,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		[=](instance<SFrame> frame, auto args)
 	{
 		auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
-		auto module = instance<Module>::make(ns, fmt::format("file://{0}", s));
+		auto module = instance<Module>::make(ns, fmt::format("file:{0}", s));
 
 		module->load();
 
@@ -422,12 +439,29 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 	auto attach = instance<lisp::MultiMethod>::make();
 	attach->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+		[](instance<SFrame> frame, auto args)
 	{
 		instance<MultiMethod> a(args[0]); instance<> b(args[1]);
-		return instance<lisp::MultiMethod>::make();
+
+		a->attach(frame->environment(), b);
+
+		return a;
 	}));
 	ret->define_eval("attach", attach);
+
+	auto dispatch = instance<lisp::MultiMethod>::make();
+	dispatch->attach(env, instance<BuiltinFunction>::make(
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<MultiMethod> a(args[0]); instance<> b(args[1]);
+
+		MultiMethod::Dispatch _dispatch;
+
+		a->dispatch(frame->environment(), b, &_dispatch);
+
+		return _dispatch.subroutine;
+	}));
+	ret->define_eval("dispatch", dispatch);
 
 	//
 	// Variable
