@@ -82,6 +82,7 @@ instance<SubroutineSignature> library::helper::binding_expr_to_signature(instanc
 		else
 		{
 			arg->name = symbol(cell);
+			arg->type = env->type_any();
 		}
 
 		ret->arguments.push_back(arg);
@@ -203,6 +204,26 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	ret->define_eval("?", truth);
 
 	// -- Special Forms --
+	auto do_ = instance<SpecialForm>::make(
+		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
+	{
+		return scope->environment()->read_rest(scope, head, sexpr);
+	},
+		[](instance<SFrame> frame, instance<Sexpr> sexpr) -> instance<>
+	{
+		// Setup special form
+		size_t size = sexpr->cells.size();
+
+		instance<> last_ret;
+		for (int i = 0; i < size; i += 1)
+		{
+			last_ret = frame->environment()->eval(frame, sexpr->cells[i]);
+		}
+
+		return last_ret;
+	});
+	ret->define_eval("do", do_);
+
 	auto define = instance<SpecialForm>::make(
 		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
 	{
@@ -225,10 +246,10 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	},
 		[](instance<SFrame> frame, instance<Sexpr> sexpr) -> instance<>
 	{
-		if (sexpr->cells.size() != 2 || !sexpr->cells[1].typeId().isType<Binding>())
+		if (sexpr->cells.size() != 2 || !sexpr->cells[1].typeId().hasFeature<SBinding>())
 			throw stdext::exception("Malformed define evaluated.");
 
-		instance<Binding> binding = sexpr->cells[1];
+		instance<SBinding> binding = sexpr->cells[1];
 
 		binding->eval(frame);
 
@@ -376,6 +397,23 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	}));
 	ret->define_eval("+", add);
 
+	auto lteq = instance<MultiMethod>::make();
+	lteq->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<int64_t, int64_t, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
+		return instance<bool>::make(*a <= *b);
+	}));
+	lteq->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<double, double, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<double> a(expect<double>(args[0])), b(expect<double>(args[1]));
+		return instance<bool>::make(*a <= *b);
+	}));
+	ret->define_eval("<=", lteq);
+
 	auto sub = instance<MultiMethod>::make();
 	sub->attach(env, instance<BuiltinFunction>::make(
 		[](auto frame, auto args)
@@ -478,6 +516,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 	auto get = instance<lisp::MultiMethod>::make();
 	get->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<Variable>(),
 		[](auto frame, auto args)
 	{
 		instance<Variable> var(args[0]);

@@ -29,6 +29,12 @@ SubroutineSignature::SubroutineSignature()
 
 instance<lisp::types::SType> SubroutineSignature::asType()
 {
+	if (arguments.size() == 1
+		&& arguments[0]->flags == Argument::Flags::VariadicCollect
+		&& arguments[0]->type.typeId().isType<types::Special>()
+		&& arguments[0]->type.asType<types::Special>()->kind == types::Special::Any)
+		return arguments[0]->type;
+
 	auto tuple = instance<lisp::types::Tuple>::make();
 	tuple->cells.reserve(this->required);
 

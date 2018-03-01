@@ -18,6 +18,7 @@ BlockBinding::BlockBinding(size_t pos, std::string name, instance<> expression)
 {
 	_pos = pos;
 	_name = name;
+	_expression = expression;
 }
 
 size_t BlockBinding::position() const
