@@ -2,6 +2,9 @@
 #include "lisp/lisp.h"
 #include "lisp/library/libraries.h"
 
+#include "system/math.h"
+#include "system/string.h"
+
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
@@ -380,57 +383,10 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	}));
 	ret->define_eval("lookup/meta", lookup_meta);
 
-	auto add = instance<MultiMethod>::make();
-	add->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<int64_t, int64_t, int64_t>(),
-		[](auto frame, auto args)
-	{
-		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
-		return instance<int64_t>::make(*a + *b);
-	}));
-	add->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<double, double, double>(),
-		[](auto frame, auto args)
-	{
-		instance<double> a(expect<double>(args[0])), b(expect<double>(args[1]));
-		return instance<double>::make(*a + *b);
-	}));
-	ret->define_eval("+", add);
+	// Quick Maths
+	system::make_math_globals(ret, ns);
 
-	auto lteq = instance<MultiMethod>::make();
-	lteq->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<int64_t, int64_t, bool>(),
-		[](auto frame, auto args)
-	{
-		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
-		return instance<bool>::make(*a <= *b);
-	}));
-	lteq->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<double, double, bool>(),
-		[](auto frame, auto args)
-	{
-		instance<double> a(expect<double>(args[0])), b(expect<double>(args[1]));
-		return instance<bool>::make(*a <= *b);
-	}));
-	ret->define_eval("<=", lteq);
-
-	auto sub = instance<MultiMethod>::make();
-	sub->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
-	{
-		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
-		return instance<int64_t>::make(*a - *b);
-	}));
-	ret->define_eval("-", sub);
-
-	auto mul = instance<MultiMethod>::make();
-	mul->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
-	{
-		instance<int64_t> a(expect<int64_t>(args[0])), b(expect<int64_t>(args[1]));
-		return instance<int64_t>::make(*a * *b);
-	}));
-	ret->define_eval("*", mul);
+	system::make_string_globals(ret, ns);
 
 	auto cwd = instance<MultiMethod>::make();
 	cwd->attach(env, instance<BuiltinFunction>::make(
