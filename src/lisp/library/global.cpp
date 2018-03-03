@@ -4,6 +4,8 @@
 
 #include "system/math.h"
 #include "system/string.h"
+#include "system/shim.h"
+#include "system/fs.h"
 
 using namespace craft;
 using namespace craft::types;
@@ -385,16 +387,10 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 	// Quick Maths
 	system::make_math_globals(ret, ns);
-
 	system::make_string_globals(ret, ns);
+	system::make_shim_globals(ret, ns);
+	system::make_fs_globals(ret, ns);
 
-	auto cwd = instance<MultiMethod>::make();
-	cwd->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
-	{
-		return instance<std::string>::make(path::absolute());
-	}));
-	ret->define_eval("cwd", cwd);
 
 	auto file_text = instance<MultiMethod>::make();
 	file_text->attach(env, instance<BuiltinFunction>::make(
