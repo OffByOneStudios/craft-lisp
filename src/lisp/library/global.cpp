@@ -491,7 +491,6 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	// Introspection
 	//
 
-	/*
 	auto report = instance<MultiMethod>::make();
 	report->attach(env, instance<BuiltinFunction>::make(
 		SubroutineSignature::makeFromArgs<Function>(),
@@ -499,10 +498,28 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	{
 		instance<Function> a(expect<Function>(args[0]));
 
-		return instance<std::string>::make(a->report());
+		return instance<std::string>::make("");
 	}));
 	ret->define_eval("report", report);
-	*/
 
+	auto time_highres = instance<MultiMethod>::make();
+	time_highres->attach(env, instance<BuiltinFunction>::make(
+		[](auto frame, auto args)
+	{
+		return instance<std::int64_t>::make((int64_t)(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
+	}));
+	ret->define_eval("time-highres", time_highres);
+
+	auto timeit = instance<Macro>::make(
+		[](instance<SScope> scope, std::vector<instance<>> const& code)
+	{
+		instance<Sexpr> expr = scope->environment()->parse(scope, "(do (define g_xxxx_begin (time-highres)) :replace (define g_xxxx_end (time-highres)) (- g_xxxx_end g_xxxx_begin))");
+
+		expr->cells[0].asType<Sexpr>()->cells[2] = code[1];
+
+		return expr->cells[0];
+	});
+	ret->define_eval("timeit", timeit);
+	
 	return ret;
 }
