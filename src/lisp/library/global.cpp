@@ -349,6 +349,10 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 		auto function = sexpr->cells[1];
 
+		if (frame.typeId().isType<Frame>()
+			&& frame.asType<Frame>()->scope().typeId().isType<Module>())
+			return function;
+
 		return instance<Closure>::make(frame, function);
 	});
 	ret->define_eval("fn", fn);

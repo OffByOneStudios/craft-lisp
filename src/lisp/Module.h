@@ -34,8 +34,13 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED std::string uri() const;
 
+		CRAFT_LISP_EXPORTED void setLive();
+
 		CRAFT_LISP_EXPORTED void load(); // might be asynchronous
 		CRAFT_LISP_EXPORTED void init(); // must be in order
+
+		// Tells the module that this is the next thing to evaluate
+		CRAFT_LISP_EXPORTED instance<> liveContinueWith(instance<Sexpr>);
 
 	public:
 		/* Helper functions for people writing modules in C++

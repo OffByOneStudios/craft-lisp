@@ -23,6 +23,8 @@ Module::Module(instance<Namespace> ns, std::string uri)
 	_ns = ns;
 	_uri = uri;
 	_inited = false;
+
+	define_eval("*module*", craft_instance_from_this());
 }
 
 std::string Module::uri() const
@@ -81,6 +83,11 @@ bool Module::isInitalized() const
 	return _inited;
 }
 
+void Module::setLive()
+{
+	content = instance<Sexpr>::make();
+}
+
 void Module::load()
 {
 	// TODO call loader
@@ -103,4 +110,22 @@ void Module::init()
 		{
 			env->eval(frame, c);
 		}
+}
+
+instance<> Module::liveContinueWith(instance<Sexpr> parsed_code)
+{
+	auto env = _ns->environment();
+	
+	instance<Sexpr> read_code = env->read(craft_instance_from_this(), parsed_code);
+
+	auto exec = instance<Execution>::make(env, _ns);
+	auto frame = instance<Frame>::make(instance<Frame>::make(exec), craft_instance_from_this());
+
+	instance<> last_result;
+	for (auto c : read_code->cells)
+	{
+		last_result = env->eval(frame, c);
+	}
+
+	return last_result;
 }

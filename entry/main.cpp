@@ -16,6 +16,8 @@ void repl(const std::string & prompt, instance<Environment> env)
 {
 	std::string long_line = "";
 
+	auto live_module = env->ns_user->requireModule("repl:console");
+
 	for (;;)
 	{
 		if (long_line.empty())
@@ -30,14 +32,15 @@ void repl(const std::string & prompt, instance<Environment> env)
 		instance<Sexpr> top_level;
 		try
 		{
-			top_level = env->read(env->ns_user, long_line);
+			top_level = env->parse(env->ns_user, long_line);
 		}
 		catch (std::exception const& e)
 		{
-			std::cout << e.what() << '\n';
-
 			if (line.empty())
+			{
 				long_line = "";
+				std::cout << e.what() << '\n';
+			}
 
 			continue;
 		}
@@ -46,10 +49,9 @@ void repl(const std::string & prompt, instance<Environment> env)
 
 		try
 		{
-			if (!top_level->cells.empty())
+			if (top_level)
 			{
-				auto exec = instance<Execution>::make(env, env->ns_user);
-				std::cout << env->eval(instance<Frame>::make(exec), top_level->cells[0]).toString() << '\n';
+				std::cout << live_module->liveContinueWith(top_level).toString() << '\n';
 			}
 		}
 		catch (std::exception const& e)

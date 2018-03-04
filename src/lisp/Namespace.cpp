@@ -35,9 +35,14 @@ instance<Module> Namespace::requireModule(std::string const& uri, instance<> res
 
 	try
 	{
-		// TODO implement resolvers
+		// TODO implement resolvers/loaders for these
 		if (protocol == "builtin" && rest == "cult.system")
 			ret = make_library_globals(craft_instance_from_this());
+		if (protocol == "repl")
+		{
+			ret = instance<Module>::make(craft_instance_from_this(), uri);
+			ret->setLive();
+		}
 	}
 	catch (std::exception const& ex)
 	{
