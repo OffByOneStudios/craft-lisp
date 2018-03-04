@@ -11,5 +11,10 @@ CRAFT_PROVIDER_DEFINE(PBackend);
 
 instance<PBackend> craft::lisp::llvm_backend_provider()
 {
-	return instance<LlvmBackend>::make();
+	return instance<PBackend>::forType<LlvmBackend>();
+}
+
+instance<PBackend> craft::lisp::bootstrap_backend_provider()
+{
+	return instance<PBackend>::forType<BootstrapInterpreter>();
 }

@@ -17,17 +17,21 @@ CRAFT_OBJECT_DEFINE(LlvmBackend)
 	_.defaults();
 }
 
-LlvmBackend::LlvmBackend()
-	: _tm(EngineBuilder().selectTarget()) // from current process
+LlvmBackend::LlvmBackend(instance<Namespace> lisp)
+	: _context()
+	, _tm(EngineBuilder().selectTarget()) // from current process
 	, _dl(_tm->createDataLayout())
 	, _objectLayer([]() { return std::make_shared<SectionMemoryManager>(); }) // lambda to make memory sections
 	, _compileLayer(_objectLayer, SimpleCompiler(*_tm))
+	, lisp(lisp)
 {
 	llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr); // load the current process
 }
 
-LlvmBackend::ModuleHandle LlvmBackend::addModule(std::unique_ptr<llvm::Module> M)
+void LlvmBackend::addModule(instance<LlvmModule> module)
 {
+	module->generate();
+
 	// Build our symbol resolver:
 	// Lambda 1: Look back into the JIT itself to find symbols that are part of
 	//           the same "logical dylib".
@@ -47,8 +51,7 @@ LlvmBackend::ModuleHandle LlvmBackend::addModule(std::unique_ptr<llvm::Module> M
 
 	// Add the set to the JIT with the resolver we created above and a newly
 	// created SectionMemoryManager.
-	return cantFail(_compileLayer.addModule(std::move(M),
-		std::move(Resolver)));
+	module->handle = cantFail(_compileLayer.addModule(std::move(module->ir), std::move(Resolver)));
 }
 
 JITSymbol LlvmBackend::findSymbol(std::string const& name)
@@ -74,7 +77,26 @@ LlvmBackendProvider::LlvmBackendProvider()
 	llvm::InitializeNativeTarget();
 }
 
-void LlvmBackendProvider::init(instance<Environment> env) const
+instance<> LlvmBackendProvider::init(instance<Namespace> ns) const
 {
-	env->backend = instance<LlvmBackend>::make();
+	return instance<LlvmBackend>::make(ns);
+}
+
+instance<> LlvmBackendProvider::addModule(instance<> backend_ns, instance<lisp::Module> lisp_module) const
+{
+	instance<LlvmBackend> ns = backend_ns;
+	instance<LlvmModule> module = instance<LlvmModule>::make(ns, lisp_module);
+
+	ns->addModule(module);
+	return module;
+}
+
+instance<> LlvmBackendProvider::addFunction(instance<> backend_module, instance<>) const
+{
+	return instance<>();
+}
+
+instance<> LlvmBackendProvider::exec(instance<lisp::SFrame> frame, instance<> code) const
+{
+	return frame->environment()->eval(frame, code);
 }

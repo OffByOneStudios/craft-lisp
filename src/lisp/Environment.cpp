@@ -19,11 +19,15 @@ Environment::Environment(std::shared_ptr<spdlog::logger> logger)
 	any->kind = types::Special::Any;
 	_any = any;
 
-	backend_provider = llvm_backend_provider();
-	backend_provider->init(craft_instance_from_this());
-
 	ns_user = instance<Namespace>::make(craft_instance_from_this());
-	global = make_library_globals(ns_user);
+
+	ns_user->interpreter_provider = bootstrap_backend_provider();
+	ns_user->interpreter = ns_user->interpreter_provider->init(ns_user);
+
+	ns_user->backend_provider = llvm_backend_provider();
+	ns_user->backend = ns_user->backend_provider->init(ns_user);
+
+	ns_user->requireModule("builtin:cult.system");
 }
 
 std::shared_ptr<spdlog::logger> Environment::log()
@@ -88,8 +92,13 @@ instance<> Environment::read(instance<SScope> scope, instance<> ast)
 		head = read(scope, head);
 
 		instance<> inspect_head = head;
-		if (head.typeId().isType<Binding>())
-			inspect_head = head.asType<Binding>()->expression();
+		if (inspect_head.typeId().isType<Binding>())
+		{
+			auto new_inspect_head = inspect_head.asType<Binding>()->getValue(instance<>());
+			if (!new_inspect_head)
+				new_inspect_head = head.asType<Binding>()->expression();
+			inspect_head = new_inspect_head;
+		}
 
 		// -- Evaluate Special Forms --
 		if (inspect_head.typeId().isType<SpecialForm>())
@@ -125,6 +134,11 @@ instance<> Environment::read_eval(instance<SScope> scope, instance<> code)
 	return eval(frame, code);
 }
 
+instance<> Environment::eval(instance<SFrame> frame, instance<> code)
+{
+	return ns_user->interpreter_provider->exec(frame, code);
+}
+
 //
 // Interpreter
 //
@@ -154,50 +168,6 @@ instance<> Environment::eval(instance<SFrame> frame, std::string const& text)
 		last_value = this->eval(frame, code);
 	}
 	return last_value;
-}
-
-instance<> Environment::eval(instance<SFrame> frame, instance<> code)
-{
-	if (code.typeId().hasFeature<SBinding>())
-		return code.asFeature<SBinding>()->getValue(frame);
-	else if (code.typeId().isType<Sexpr>())
-	{
-		instance<Sexpr> expr = code;
-
-		if (expr->cells.size() == 0)
-			throw stdext::exception("Unquoted empty list.");
-
-		// -- Evaluate Head --
-		instance<> head = expr->car();
-
-		head = eval(frame, head);
-
-		// -- Evaluate Special Forms --
-		if (head.typeId().isType<SpecialForm>())
-			return head.asType<SpecialForm>()->eval(frame, expr);
-
-		// -- Evaluate Subroutine --
-		if (!head.hasFeature<PSubroutine>())
-		{
-			throw stdext::exception("Cannot call `{0}`", head.toString());
-		}
-
-		auto subroutine_provider = head.getFeature<PSubroutine>();
-
-		std::vector<instance<>> sub_expr_values;
-		sub_expr_values.reserve(expr->cells.size() - 1);
-
-		for (auto it = expr->cells.begin() + 1, end = expr->cells.end(); it != end; ++it)
-		{
-			sub_expr_values.push_back(eval(frame, *it));
-		}
-
-		// -- Call --
-		frame = subroutine_provider->call_frame(head, frame);
-		return subroutine_provider->call(head, frame, sub_expr_values);
-	}
-	else
-		return code;
 }
 
 //

@@ -100,7 +100,7 @@ instance<SubroutineSignature> library::helper::binding_expr_to_signature(instanc
 instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 {
 	auto env = ns->environment();
-	auto ret = instance<Module>::make(ns, "builtin://globals");
+	auto ret = instance<Module>::make(ns, "builtin:cult.system");
 
 	// -- Types --
 	auto Any = instance<types::Special>::make();

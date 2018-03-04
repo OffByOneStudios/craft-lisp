@@ -14,22 +14,31 @@ namespace lisp
 
 		instance<Environment> _environment;
 		instance<Namespace> _ns;
-		std::string _filepath;
+		std::string _uri;
 
+		bool _inited;
 		std::map<std::string, instance<SBinding>> _lookup;
 
 	public:
+		instance<Sexpr> content; // lisp "source" code; used by interpreter
 
-		CRAFT_LISP_EXPORTED Module(instance<Namespace> ns, std::string path);
-
-		CRAFT_LISP_EXPORTED static instance<Module> makeLiveModule(instance<Environment> env);
-
-		CRAFT_LISP_EXPORTED std::string filepath() const;
-
-		CRAFT_LISP_EXPORTED void load();
+		instance<> loader; // module specific loader
+		instance<> backend; // module + backend specific object
 
 	public:
-		/* Helper function for people writing modules in C++
+
+		CRAFT_LISP_EXPORTED Module(instance<Namespace> ns, std::string uri);
+
+		CRAFT_LISP_EXPORTED bool isLoaded() const;
+		CRAFT_LISP_EXPORTED bool isInitalized() const;
+
+		CRAFT_LISP_EXPORTED std::string uri() const;
+
+		CRAFT_LISP_EXPORTED void load(); // might be asynchronous
+		CRAFT_LISP_EXPORTED void init(); // must be in order
+
+	public:
+		/* Helper functions for people writing modules in C++
 		
 		*/
 		CRAFT_LISP_EXPORTED instance<SBinding> define_eval(std::string name, instance<> value);
@@ -40,6 +49,7 @@ namespace lisp
 		//
 		CRAFT_LISP_EXPORTED virtual instance<Environment> environment() const override;
 		CRAFT_LISP_EXPORTED virtual instance<Namespace> namespace_() const override;
+		inline virtual bool isDynamicScope() const override { return false; }
 		CRAFT_LISP_EXPORTED virtual instance<SScope> parent() const override;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) override;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) override;

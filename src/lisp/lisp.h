@@ -5,6 +5,7 @@ namespace craft {
 namespace lisp
 {
 	class PBackend;
+	class BootstrapInterpreter;
 
 	class SScope;
 	class SFrame;
@@ -12,6 +13,8 @@ namespace lisp
 	class Namespace;
 	class Execution;
 	class Environment;
+
+	class Module;
 
 	class SubroutineSignature;
 	class Binding;

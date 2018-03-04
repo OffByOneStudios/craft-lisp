@@ -22,6 +22,38 @@ Namespace::Namespace(instance<Environment> env)
 	define(instance<Binding>::make("*ns*", craft_instance_from_this()));
 }
 
+instance<Module> Namespace::requireModule(std::string const& uri, instance<> resolver_specific_extra)
+{
+	auto protopos = uri.find(':');
+	if (protopos == std::string::npos)
+		throw stdext::exception("Malformed module request `{0}`.", uri);
+
+	std::string protocol = uri.substr(0, protopos);
+	std::string rest = uri.substr(protopos + 1);
+
+	instance<Module> ret;
+
+	try
+	{
+		// TODO implement resolvers
+		if (protocol == "builtin" && rest == "cult.system")
+			ret = make_library_globals(craft_instance_from_this());
+	}
+	catch (std::exception const& ex)
+	{
+
+		throw stdext::exception(ex, "Failed to construct module `{0}`", uri);
+	}
+
+	if (ret)
+	{
+		ret->load();
+		ret->init();
+	}
+
+	return ret;
+}
+
 instance<Environment> Namespace::environment() const
 {
 	return _environment;

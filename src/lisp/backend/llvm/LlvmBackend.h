@@ -11,6 +11,9 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::LlvmBackend);
 	private:
+		friend class LlvmModule;
+
+		llvm::LLVMContext _context;
 
 		std::unique_ptr<llvm::TargetMachine> _tm;
 		const llvm::DataLayout _dl;
@@ -20,13 +23,15 @@ namespace lisp
 	public:
 		using ModuleHandle = decltype(_compileLayer)::ModuleHandleT;
 
-	public:
-
-		CRAFT_LISP_EXPORTED LlvmBackend();
+		instance<Namespace> lisp;
 
 	public:
 
-		CRAFT_LISP_EXPORTED ModuleHandle addModule(std::unique_ptr<llvm::Module> module);
+		CRAFT_LISP_EXPORTED LlvmBackend(instance<Namespace>);
+
+	public:
+
+		CRAFT_LISP_EXPORTED void addModule(instance<LlvmModule> module);
 
 		CRAFT_LISP_EXPORTED llvm::JITSymbol findSymbol(std::string const& name);
 		CRAFT_LISP_EXPORTED llvm::JITTargetAddress getSymbolAddress(std::string const& name);
@@ -41,7 +46,12 @@ namespace lisp
 		CRAFT_LISP_EXPORTED LlvmBackendProvider();
 
 	public:
-		virtual void init(instance<Environment> env) const;
+		virtual instance<> init(instance<Namespace> env) const override;
+
+		virtual instance<> addModule(instance<> backend_ns, instance<Module>) const override;
+		virtual instance<> addFunction(instance<> backend_module, instance<>) const override;
+
+		virtual instance<> exec(instance<lisp::SFrame> frame, instance<> code) const override;
 	};
 
 }}

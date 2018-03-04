@@ -16,6 +16,11 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED virtual instance<SScope> parent() const = 0;
 
+		// Indicates a dynamic lexical scope
+		// * Modules and Namespaces are not lexically dynamic
+		// * Function and Class scopes are
+		CRAFT_LISP_EXPORTED virtual bool isDynamicScope() const = 0;
+
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) = 0;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) = 0;
 	};

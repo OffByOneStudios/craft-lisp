@@ -41,4 +41,14 @@
 // Lisp Object
 //
 
+namespace craft {
+namespace lisp
+{
+	class LlvmBackend;
+	class LlvmModule;
+	class LlvmSubroutine;
+}}
+
 #include "LlvmBackend.h"
+#include "LlvmModule.h"
+#include "LlvmSubroutine.h"

@@ -9,7 +9,7 @@ using namespace craft::lisp;
 
 CRAFT_OBJECT_DEFINE(Module)
 {
-	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Module> m) { return m->filepath(); });
+	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Module> m) { return m->uri(); });
 
 	_.use<SScope>().byCasting();
 
@@ -17,17 +17,17 @@ CRAFT_OBJECT_DEFINE(Module)
 }
 
 
-Module::Module(instance<Namespace> ns, std::string filepath)
-	: _environment(), _ns(), _filepath(), _lookup()
+Module::Module(instance<Namespace> ns, std::string uri)
 {
 	_environment = ns->environment();
 	_ns = ns;
-	_filepath = filepath;
+	_uri = uri;
+	_inited = false;
 }
 
-std::string Module::filepath() const
+std::string Module::uri() const
 {
-	return _filepath;
+	return _uri;
 }
 
 instance<Environment> Module::environment() const
@@ -72,15 +72,35 @@ instance<SBinding> Module::define_eval(std::string name, instance<> value)
 	return res;
 }
 
+bool Module::isLoaded() const
+{
+	return bool(content);
+}
+bool Module::isInitalized() const
+{
+	return _inited;
+}
+
 void Module::load()
 {
-	auto text = craft::fs::read<std::string>(_filepath, &craft::fs::string_read).get();
+	// TODO call loader
+	//auto text = craft::fs::read<std::string>(_uri, &craft::fs::string_read).get();
 
 	auto env = _ns->environment();
 
-	instance<Sexpr> cell = env->read(craft_instance_from_this(), text);
-	for (auto c : cell->cells)
-	{
-		env->eval(craft_instance_from_this(), c);
-	}
+	//content = env->read(craft_instance_from_this(), text);
+}
+
+void Module::init()
+{
+	auto env = _ns->environment();
+
+	auto execution = instance<Execution>::make(env, _ns);
+	auto frame = instance<Frame>::make(instance<Frame>::make(execution), craft_instance_from_this());
+
+	if (content)
+		for (auto c : content->cells)
+		{
+			env->eval(frame, c);
+		}
 }

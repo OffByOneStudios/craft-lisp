@@ -21,11 +21,7 @@ namespace lisp
 
 	public:
 
-		instance<Module> global;
 		instance<Namespace> ns_user;
-
-		instance<> backend;
-		instance<PBackend> backend_provider;
 
 	public:
 
