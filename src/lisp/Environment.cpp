@@ -19,8 +19,8 @@ Environment::Environment(std::shared_ptr<spdlog::logger> logger)
 	any->kind = types::Special::Any;
 	_any = any;
 
-	ns_cult = instance<Namespace>::make(craft_instance_from_this());
-	global = make_library_globals(ns_cult);
+	backend_provider = llvm_backend_provider();
+	backend_provider->init(craft_instance_from_this());
 
 	ns_user = instance<Namespace>::make(craft_instance_from_this());
 	global = make_library_globals(ns_user);

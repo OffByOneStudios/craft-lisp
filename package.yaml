@@ -8,7 +8,64 @@ dependencies:
   - Types
   
 vendor-dependencies:
-  x86_64-pc-windows-msvccoff: []
+  x86_64-pc-windows-msvccoff:
+    - "LLVMX86Info"
+    - "LLVMX86Utils"
+    - "LLVMXRay"
+    - "LLVMAnalysis"
+    - "LLVMAsmParser"
+    - "LLVMAsmPrinter"
+    - "LLVMBinaryFormat"
+    - "LLVMBitReader"
+    - "LLVMBitWriter"
+    - "LLVMCodeGen"
+    - "LLVMCore"
+    - "LLVMCoroutines"
+    - "LLVMCoverage"
+    - "LLVMDebugInfoCodeView"
+    - "LLVMDebugInfoDWARF"
+    - "LLVMDebugInfoMSF"
+    - "LLVMDebugInfoPDB"
+    - "LLVMDemangle"
+    - "LLVMDlltoolDriver"
+    - "LLVMExecutionEngine"
+    - "LLVMGlobalISel"
+    - "LLVMInstCombine"
+    - "LLVMInstrumentation"
+    - "LLVMInterpreter"
+    - "LLVMipo"
+    - "LLVMIRReader"
+    - "LLVMLibDriver"
+    - "LLVMLineEditor"
+    - "LLVMLinker"
+    - "LLVMLTO"
+    - "LLVMMC"
+    - "LLVMMCDisassembler"
+    - "LLVMMCJIT"
+    - "LLVMMCParser"
+    - "LLVMMIRParser"
+    - "LLVMObjCARCOpts"
+    - "LLVMObject"
+    - "LLVMObjectYAML"
+    - "LLVMOption"
+    - "LLVMOrcJIT"
+    - "LLVMPasses"
+    - "LLVMProfileData"
+    - "LLVMRuntimeDyld"
+    - "LLVMScalarOpts"
+    - "LLVMSelectionDAG"
+    - "LLVMSupport"
+    - "LLVMSymbolize"
+    - "LLVMTableGen"
+    - "LLVMTarget"
+    - "LLVMTestingSupport"
+    - "LLVMTransformUtils"
+    - "LLVMVectorize"
+    - "LLVMX86AsmParser"
+    - "LLVMX86AsmPrinter"
+    - "LLVMX86CodeGen"
+    - "LLVMX86Desc"
+    - "LLVMX86Disassembler"
   osx_x64_clang: []
   debian_x64_gcc: []
 
@@ -28,6 +85,9 @@ platform-flags:
     - "-pthread"
     - "-fpermissive"
   
+platform-link-flags:
+  x86_64-pc-windows-msvccoff:
+    - "/ignore:4099"
 
 files:
   library:
