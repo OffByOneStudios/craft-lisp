@@ -1,9 +1,7 @@
 
 #include "lisp/common.h"
-
 #include "lisp/library/libraries.h"
 
-#include "./math.h"
 
 using namespace craft;
 using namespace craft::types;

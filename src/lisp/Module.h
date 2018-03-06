@@ -17,7 +17,8 @@ namespace lisp
 		std::string _uri;
 
 		bool _inited;
-		std::map<std::string, instance<SBinding>> _lookup;
+		std::map<std::string, size_t> _lookup;
+		std::vector<instance<SBinding>> _bindings;
 
 	public:
 		instance<Sexpr> content; // lisp "source" code; used by interpreter
@@ -41,6 +42,8 @@ namespace lisp
 
 		// Tells the module that this is the next thing to evaluate
 		CRAFT_LISP_EXPORTED instance<> liveContinueWith(instance<Sexpr>);
+
+		CRAFT_LISP_EXPORTED std::vector<instance<SBinding>> const& bindings() const;
 
 	public:
 		/* Helper functions for people writing modules in C++

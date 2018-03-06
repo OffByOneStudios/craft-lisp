@@ -1,0 +1,15 @@
+(define fib
+  (fn (n)
+    (do
+      (define a (Variable 1))
+      (define b (Variable 1))
+      (define i (Variable 3))
+      (while (<= (get i) n)
+        (do
+          (define c (+ (get a) (get b)))
+          (set a (get b))
+          (set b c)
+          (set i (+ (get i) 1))
+        ))
+      (get b)
+    )))

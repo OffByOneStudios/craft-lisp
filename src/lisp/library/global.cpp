@@ -2,11 +2,6 @@
 #include "lisp/lisp.h"
 #include "lisp/library/libraries.h"
 
-#include "system/math.h"
-#include "system/string.h"
-#include "system/shim.h"
-#include "system/fs.h"
-
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
@@ -200,10 +195,10 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	// -- Compiler Specials --
 	auto truth = instance<MultiMethod>::make();
 	truth->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<bool, bool>(),
 		[](auto frame, std::vector<instance<>> const& args)
 	{
-		instance<int64_t> a(args[0]);
-		return instance<bool>::make(*a != 0);
+		return instance<bool>(args[0]);
 	}));
 	ret->define_eval("truth", truth);
 	ret->define_eval("?", truth);
@@ -389,11 +384,35 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	}));
 	ret->define_eval("lookup/meta", lookup_meta);
 
-	// Quick Maths
-	system::make_math_globals(ret, ns);
-	system::make_string_globals(ret, ns);
-	system::make_shim_globals(ret, ns);
-	system::make_fs_globals(ret, ns);
+	auto _require_impl = instance<BuiltinFunction>::make(
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<Module> module = args[0];
+		instance<std::string> uri = args[1];
+
+		return module->namespace_()->requireModule(*uri, args.size() < 3 ? instance<>() : args[2]);
+	});
+
+	auto require = instance<Macro>::make(
+		[_require_impl](instance<SScope> scope, std::vector<instance<>> const& code)
+	{
+		instance<Sexpr> expr = scope->environment()->parse(scope, "(:replace *module*)");
+
+		auto parsed_macro = expr->cells[0].asType<Sexpr>();
+
+		parsed_macro->cells[0] = _require_impl;
+		for (auto it = code.begin() + 1; it != code.end(); ++it)
+			parsed_macro->cells.push_back(*it);
+
+		return parsed_macro;
+	});
+	ret->define_eval("require", require);
+
+	
+	library::system::make_math_globals(ret, ns); // Quick Maths
+	library::system::make_string_globals(ret, ns);
+	library::system::make_shim_globals(ret, ns);
+	library::system::make_fs_globals(ret, ns);
 
 
 	auto file_text = instance<MultiMethod>::make();
@@ -406,19 +425,6 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		return instance<std::string>::make(text);
 	}));
 	ret->define_eval("file/text", file_text);
-
-	auto file_eval = instance<MultiMethod>::make();
-	file_eval->attach(env, instance<BuiltinFunction>::make(
-		[=](instance<SFrame> frame, auto args)
-	{
-		auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
-		auto module = instance<Module>::make(ns, fmt::format("file:{0}", s));
-
-		module->load();
-
-		return module;
-	}));
-	ret->define_eval("file/eval", file_eval);
 
 	//
 	// MultiMethod

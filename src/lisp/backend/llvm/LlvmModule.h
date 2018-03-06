@@ -26,5 +26,6 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED void generate();
 
+		CRAFT_LISP_EXPORTED void addSubroutine(instance<LlvmSubroutine> subroutine);
 	};
 }}

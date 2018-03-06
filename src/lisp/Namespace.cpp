@@ -22,8 +22,9 @@ Namespace::Namespace(instance<Environment> env)
 	define(instance<Binding>::make("*ns*", craft_instance_from_this()));
 }
 
-instance<Module> Namespace::requireModule(std::string const& uri, instance<> resolver_specific_extra)
+instance<Module> Namespace::requireModule(std::string const& uri_, instance<> resolver_specific_extra)
 {
+	auto uri = uri_;
 	auto protopos = uri.find(':');
 	if (protopos == std::string::npos)
 		throw stdext::exception("Malformed module request `{0}`.", uri);
@@ -36,6 +37,7 @@ instance<Module> Namespace::requireModule(std::string const& uri, instance<> res
 	try
 	{
 		// TODO implement resolvers/loaders for these
+		// All of this should go somewhere else, and be made internal to Module
 		if (protocol == "builtin" && rest == "cult.system")
 			ret = make_library_globals(craft_instance_from_this());
 		if (protocol == "repl")
@@ -43,6 +45,19 @@ instance<Module> Namespace::requireModule(std::string const& uri, instance<> res
 			ret = instance<Module>::make(craft_instance_from_this(), uri);
 			ret->setLive();
 		}
+		if (protocol == "file")
+		{
+			auto s = path::normalize(path::absolute(rest));
+			if (!path::exists(s))
+				throw stdext::exception("Module path `{0}` does not exist.", s);
+
+			auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
+			ret = instance<Module>::make(craft_instance_from_this(), uri);
+			ret->content = _environment->read(craft_instance_from_this(), text);
+		}
+
+		// TODO set uri to the canonical version of the uri from the resolver
+		uri = uri;
 	}
 	catch (std::exception const& ex)
 	{
@@ -55,6 +70,15 @@ instance<Module> Namespace::requireModule(std::string const& uri, instance<> res
 		ret->load();
 		ret->init();
 	}
+
+	// TODO: Lock when we do this (and the init above probably)
+	auto i = _module_load_list.size();
+	_module_load_list.push_back(ret);
+	_module_cache[uri] = i;
+	on_moduleInit.emit(ret);
+
+	interpreter_provider->addModule(backend, ret);
+	ret->backend = backend_provider->addModule(backend, ret);
 
 	return ret;
 }

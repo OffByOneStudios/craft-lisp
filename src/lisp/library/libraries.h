@@ -52,10 +52,17 @@ namespace lisp {
 			*/
 			CRAFT_LISP_EXPORTED instance<SubroutineSignature> binding_expr_to_signature(instance<SScope> scope, instance<Sexpr>);
 		}
+
+		namespace system
+		{
+			void make_string_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_shim_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_math_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_fs_globals(instance<Module>& m, instance<Namespace>& ns);
+		}
 	}
 
 	instance<Module> make_library_globals(instance<Namespace> ns);
-
 
 }}
 

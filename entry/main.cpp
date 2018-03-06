@@ -39,7 +39,7 @@ void repl(const std::string & prompt, instance<Environment> env)
 			if (line.empty())
 			{
 				long_line = "";
-				std::cout << e.what() << '\n';
+				std::cout << "parser: " << e.what() << '\n';
 			}
 
 			continue;

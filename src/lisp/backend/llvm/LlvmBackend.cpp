@@ -26,6 +26,9 @@ LlvmBackend::LlvmBackend(instance<Namespace> lisp)
 	, lisp(lisp)
 {
 	llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr); // load the current process
+
+	_type_anyPtr = llvm::Type::getInt8PtrTy(_context);
+	_type_instance = llvm::StructType::get(_context, { _type_anyPtr, _type_anyPtr });
 }
 
 void LlvmBackend::addModule(instance<LlvmModule> module)
@@ -75,6 +78,8 @@ void LlvmBackend::removeModule(ModuleHandle H)
 LlvmBackendProvider::LlvmBackendProvider()
 {
 	llvm::InitializeNativeTarget();
+	llvm::InitializeNativeTargetAsmPrinter();
+	llvm::InitializeNativeTargetAsmParser();
 }
 
 instance<> LlvmBackendProvider::init(instance<Namespace> ns) const
@@ -91,9 +96,13 @@ instance<> LlvmBackendProvider::addModule(instance<> backend_ns, instance<lisp::
 	return module;
 }
 
-instance<> LlvmBackendProvider::addFunction(instance<> backend_module, instance<>) const
+instance<> LlvmBackendProvider::addFunction(instance<> backend_module, instance<> lisp_subroutine) const
 {
-	return instance<>();
+	instance<LlvmModule> module = backend_module;
+	instance<LlvmSubroutine> subroutine = instance<LlvmSubroutine>::make(module, lisp_subroutine);
+
+	module->addSubroutine(subroutine);
+	return subroutine;
 }
 
 instance<> LlvmBackendProvider::exec(instance<lisp::SFrame> frame, instance<> code) const

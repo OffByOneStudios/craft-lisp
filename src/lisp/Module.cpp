@@ -45,6 +45,11 @@ instance<SScope> Module::parent() const
 	return _ns;
 }
 
+std::vector<instance<SBinding>> const& Module::bindings() const
+{
+	return _bindings;
+}
+
 instance<SBinding> Module::lookup(std::string const& s)
 {
 	auto it = _lookup.find(s);
@@ -53,14 +58,16 @@ instance<SBinding> Module::lookup(std::string const& s)
 		return _ns->lookup(s);
 	}
 
-	return it->second;
+	return _bindings[it->second];
 }
 
 instance<SBinding> Module::define(std::string name, instance<> value)
 {
 	auto binding = instance<Binding>::make(name, value);
 	binding->addMeta("module", craft_instance_from_this());
-	_lookup[binding->name()] = binding;
+	auto i = _bindings.size();
+	_bindings.push_back(binding);
+	_lookup[binding->name()] = i;
 	_ns->define(binding);
 	return binding;
 }
@@ -91,11 +98,6 @@ void Module::setLive()
 void Module::load()
 {
 	// TODO call loader
-	//auto text = craft::fs::read<std::string>(_uri, &craft::fs::string_read).get();
-
-	auto env = _ns->environment();
-
-	//content = env->read(craft_instance_from_this(), text);
 }
 
 void Module::init()

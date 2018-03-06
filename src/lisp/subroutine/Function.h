@@ -14,7 +14,8 @@ namespace lisp
 		instance<SubroutineSignature> _signature;
 		instance<Sexpr> _body;
 
-		instance<> _backend;
+	public:
+		instance<> backend;
 
 	public:
 		CRAFT_LISP_EXPORTED Function();

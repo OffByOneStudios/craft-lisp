@@ -13,6 +13,7 @@ namespace lisp
 	private:
 		instance<Environment> _environment;
 
+		std::map<std::string, size_t> _module_cache;
 		std::vector<instance<Module>> _module_load_list;
 
 		std::map<std::string, instance<SBinding>> _lookup;
@@ -30,6 +31,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<Module> requireModule(std::string const& s, instance<> resolver_specific_extra = instance<>());
 
 		CRAFT_LISP_EXPORTED instance<SBinding> define(instance<SBinding>);
+
+		Signal<void(instance<Module>)> on_moduleInit;
 
 	public:
 		//
