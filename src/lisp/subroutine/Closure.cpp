@@ -38,9 +38,9 @@ instance<SubroutineSignature> Closure::signature()
 	return _provider->signature(_subroutine);
 }
 
-instance<SFrame> Closure::call_frame(instance<SFrame> parent)
+instance<SFrame> Closure::call_frame()
 {
-	auto ret = _provider->call_frame(_subroutine, parent);
+	auto ret = _provider->call_frame(_subroutine);
 	if (ret.typeId().isType<Frame>())
 	{
 		ret.asType<Frame>()->setLexicalParent(_frame);

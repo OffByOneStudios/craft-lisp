@@ -22,7 +22,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<SFrame> closure();
 
 		CRAFT_LISP_EXPORTED instance<SubroutineSignature> Closure::signature();
-		CRAFT_LISP_EXPORTED instance<SFrame> call_frame(instance<SFrame> parent);
+		CRAFT_LISP_EXPORTED instance<SFrame> call_frame();
 		CRAFT_LISP_EXPORTED instance<> call(instance<SFrame> const& call_frame, std::vector<instance<>> const&);
 	};
 

@@ -88,7 +88,7 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 				}
 				else
 				{
-					target = frame->execution()->namespace_()->lookup(match)->getValue(frame);
+					target = frame->getNamespace()->lookup(match)->getValue(frame);
 				}
 
 				instance<std::string> c = str->call(frame, { target });

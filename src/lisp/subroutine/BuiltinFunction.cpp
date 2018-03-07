@@ -30,9 +30,11 @@ instance<SubroutineSignature> BuiltinFunction::signature()
 {
 	return _signature;
 }
-instance<SFrame> BuiltinFunction::call_frame(instance<SFrame> parent)
+instance<SFrame> BuiltinFunction::call_frame()
 {
-	return parent;
+	auto ret = instance<Frame>::make();
+	ret->setRepresentative(craft_instance_from_this());
+	return ret;
 }
 instance<> BuiltinFunction::call(instance<SFrame> const& frame, std::vector<instance<>> const& args)
 {

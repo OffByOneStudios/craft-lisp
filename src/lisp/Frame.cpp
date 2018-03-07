@@ -14,42 +14,54 @@ CRAFT_OBJECT_DEFINE(Frame)
 	_.defaults();
 }
 
-
-Frame::Frame(instance<Execution> exe)
+Frame::Frame()
 {
-	_execution = exe;
-	_parent = instance<>();
 }
 
-Frame::Frame(instance<SFrame> parent, instance<SScope> scope)
+Frame::Frame(instance<SScope> scope)
 {
-	_execution = parent->execution();
-	_parent = parent;
-
 	_scope = scope;
 }
 
+void Frame::setRepresentative(instance<> value)
+{
+	_representative = value;
+}
+void Frame::setLexicalParent(instance<SFrame> value)
+{
+	_parent_lexical = value;
+}
 
-instance<Environment> Frame::environment() const
+instance<Namespace> Frame::getNamespace() const
 {
-	return _execution->environment();
+	return _execution->getNamespace();
 }
-instance<SFrame> Frame::parent() const
+instance<SFrame> Frame::getPrevious() const
 {
-	return _parent;
+	return _execution->stack()[_stack_location - 1];
 }
-instance<SFrame> Frame::lexical_parent() const
+instance<SFrame> Frame::getLexicalParent() const
 {
 	return _parent_lexical;
 }
+instance<> Frame::getRepresentative() const
+{
+	return _representative;
+}
 
-instance<SScope> Frame::scope() const
+instance<SScope> Frame::getScope() const
 {
 	return _scope;
 }
-instance<Execution> Frame::execution() const
+instance<Execution> Frame::getExecution() const
 {
 	return _execution;
+}
+
+void Frame::beginExecution(instance<Execution> value)
+{
+	_stack_location = value->stack().size() - 1;
+	_execution = value;
 }
 
 size_t Frame::push(instance<> value)
@@ -67,9 +79,4 @@ void Frame::set(size_t index, instance<> value)
 		_values.resize(index + 1);
 
 	_values[index] = value;
-}
-
-void Frame::setLexicalParent(instance<SFrame> value)
-{
-	_parent_lexical = value;
 }

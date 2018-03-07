@@ -40,7 +40,7 @@ instance<> BlockBinding::eval(instance<SFrame> frame)
 {
 	instance<Frame> block = frame;
 
-	auto value = frame->environment()->eval(frame, _expression);
+	auto value = frame->getNamespace()->environment()->eval(frame, _expression);
 	block->set(_pos, value);
 
 	return value;

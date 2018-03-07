@@ -26,7 +26,7 @@ namespace lisp
 	public:
 		virtual instance<SubroutineSignature> signature(instance<> subroutine) const = 0;
 
-		virtual instance<SFrame> call_frame(instance<> subroutine, instance<SFrame> const& parent) const = 0;
+		virtual instance<SFrame> call_frame(instance<> subroutine) const = 0;
 		virtual instance<> call(instance<> subroutine, instance<SFrame> const& call_frame, std::vector<instance<>> const&) const = 0;
 	};
 
@@ -46,11 +46,11 @@ namespace lisp
 			return ret->signature();
 		}
 
-		inline virtual instance<SFrame> call_frame(instance<> subroutine, instance<SFrame> const& parent) const override
+		inline virtual instance<SFrame> call_frame(instance<> subroutine) const override
 		{
 			instance<T> ret = subroutine;
 
-			return ret->call_frame(parent);
+			return ret->call_frame();
 		}
 
 		inline virtual instance<> call(instance<> subroutine, instance<SFrame> const& context, std::vector<instance<>> const& args) const override

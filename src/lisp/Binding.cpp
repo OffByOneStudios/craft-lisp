@@ -41,7 +41,7 @@ instance<> Binding::value()
 
 instance<> Binding::eval(instance<SFrame> frame)
 {
-	_value = frame->environment()->eval(frame, _expression);
+	_value = frame->getNamespace()->environment()->eval(frame, _expression);
 
 	return _value;
 }

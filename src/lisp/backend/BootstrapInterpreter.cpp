@@ -75,7 +75,8 @@ instance<> BootstrapInterpreterProvider::exec(instance<lisp::SFrame> frame, inst
 		}
 
 		// -- Call --
-		frame = subroutine_provider->call_frame(head, frame);
+		frame = subroutine_provider->call_frame(head);
+		Execution::execute(frame);
 		return subroutine_provider->call(head, frame, sub_expr_values);
 	}
 	else

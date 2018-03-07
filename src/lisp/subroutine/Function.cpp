@@ -24,15 +24,15 @@ instance<SubroutineSignature> Function::signature()
 	return _signature;
 }
 
-instance<SFrame> Function::call_frame(instance<SFrame> parent)
+instance<SFrame> Function::call_frame()
 {
-	return _signature->push_frame(parent);
+	return _signature->push_frame();
 }
 
 instance<> Function::call(instance<SFrame> const& call_frame, std::vector<instance<>> const& args)
 {
 	_signature->set_frame(call_frame, args);
-	return call_frame->environment()->eval(call_frame, _body);
+	return call_frame->getNamespace()->environment()->eval(call_frame, _body);
 }
 
 void Function::setBody(instance<Sexpr> body)

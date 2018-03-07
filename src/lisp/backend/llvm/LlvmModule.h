@@ -11,7 +11,7 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::LlvmModule);
 	public:
-		instance<LlvmBackend> _parent;
+		instance<LlvmBackend> _backend;
 
 		instance<Module> _lisp;
 

@@ -11,8 +11,9 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::LlvmSubroutine);
 	public:
-		instance<LlvmModule> _parent;
+		instance<LlvmModule> _module;
 
+		std::string _binding_hint;
 		instance<> _lisp;
 
 		llvm::Function* func;

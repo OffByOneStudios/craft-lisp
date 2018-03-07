@@ -104,8 +104,8 @@ void Module::init()
 {
 	auto env = _ns->environment();
 
-	auto execution = instance<Execution>::make(env, _ns);
-	auto frame = instance<Frame>::make(instance<Frame>::make(execution), craft_instance_from_this());
+	auto frame = instance<Frame>::make(craft_instance_from_this());
+	Execution::execute(frame);
 
 	if (content)
 		for (auto c : content->cells)
@@ -120,8 +120,8 @@ instance<> Module::liveContinueWith(instance<Sexpr> parsed_code)
 	
 	instance<Sexpr> read_code = env->read(craft_instance_from_this(), parsed_code);
 
-	auto exec = instance<Execution>::make(env, _ns);
-	auto frame = instance<Frame>::make(instance<Frame>::make(exec), craft_instance_from_this());
+	auto frame = instance<Frame>::make(craft_instance_from_this());
+	Execution::execute(frame);
 
 	instance<> last_result;
 	for (auto c : read_code->cells)

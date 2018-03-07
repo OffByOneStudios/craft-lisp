@@ -30,14 +30,16 @@ instance<SubroutineSignature> MultiMethod::signature()
 	return _signature;
 }
 
-instance<SFrame> MultiMethod::call_frame(instance<SFrame> parent)
+instance<SFrame> MultiMethod::call_frame()
 {
-	return parent;
+	auto ret = instance<Frame>::make();
+	ret->setRepresentative(craft_instance_from_this());
+	return ret;
 }
 
 instance<> MultiMethod::call(instance<SFrame> const& frame, std::vector<instance<>> const& args)
 {
-	auto env = frame->environment();
+	auto env = frame->getNamespace()->environment();
 
 	Dispatch _dispatch;
 	dispatch(env, type_of(env, args), &_dispatch);
@@ -46,8 +48,8 @@ instance<> MultiMethod::call(instance<SFrame> const& frame, std::vector<instance
 		throw stdext::exception("Dispatch failed.");
 
 	auto provider = _dispatch.subroutine.getFeature<PSubroutine>();
-	auto call_frame = provider->call_frame(_dispatch.subroutine, frame);
-
+	auto call_frame = provider->call_frame(_dispatch.subroutine);
+	Execution::execute(call_frame);
 	return _dispatch.subroutine.getFeature<PSubroutine>()->call(_dispatch.subroutine, call_frame, args);
 }
 

@@ -11,17 +11,23 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Execution);
 	private:
 
-		instance<Environment> _environment;
 		instance<Namespace> _namespace;
 
 		std::vector<instance<SFrame>> _stack;
 
+		static thread_local instance<Execution> _tl_current;
+
 	public:
 
-		CRAFT_LISP_EXPORTED Execution(instance<Environment> env, instance<Namespace> ns);
+		CRAFT_LISP_EXPORTED Execution(instance<Namespace> ns);
 
-		CRAFT_LISP_EXPORTED instance<Environment> environment() const;
-		CRAFT_LISP_EXPORTED instance<Namespace> namespace_() const;
+		CRAFT_LISP_EXPORTED void makeCurrent();
+		CRAFT_LISP_EXPORTED static instance<Execution> getCurrent();
+		CRAFT_LISP_EXPORTED void clearFromCurrent();
+
+		CRAFT_LISP_EXPORTED static instance<Execution> execute(instance<SFrame>);
+
+		CRAFT_LISP_EXPORTED instance<Namespace> getNamespace() const;
 
 		CRAFT_LISP_EXPORTED std::vector<instance<SFrame>> const& stack() const;
 		CRAFT_LISP_EXPORTED void push_frame(instance<SFrame> _push);

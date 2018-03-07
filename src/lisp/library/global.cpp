@@ -10,7 +10,7 @@ using namespace craft::lisp::library::helper;
 
 bool special::helper::truth(instance<SFrame> frame, instance<PSubroutine> truth, instance<> code)
 {
-	auto result = frame->environment()->eval(frame, code);
+	auto result = frame->getNamespace()->environment()->eval(frame, code);
 	auto value = truth->call(truth, frame, { result });
 
 	assert(value.typeId().isType<bool>());
@@ -135,7 +135,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		if (args.size() == 0)
 		{
 			for (auto tid : pidentifier->supportedTypes())
-				frame->environment()->log()->info(tid.toString());
+				frame->getNamespace()->environment()->log()->info(tid.toString());
 			return instance<>();
 		}
 
@@ -187,7 +187,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	{
 		instance<> a(args[0]), b(args[1]);
 
-		return instance<bool>::make(types::is_subtype(frame->environment(), a, b));
+		return instance<bool>::make(types::is_subtype(frame->getNamespace()->environment(), a, b));
 	}));
 	ret->define_eval("subtype?", subtype);
 	ret->define_eval("\u227C", subtype);
@@ -217,7 +217,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		instance<> last_ret;
 		for (int i = 0; i < size; i += 1)
 		{
-			last_ret = frame->environment()->eval(frame, sexpr->cells[i]);
+			last_ret = frame->getNamespace()->environment()->eval(frame, sexpr->cells[i]);
 		}
 
 		return last_ret;
@@ -274,12 +274,12 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		for (index = 1; index < size; index += 2)
 		{
 			if (special::helper::truth(frame, truth, sexpr->cells[index]))
-				return frame->environment()->eval(frame, sexpr->cells[index + 1]);
+				return frame->getNamespace()->environment()->eval(frame, sexpr->cells[index + 1]);
 		}
 
 		// Check for last branch
 		if (index - 1 < size)
-			return frame->environment()->eval(frame, sexpr->cells[index]);
+			return frame->getNamespace()->environment()->eval(frame, sexpr->cells[index]);
 		else
 			return instance<>();
 	});
@@ -303,7 +303,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		instance<> last_ret;
 		while (special::helper::truth(frame, truth, condition))
 		{
-			last_ret = frame->environment()->eval(frame, body);
+			last_ret = frame->getNamespace()->environment()->eval(frame, body);
 		}
 
 		return last_ret;
@@ -345,7 +345,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		auto function = sexpr->cells[1];
 
 		if (frame.typeId().isType<Frame>()
-			&& frame.asType<Frame>()->scope().typeId().isType<Module>())
+			&& frame.asType<Frame>()->getScope().typeId().isType<Module>())
 			return function;
 
 		return instance<Closure>::make(frame, function);
@@ -413,6 +413,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	library::system::make_string_globals(ret, ns);
 	library::system::make_shim_globals(ret, ns);
 	library::system::make_fs_globals(ret, ns);
+	library::system::make_llvm_globals(ret, ns);
 
 
 	auto file_text = instance<MultiMethod>::make();
@@ -443,7 +444,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	{
 		instance<MultiMethod> a(args[0]); instance<> b(args[1]);
 
-		a->attach(frame->environment(), b);
+		a->attach(frame->getNamespace()->environment(), b);
 
 		return a;
 	}));
@@ -457,7 +458,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 		MultiMethod::Dispatch _dispatch;
 
-		a->dispatch(frame->environment(), b, &_dispatch);
+		a->dispatch(frame->getNamespace()->environment(), b, &_dispatch);
 
 		return _dispatch.subroutine;
 	}));

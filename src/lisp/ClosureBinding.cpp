@@ -46,7 +46,7 @@ instance<> ClosureBinding::getValue(instance<SFrame> frame) const
 {
 	for (int i = _lexical_pos; i != 0; i--)
 	{
-		frame = frame->lexical_parent();
+		frame = frame->getLexicalParent();
 		if (!frame)
 			throw stdext::exception("Lexical frames not populated.");
 	}

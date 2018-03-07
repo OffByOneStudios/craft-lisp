@@ -11,6 +11,8 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::LlvmBackend);
 	private:
+		friend class LlvmBackendProvider;
+
 		friend class LlvmModule;
 		friend class LlvmSubroutine;
 
@@ -21,13 +23,16 @@ namespace lisp
 		llvm::orc::RTDyldObjectLinkingLayer _objectLayer;
 		llvm::orc::IRCompileLayer<decltype(_objectLayer), llvm::orc::SimpleCompiler> _compileLayer;
 
+		std::shared_ptr<llvm::JITSymbolResolver> _resolver;
+
 		llvm::Type* _type_anyPtr;
 		llvm::Type* _type_instance;
 
 	public:
-		using ModuleHandle = decltype(_compileLayer)::ModuleHandleT;
-
 		instance<Namespace> lisp;
+
+	public:
+		using ModuleHandle = decltype(_compileLayer)::ModuleHandleT;
 
 	public:
 

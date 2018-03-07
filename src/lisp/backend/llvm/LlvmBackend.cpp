@@ -10,6 +10,18 @@ using namespace craft::lisp;
 using namespace llvm;
 using namespace llvm::orc;
 
+CRAFT_LISP_EXPORTED instance<> __trampoline_interpreter(LlvmSubroutine* subroutine, instance<>* arry, size_t count)
+{
+	auto sexpr = instance<Sexpr>::make();
+	sexpr->cells.reserve(count + 1);
+	sexpr->cells.push_back(subroutine);
+	std::copy(arry, arry + count, std::back_inserter(sexpr->cells));
+
+	auto frame = Execution::getCurrent();
+	auto ns = frame->getNamespace();
+	return ns->interpreter_provider->exec(frame, sexpr);
+}
+
 CRAFT_OBJECT_DEFINE(LlvmBackend)
 {
 	_.use<PBackend>().singleton<LlvmBackendProvider>();
@@ -29,17 +41,11 @@ LlvmBackend::LlvmBackend(instance<Namespace> lisp)
 
 	_type_anyPtr = llvm::Type::getInt8PtrTy(_context);
 	_type_instance = llvm::StructType::get(_context, { _type_anyPtr, _type_anyPtr });
-}
-
-void LlvmBackend::addModule(instance<LlvmModule> module)
-{
-	module->generate();
 
 	// Build our symbol resolver:
-	// Lambda 1: Look back into the JIT itself to find symbols that are part of
-	//           the same "logical dylib".
+	// Lambda 1: Look back into the JIT itself to find symbols that are part of the same "logical dylib".
 	// Lambda 2: Search for external symbols in the host process.
-	auto Resolver = createLambdaResolver(
+	_resolver = createLambdaResolver(
 		[&](const std::string &Name) {
 		if (auto Sym = _compileLayer.findSymbol(Name, false))
 			return Sym;
@@ -51,10 +57,14 @@ void LlvmBackend::addModule(instance<LlvmModule> module)
 			return JITSymbol(SymAddr, JITSymbolFlags::Exported);
 		return JITSymbol(nullptr);
 	});
+}
 
-	// Add the set to the JIT with the resolver we created above and a newly
-	// created SectionMemoryManager.
-	module->handle = cantFail(_compileLayer.addModule(std::move(module->ir), std::move(Resolver)));
+void LlvmBackend::addModule(instance<LlvmModule> module)
+{
+	module->generate();
+
+	// Add the set to the JIT with the resolver we created above and a newly created SectionMemoryManager.
+	//module->handle = cantFail(_compileLayer.addModule(std::move(module->ir), _resolver));
 }
 
 JITSymbol LlvmBackend::findSymbol(std::string const& name)
@@ -107,5 +117,18 @@ instance<> LlvmBackendProvider::addFunction(instance<> backend_module, instance<
 
 instance<> LlvmBackendProvider::exec(instance<lisp::SFrame> frame, instance<> code) const
 {
-	return frame->environment()->eval(frame, code);
+	instance<Function> function;
+	if (code.typeId().isType<Sexpr>())
+		code = code.asType<Sexpr>()->car();
+	if (code.typeId().isType<Function>())
+		function = code;
+
+	if (function)
+	{
+		instance<LlvmBackend> backend = function->backend.asType<LlvmSubroutine>()->_module->_backend;
+
+
+	}
+	else
+		return frame->getNamespace()->environment()->eval(frame, code);
 }

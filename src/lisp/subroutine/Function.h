@@ -21,7 +21,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED Function();
 
 		CRAFT_LISP_EXPORTED instance<SubroutineSignature> signature();
-		CRAFT_LISP_EXPORTED instance<SFrame> call_frame(instance<SFrame> parent);
+		CRAFT_LISP_EXPORTED instance<SFrame> call_frame();
 		CRAFT_LISP_EXPORTED instance<> call(instance<SFrame> const& frame, std::vector<instance<>> const&);
 
 		CRAFT_LISP_EXPORTED void setBody(instance<Sexpr> body);

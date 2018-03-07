@@ -13,3 +13,6 @@
         ))
       (get b)
     )))
+
+(define foo
+  (fn (a b) (+ a (+ b 10))))

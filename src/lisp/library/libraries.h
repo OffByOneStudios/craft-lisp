@@ -59,6 +59,7 @@ namespace lisp {
 			void make_shim_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_math_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_fs_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_llvm_globals(instance<Module>& m, instance<Namespace>& ns);
 		}
 	}
 

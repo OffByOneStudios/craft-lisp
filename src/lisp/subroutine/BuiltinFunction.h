@@ -23,7 +23,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED BuiltinFunction(instance<SubroutineSignature>, f_call);
 
 		CRAFT_LISP_EXPORTED instance<SubroutineSignature> signature();
-		CRAFT_LISP_EXPORTED instance<SFrame> call_frame(instance<SFrame> parent);
+		CRAFT_LISP_EXPORTED instance<SFrame> call_frame();
 		CRAFT_LISP_EXPORTED instance<> call(instance<SFrame> const& scope, std::vector<instance<>> const&);
 
 		CRAFT_LISP_EXPORTED void setSignature(instance<SubroutineSignature> signature);

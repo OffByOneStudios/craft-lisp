@@ -53,7 +53,7 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 
 			auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
 			ret = instance<Module>::make(craft_instance_from_this(), uri);
-			ret->content = _environment->read(craft_instance_from_this(), text);
+			ret->content = _environment->read(ret, text);
 		}
 
 		// TODO set uri to the canonical version of the uri from the resolver
@@ -61,7 +61,6 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 	}
 	catch (std::exception const& ex)
 	{
-
 		throw stdext::exception(ex, "Failed to construct module `{0}`", uri);
 	}
 

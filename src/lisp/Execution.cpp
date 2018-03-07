@@ -6,6 +6,7 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
+thread_local instance<Execution> Execution::_tl_current;
 
 CRAFT_OBJECT_DEFINE(Execution)
 {
@@ -13,19 +14,48 @@ CRAFT_OBJECT_DEFINE(Execution)
 }
 
 
-Execution::Execution(instance<Environment> env, instance<Namespace> ns)
+Execution::Execution(instance<Namespace> ns)
 {
-	_environment = env;
 	_namespace = ns;
 }
 
-instance<Namespace> Execution::namespace_() const
+void Execution::makeCurrent()
+{
+	_tl_current = craft_instance_from_this();
+}
+instance<Execution> Execution::getCurrent()
+{
+	return _tl_current;
+}
+void Execution::clearFromCurrent()
+{
+	assert(_tl_current == craft_instance_from_this());
+
+	_tl_current = instance<>();
+}
+
+instance<Execution> Execution::execute(instance<SFrame> frame)
+{
+	auto exc = getCurrent();
+	if (!exc)
+	{
+		if (frame.typeId().isType<Frame>())
+		{
+			auto scope = frame.asType<Frame>()->getScope();
+			exc = instance<Execution>::make(scope->namespace_());
+			exc->makeCurrent();
+		}
+	}
+
+	exc->_stack.push_back(frame);
+	frame->beginExecution(exc);
+
+	return exc;
+}
+
+instance<Namespace> Execution::getNamespace() const
 {
 	return _namespace;
-}
-instance<Environment> Execution::environment() const
-{
-	return _environment;
 }
 
 std::vector<instance<SFrame>> const& Execution::stack() const

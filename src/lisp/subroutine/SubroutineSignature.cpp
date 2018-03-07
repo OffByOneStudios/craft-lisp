@@ -112,14 +112,14 @@ instance<SScope> SubroutineSignature::read_frame(instance<SScope> const& scope)
 	return new_scope;
 }
 
-instance<SFrame> SubroutineSignature::push_frame(instance<SFrame> const& parent)
+instance<SFrame> SubroutineSignature::push_frame()
 {
-	return instance<Frame>::make(parent, _scope);
+	return instance<Frame>::make(_scope);
 }
 
 instance<SFrame> SubroutineSignature::set_frame(instance<SFrame> const& frame, std::vector<instance<>> const& args)
 {
-	check(frame->environment(), args);
+	check(frame->getNamespace()->environment(), args);
 
 	instance<Frame> call_frame = frame;
 

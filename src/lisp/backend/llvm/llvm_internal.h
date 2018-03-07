@@ -9,6 +9,8 @@
 #ifdef _MSC_VER
 #pragma warning( push, 1 )
 #pragma warning( disable : 4141 )
+#pragma warning( disable : 4291 )
+#pragma warning( disable : 4624 )
 #endif
 
 #include "llvm/Support/TargetSelect.h"
@@ -23,6 +25,15 @@
 #include "llvm/ExecutionEngine/Orc/RTDyldObjectLinkingLayer.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Mangler.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
