@@ -257,6 +257,29 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	});
 	ret->define_eval("define", define);
 
+
+	auto quote = instance<SpecialForm>::make(
+		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
+	{
+		sexpr->cells[0] = head;
+		return sexpr;
+	},
+		[](instance<SFrame> frame, instance<Sexpr> sexpr) -> instance<>
+	{
+		if (sexpr->cells.size() == 2)
+		{
+			return sexpr->cells[1];
+		}
+		auto res = instance<Sexpr>::make();
+		for (auto it = sexpr->cells.begin() + 1; it != sexpr->cells.end(); ++it)
+		{
+			res->cells.push_back(*it);
+		}
+
+		return res;
+	});
+	ret->define_eval("quote", quote);
+
 	auto cond = instance<SpecialForm>::make(
 		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
 	{
@@ -414,7 +437,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	library::system::make_shim_globals(ret, ns);
 	library::system::make_fs_globals(ret, ns);
 	library::system::make_llvm_globals(ret, ns);
-
+	library::system::make_zmq_globals(ret, ns);
 
 	auto file_text = instance<MultiMethod>::make();
 	file_text->attach(env, instance<BuiltinFunction>::make(

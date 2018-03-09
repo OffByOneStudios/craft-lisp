@@ -43,6 +43,49 @@ void system::make_shim_globals(instance<Module>& ret, instance<Namespace>& ns)
 	}));
 	ret->define_eval("parse", _parse);
 
+	auto _call = instance<MultiMethod>::make();
+	_call->attach(env, instance<BuiltinFunction>::make(
+		[](auto frame, auto args)
+	{
+		instance<> a(args[0]);
+		instance<std::string> b(expect<std::string>(args[1]));
+
+		if (!a.hasFeature<SObjectManipulation>()) throw stdext::exception("Object Does not Implement SObjectManipulation");
+
+		auto mani = a.getFeature<SObjectManipulation>();
+
+		auto listings = mani->objectManipulation_findListings(*b);
+
+		if(!listings.size()) throw stdext::exception("Object Has no Such Member {0}", *b.get());
+
+		for (auto l : listings)
+		{
+			auto meta = mani->objectManipulation_getMeta(l);
+			if (meta.argTypes.size() != args.size() - 2) continue;
+
+			bool found = true;
+			for (size_t i = 0; i != meta.argTypes.size(); i++)
+			{
+				if (args[i + 2].typeId() != meta.argTypes[i])
+				{
+					found = false;
+					break;
+				}
+			}
+			if (found)
+			{
+				auto cargs = std::vector<instance<>>(args.begin() + 2, args.end());
+
+				return mani->objectManipulation_call(l, cargs);
+			}
+		}
+		
+		throw stdext::exception("Object Has no Member {0} Matching Argument List", *b.get());
+
+	}));
+	ret->define_eval("call", _call);
+
+
 	auto ctypes = instance<MultiMethod>::make();
 	ctypes->attach(env, instance<BuiltinFunction>::make(
 		[](auto frame, auto args)

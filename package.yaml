@@ -9,6 +9,7 @@ dependencies:
   
 vendor-dependencies:
   x86_64-pc-windows-msvccoff:
+    - "zmq"
     - "LLVMX86Info"
     - "LLVMX86Utils"
     - "LLVMXRay"
@@ -66,8 +67,10 @@ vendor-dependencies:
     - "LLVMX86CodeGen"
     - "LLVMX86Desc"
     - "LLVMX86Disassembler"
-  osx_x64_clang: []
-  debian_x64_gcc: []
+  osx_x64_clang:
+    - "zmq"
+  debian_x64_gcc:
+    - "zmq"
 
 platform-dependencies:
   x86_64-pc-windows-msvccoff: []
