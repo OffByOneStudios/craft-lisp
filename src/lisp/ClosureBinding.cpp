@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(ClosureBinding)
+CRAFT_DEFINE(ClosureBinding)
 {
 	_.use<SBinding>().byCasting();
 

@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Frame)
+CRAFT_DEFINE(Frame)
 {
 	_.use<SFrame>().byCasting();
 

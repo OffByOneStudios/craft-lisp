@@ -19,7 +19,7 @@ namespace lisp
 		class SType
 			: public types::Aspect
 		{
-			CRAFT_LISP_EXPORTED CRAFT_ASPECT_DECLARE(craft::lisp::types::SType, "lisp.type", types::FactoryAspectManager);
+			CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::types::SType, "lisp.type", types::FactoryAspectManager);
 		protected:
 
 			CRAFT_LISP_EXPORTED static bool reinvokeSubtype(AlgorithmSubtype*, instance<Environment> env, instance<> left, instance<> right);
@@ -62,23 +62,6 @@ namespace lisp
 			TypeId type;
 
 			inline CraftType(TypeId id) : type(id) { }
-
-		public:
-			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
-			CRAFT_LISP_EXPORTED virtual bool isSubtypingSimple() const override;
-
-			CRAFT_LISP_EXPORTED virtual bool isSubtype(instance<Environment>, instance<> left, AlgorithmSubtype* = nullptr) const override;
-		};
-
-		class CraftFeature
-			: public virtual craft::types::Object
-			, Implements<SType>
-		{
-			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::types::CraftFeature);
-		public:
-			FeatureId feature;
-
-			inline CraftFeature(FeatureId id) : feature(id) { }
 
 		public:
 			CRAFT_LISP_EXPORTED virtual bool isConcrete() const override;
@@ -181,7 +164,7 @@ namespace lisp
 			  =>   \-/ :  I | A_I <: B_I
 
 		*/
-		class AlgorithmSubtype
+		class AlgorithmSubtype sealed
 		{
 		private: // init
 			instance<Environment> _env;

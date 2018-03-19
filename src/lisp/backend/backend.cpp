@@ -6,7 +6,7 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
-CRAFT_PROVIDER_DEFINE(PBackend);
+CRAFT_DEFINE(PBackend) { _.defaults(); }
 
 
 instance<PBackend> craft::lisp::llvm_backend_provider()

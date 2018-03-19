@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Symbol)
+CRAFT_DEFINE(Symbol)
 {
 	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Symbol> i) { return i->value; });
 

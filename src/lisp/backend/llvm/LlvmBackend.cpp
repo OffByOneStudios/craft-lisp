@@ -14,7 +14,7 @@ CRAFT_LISP_EXPORTED instance<> __trampoline_interpreter(LlvmSubroutine* subrouti
 {
 	auto sexpr = instance<Sexpr>::make();
 	sexpr->cells.reserve(count + 1);
-	sexpr->cells.push_back(subroutine);
+	sexpr->cells.push_back(instance<LlvmSubroutine>(subroutine));
 	std::copy(arry, arry + count, std::back_inserter(sexpr->cells));
 
 	auto frame = Execution::getCurrent();
@@ -22,7 +22,7 @@ CRAFT_LISP_EXPORTED instance<> __trampoline_interpreter(LlvmSubroutine* subrouti
 	return ns->interpreter_provider->exec(frame, sexpr);
 }
 
-CRAFT_OBJECT_DEFINE(LlvmBackend)
+CRAFT_DEFINE(LlvmBackend)
 {
 	_.use<PBackend>().singleton<LlvmBackendProvider>();
 

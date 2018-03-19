@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Keyword)
+CRAFT_DEFINE(Keyword)
 {
 	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Keyword> i) { return ":" + i->value; });
 

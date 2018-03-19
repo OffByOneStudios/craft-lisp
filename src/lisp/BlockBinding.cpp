@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(BlockBinding)
+CRAFT_DEFINE(BlockBinding)
 {
 	_.use<SBinding>().byCasting();
 

@@ -10,7 +10,7 @@ using namespace craft::lisp;
 using namespace llvm;
 using namespace llvm::orc;
 
-CRAFT_OBJECT_DEFINE(LlvmSubroutine)
+CRAFT_DEFINE(LlvmSubroutine)
 {
 	_.defaults();
 }

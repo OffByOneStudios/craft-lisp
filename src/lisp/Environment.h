@@ -26,6 +26,7 @@ namespace lisp
 	public:
 
 		CRAFT_LISP_EXPORTED Environment(std::shared_ptr<spdlog::logger> logger);
+		CRAFT_LISP_EXPORTED void craft_setupInstance();
 
 		// Global Logger
 		CRAFT_LISP_EXPORTED std::shared_ptr<spdlog::logger> log();

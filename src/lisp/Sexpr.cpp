@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Sexpr)
+CRAFT_DEFINE(Sexpr)
 {
 	_.use<PClone>().singleton<DefaultCopyConstructor>();
 	_.use<PParse>().singleton<FunctionalParse>(&Sexpr::_fromString);

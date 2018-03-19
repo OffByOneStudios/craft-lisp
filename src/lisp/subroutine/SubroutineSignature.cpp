@@ -6,7 +6,7 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
-CRAFT_OBJECT_DEFINE(Argument)
+CRAFT_DEFINE(Argument)
 {
 	_.use<PStringer>().singleton<FunctionalStringer>(
 		[](instance <Argument> arg) -> std::string
@@ -23,7 +23,7 @@ Argument::Argument()
 }
 
 
-CRAFT_OBJECT_DEFINE(SubroutineSignature)
+CRAFT_DEFINE(SubroutineSignature)
 {
 	_.use<PStringer>().singleton<FunctionalStringer>(
 		[](instance <SubroutineSignature> sig) -> std::string

@@ -8,7 +8,7 @@ namespace lisp
 	class SBinding
 		: public craft::types::Aspect
 	{
-		CRAFT_LISP_EXPORTED CRAFT_ASPECT_DECLARE(craft::lisp::SBinding, "lisp.binding", types::FactoryAspectManager);
+		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SBinding, "lisp.binding", types::FactoryAspectManager);
 
 	public:
 		CRAFT_LISP_EXPORTED virtual std::string name() const = 0;

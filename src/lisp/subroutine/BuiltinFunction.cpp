@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(BuiltinFunction)
+CRAFT_DEFINE(BuiltinFunction)
 {
 	_.use<PSubroutine>().singleton<AutoSubroutine>();
 
@@ -33,7 +33,7 @@ instance<SubroutineSignature> BuiltinFunction::signature()
 instance<SFrame> BuiltinFunction::call_frame()
 {
 	auto ret = instance<Frame>::make();
-	ret->setRepresentative(craft_instance_from_this());
+	ret->setRepresentative(craft_instance());
 	return ret;
 }
 instance<> BuiltinFunction::call(instance<SFrame> const& frame, std::vector<instance<>> const& args)

@@ -6,7 +6,7 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
-CRAFT_OBJECT_DEFINE(Variable)
+CRAFT_DEFINE(Variable)
 {
 	_.defaults();
 }

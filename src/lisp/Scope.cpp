@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Scope)
+CRAFT_DEFINE(Scope)
 {
 	_.use<SScope>().byCasting();
 

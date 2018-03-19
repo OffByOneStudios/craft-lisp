@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Module)
+CRAFT_DEFINE(Module)
 {
 	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Module> m) { return m->uri(); });
 
@@ -23,8 +23,13 @@ Module::Module(instance<Namespace> ns, std::string uri)
 	_ns = ns;
 	_uri = uri;
 	_inited = false;
+}
 
-	define_eval("*module*", craft_instance_from_this());
+void Module::craft_setupInstance()
+{
+	Object::craft_setupInstance();
+
+	define_eval("*module*", craft_instance());
 }
 
 std::string Module::uri() const
@@ -77,7 +82,7 @@ instance<SBinding> Module::lookup(std::string const& s)
 instance<SBinding> Module::define(std::string name, instance<> value)
 {
 	auto binding = instance<Binding>::make(name, value);
-	binding->addMeta("module", craft_instance_from_this());
+	binding->addMeta("module", craft_instance());
 	auto i = _bindings.size();
 	_bindings.push_back(binding);
 	_lookup[binding->name()] = i;
@@ -117,7 +122,7 @@ void Module::init()
 {
 	auto env = _ns->environment();
 
-	auto frame = instance<Frame>::make(craft_instance_from_this());
+	auto frame = instance<Frame>::make(craft_instance());
 	Execution::execute(frame);
 
 	if (content)
@@ -131,9 +136,9 @@ instance<> Module::liveContinueWith(instance<Sexpr> parsed_code)
 {
 	auto env = _ns->environment();
 	
-	instance<Sexpr> read_code = env->read(craft_instance_from_this(), parsed_code);
+	instance<Sexpr> read_code = env->read(craft_instance(), parsed_code);
 
-	auto frame = instance<Frame>::make(craft_instance_from_this());
+	auto frame = instance<Frame>::make(craft_instance());
 	Execution::execute(frame);
 
 	instance<> last_result;

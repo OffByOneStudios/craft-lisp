@@ -21,7 +21,7 @@ namespace lisp
 	class PSubroutine abstract
 		: public craft::types::Provider
 	{
-		CRAFT_LISP_EXPORTED CRAFT_PROVIDER_DECLARE(PSubroutine, "lisp.subroutine", craft::types::SingletonProviderManager);
+		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(PSubroutine, "lisp.subroutine", craft::types::SingletonProviderManager);
 
 	public:
 		virtual instance<SubroutineSignature> signature(instance<> subroutine) const = 0;

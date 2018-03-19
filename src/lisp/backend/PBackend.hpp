@@ -8,7 +8,7 @@ namespace lisp
 	class PBackend
 		: public craft::types::Provider
 	{
-		CRAFT_LISP_EXPORTED CRAFT_PROVIDER_DECLARE(craft::lisp::PBackend, "lisp.backend", types::SingletonProviderManager);
+		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::PBackend, "lisp.backend", types::SingletonProviderManager);
 
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<> init(instance<Namespace>) const = 0;

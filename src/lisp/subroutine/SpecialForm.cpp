@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(SpecialForm)
+CRAFT_DEFINE(SpecialForm)
 {
 	_.defaults();
 }

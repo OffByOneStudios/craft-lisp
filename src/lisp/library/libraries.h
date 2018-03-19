@@ -42,7 +42,7 @@ namespace lisp {
 				if (inst.typeId().isType<T>())
 					return inst;
 
-				throw stdext::exception("Expected {0} got {1}", types::type<T>::typeId().toString(), inst.typeId().toString());
+				throw stdext::exception("Expected {0} got {1}", types::cpptype<T>::typeDesc().toString(), inst.typeId().toString());
 			}
 
 			/* Takes an sexpr represting a function binding, and returns a signature

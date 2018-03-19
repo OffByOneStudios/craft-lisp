@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Macro)
+CRAFT_DEFINE(Macro)
 {
 	_.defaults();
 }

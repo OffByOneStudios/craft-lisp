@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Function)
+CRAFT_DEFINE(Function)
 {
 	_.use<PSubroutine>().singleton<AutoSubroutine>();
 

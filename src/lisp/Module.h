@@ -29,6 +29,7 @@ namespace lisp
 	public:
 
 		CRAFT_LISP_EXPORTED Module(instance<Namespace> ns, std::string uri);
+		CRAFT_LISP_EXPORTED void craft_setupInstance();
 
 		CRAFT_LISP_EXPORTED bool isLoaded() const;
 		CRAFT_LISP_EXPORTED bool isInitalized() const;

@@ -5,7 +5,7 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
-CRAFT_PROVIDER_DEFINE(PSubroutine);
-CRAFT_ASPECT_DEFINE(SBinding);
-CRAFT_ASPECT_DEFINE(SScope);
-CRAFT_ASPECT_DEFINE(SFrame);
+CRAFT_DEFINE(PSubroutine) { _.defaults(); }
+CRAFT_DEFINE(SBinding) { _.defaults(); }
+CRAFT_DEFINE(SScope) { _.defaults(); }
+CRAFT_DEFINE(SFrame) { _.defaults(); }

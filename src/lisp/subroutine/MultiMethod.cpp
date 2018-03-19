@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(MultiMethod)
+CRAFT_DEFINE(MultiMethod)
 {
 	_.use<PSubroutine>().singleton<AutoSubroutine>();
 
@@ -29,7 +29,7 @@ MultiMethod::MultiMethod()
 instance<SFrame> MultiMethod::call_frame()
 {
 	auto ret = instance<Frame>::make();
-	ret->setRepresentative(craft_instance_from_this());
+	ret->setRepresentative(craft_instance());
 	return ret;
 }
 

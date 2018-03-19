@@ -6,7 +6,7 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
-CRAFT_OBJECT_DEFINE(BootstrapInterpreter)
+CRAFT_DEFINE(BootstrapInterpreter)
 {
 	_.use<PBackend>().singleton<BootstrapInterpreterProvider>();
 

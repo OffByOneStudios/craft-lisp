@@ -10,7 +10,7 @@ using namespace craft::lisp;
 using namespace llvm;
 using namespace llvm::orc;
 
-CRAFT_OBJECT_DEFINE(LlvmModule)
+CRAFT_DEFINE(LlvmModule)
 {
 	_.defaults();
 }
@@ -41,7 +41,7 @@ void LlvmModule::generate()
 		if (v.typeId().isType<Function>())
 		{
 			instance<Function> f = v;
-			f->backend = _backend.asFeature<PBackend>()->addFunction(craft_instance_from_this(), f);
+			f->backend = _backend.asFeature<PBackend>()->addFunction(craft_instance(), f);
 			auto subroutine = f->backend.asType<LlvmSubroutine>();
 			subroutine->_binding_hint = b->name();
 			subroutine->generate();

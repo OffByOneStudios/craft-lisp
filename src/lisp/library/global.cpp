@@ -107,25 +107,25 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	Bottom->kind = types::Special::Bottom;
 	ret->define_eval("Bottom", Bottom);
 
-	auto String = instance<lisp::types::CraftType>::make(types::type<std::string>::typeId());
+	auto String = instance<lisp::types::CraftType>::make(types::cpptype<std::string>::typeDesc());
 	ret->define_eval("String", String);
 
-	auto Bool = instance<lisp::types::CraftType>::make(types::type<bool>::typeId());
+	auto Bool = instance<lisp::types::CraftType>::make(types::cpptype<bool>::typeDesc());
 	ret->define_eval("Bool", Bool);
 
-	auto Int = instance<lisp::types::CraftType>::make(types::type<int64_t>::typeId());
+	auto Int = instance<lisp::types::CraftType>::make(types::cpptype<int64_t>::typeDesc());
 	ret->define_eval("Int", Int);
 
-	auto Float64 = instance<lisp::types::CraftType>::make(types::type<double>::typeId());
+	auto Float64 = instance<lisp::types::CraftType>::make(types::cpptype<double>::typeDesc());
 	ret->define_eval("Float64", Float64);
 
-	auto Symbol_ = instance<lisp::types::CraftType>::make(types::type<lisp::Symbol>::typeId());
+	auto Symbol_ = instance<lisp::types::CraftType>::make(types::cpptype<lisp::Symbol>::typeDesc());
 	ret->define_eval("Symbol", Symbol_);
 
-	auto Keyword_ = instance<lisp::types::CraftType>::make(types::type<lisp::Keyword>::typeId());
+	auto Keyword_ = instance<lisp::types::CraftType>::make(types::cpptype<lisp::Keyword>::typeDesc());
 	ret->define_eval("Keyword", Keyword_);
 
-	auto Sexpr_ = instance<lisp::types::CraftType>::make(types::type<lisp::Sexpr>::typeId());
+	auto Sexpr_ = instance<lisp::types::CraftType>::make(types::cpptype<lisp::Sexpr>::typeDesc());
 	ret->define_eval("Sexpr", Sexpr_);
 
 	auto craft_type = instance<BuiltinFunction>::make(

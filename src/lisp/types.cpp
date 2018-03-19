@@ -7,9 +7,9 @@ using namespace craft::types;
 using namespace craft::lisp;
 using namespace craft::lisp::types;
 
-CRAFT_ASPECT_DEFINE(SType);
+CRAFT_DEFINE(SType) { _.defaults(); }
 
-CRAFT_OBJECT_DEFINE(Special)
+CRAFT_DEFINE(Special)
 {
 	_.use<SType>().byCasting();
 
@@ -23,7 +23,7 @@ CRAFT_OBJECT_DEFINE(Special)
 
 	_.defaults();
 }
-CRAFT_OBJECT_DEFINE(CraftType)
+CRAFT_DEFINE(CraftType)
 {
 	_.use<SType>().byCasting();
 
@@ -35,45 +35,33 @@ CRAFT_OBJECT_DEFINE(CraftType)
 
 	_.defaults();
 }
-CRAFT_OBJECT_DEFINE(CraftFeature)
-{
-	_.use<SType>().byCasting();
-
-	_.use<PStringer>().singleton<FunctionalStringer>(
-		[](instance<CraftFeature> i) -> std::string
-	{
-		return i->feature.toString(true);
-	});
-
-	_.defaults();
-}
-CRAFT_OBJECT_DEFINE(AbstractTag)
+CRAFT_DEFINE(AbstractTag)
 {
 	_.use<SType>().byCasting();
 
 	_.defaults();
 }
 
-CRAFT_OBJECT_DEFINE(Union)
+CRAFT_DEFINE(Union)
 {
 	_.use<SType>().byCasting();
 
 	_.defaults();
 }
-CRAFT_OBJECT_DEFINE(Tuple)
+CRAFT_DEFINE(Tuple)
 {
 	_.use<SType>().byCasting();
 
 	_.defaults();
 }
 
-CRAFT_OBJECT_DEFINE(TypeVar)
+CRAFT_DEFINE(TypeVar)
 {
 	_.use<SType>().byCasting();
 
 	_.defaults();
 }
-CRAFT_OBJECT_DEFINE(Exists)
+CRAFT_DEFINE(Exists)
 {
 	_.use<SType>().byCasting();
 
@@ -163,6 +151,7 @@ bool CraftType::isSubtype(instance<Environment> env, instance<> left, AlgorithmS
 	Type CraftType
 */
 
+/*
 bool CraftFeature::isConcrete() const
 {
 	return false;
@@ -188,7 +177,7 @@ bool CraftFeature::isSubtype(instance<Environment> env, instance<> left, Algorit
 	assert(false && "");
 	return false;
 }
-
+*/
 
 /*
 	Type AbstractTag

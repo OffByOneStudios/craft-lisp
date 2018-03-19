@@ -74,9 +74,7 @@ namespace lisp
 		template<typename T>
 		inline static instance<types::SType> sigType()
 		{
-			if (craft::type<T>::isFeature)
-				return instance<types::CraftFeature>::make(type<T>::featureId());
-			return instance<types::CraftType>::make(type<T>::typeId());
+			return instance<types::CraftType>::make(cpptype<T>::typeDesc());
 		}
 
 		template<typename T>

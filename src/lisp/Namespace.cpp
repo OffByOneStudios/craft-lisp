@@ -7,7 +7,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 
-CRAFT_OBJECT_DEFINE(Namespace)
+CRAFT_DEFINE(Namespace)
 {
 	_.use<SScope>().byCasting();
 
@@ -19,7 +19,7 @@ Namespace::Namespace(instance<Environment> env)
 {
 	_environment = env;
 
-	define(instance<Binding>::make("*ns*", craft_instance_from_this()));
+	define(instance<Binding>::make("*ns*", craft_instance()));
 }
 
 instance<Module> Namespace::requireModule(std::string const& uri_, instance<> resolver_specific_extra)
@@ -39,10 +39,10 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 		// TODO implement resolvers/loaders for these
 		// All of this should go somewhere else, and be made internal to Module
 		if (protocol == "builtin" && rest == "cult.system")
-			ret = make_library_globals(craft_instance_from_this());
+			ret = make_library_globals(craft_instance());
 		if (protocol == "repl")
 		{
-			ret = instance<Module>::make(craft_instance_from_this(), uri);
+			ret = instance<Module>::make(craft_instance(), uri);
 			ret->setLive();
 		}
 		if (protocol == "file")
@@ -52,7 +52,7 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 				throw stdext::exception("Module path `{0}` does not exist.", s);
 
 			auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
-			ret = instance<Module>::make(craft_instance_from_this(), uri);
+			ret = instance<Module>::make(craft_instance(), uri);
 			ret->content = _environment->read(ret, text);
 		}
 
@@ -88,7 +88,7 @@ instance<Environment> Namespace::environment() const
 }
 instance<Namespace> Namespace::namespace_() const
 {
-	return craft_instance_from_this();
+	return craft_instance();
 }
 instance<SScope> Namespace::parent() const
 {

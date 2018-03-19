@@ -8,7 +8,7 @@ namespace lisp
 	class SScope
 		: public craft::types::Aspect
 	{
-		CRAFT_LISP_EXPORTED CRAFT_ASPECT_DECLARE(craft::lisp::SScope, "lisp.scope", types::FactoryAspectManager);
+		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SScope, "lisp.scope", types::FactoryAspectManager);
 
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<Environment> environment() const = 0;

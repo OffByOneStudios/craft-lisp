@@ -19,9 +19,18 @@ void system::make_llvm_globals(instance<Module>& ret, instance<Namespace>& ns)
 	{
 		instance<Function> a(expect<Function>(args[0]));
 		auto ret = instance<std::string>::make("");
-    llvm::raw_string_ostream l(*ret);
-  
+		llvm::raw_string_ostream l(*ret);
+
 		a->backend.asType<LlvmSubroutine>()->func->print(l);
+
+		if (a->backend)
+		{
+			a->backend.asType<LlvmSubroutine>()->func->print(l);
+		}
+		else
+		{
+			ret->append("No IR.");
+		}
 
 		return ret;
 	}));
@@ -31,8 +40,17 @@ void system::make_llvm_globals(instance<Module>& ret, instance<Namespace>& ns)
 	{
 		instance<Module> a(expect<Module>(args[0]));
 		auto ret = instance<std::string>::make("");
-    llvm::raw_string_ostream l(*ret);
+		llvm::raw_string_ostream l(*ret);
 		a->backend.asType<LlvmModule>()->ir->print(l, nullptr);
+
+		if (a->backend)
+		{
+			a->backend.asType<LlvmModule>()->ir->print(l, nullptr);
+		}
+			else
+		{
+			ret->append("No IR.");
+		}
 
 		return ret;
 	}));

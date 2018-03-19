@@ -8,7 +8,7 @@ using namespace craft::lisp;
 
 thread_local instance<Execution> Execution::_tl_current;
 
-CRAFT_OBJECT_DEFINE(Execution)
+CRAFT_DEFINE(Execution)
 {
 	_.defaults();
 }
@@ -21,7 +21,7 @@ Execution::Execution(instance<Namespace> ns)
 
 void Execution::makeCurrent()
 {
-	_tl_current = craft_instance_from_this();
+	_tl_current = craft_instance();
 }
 instance<Execution> Execution::getCurrent()
 {
@@ -29,7 +29,7 @@ instance<Execution> Execution::getCurrent()
 }
 void Execution::clearFromCurrent()
 {
-	assert(_tl_current == craft_instance_from_this());
+	assert(_tl_current == craft_instance());
 
 	_tl_current = instance<>();
 }

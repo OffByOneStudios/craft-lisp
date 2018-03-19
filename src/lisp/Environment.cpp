@@ -6,7 +6,7 @@ using namespace craft::lisp;
 using namespace craft::lisp::types;
 
 
-CRAFT_OBJECT_DEFINE(Environment)
+CRAFT_DEFINE(Environment)
 {
 	_.defaults();
 }
@@ -18,8 +18,13 @@ Environment::Environment(std::shared_ptr<spdlog::logger> logger)
 	auto any = instance<types::Special>::make();
 	any->kind = types::Special::Any;
 	_any = any;
+}
 
-	ns_user = instance<Namespace>::make(craft_instance_from_this());
+void Environment::craft_setupInstance()
+{
+	Object::craft_setupInstance();
+
+	ns_user = instance<Namespace>::make(craft_instance());
 
 	ns_user->interpreter_provider = bootstrap_backend_provider();
 	ns_user->interpreter = ns_user->interpreter_provider->init(ns_user);
