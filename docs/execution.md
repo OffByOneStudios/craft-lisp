@@ -2,20 +2,13 @@
 
 Here we describe the ideal execution model of CULT for maximum power. For optimization purposes some of these structures might be reified into complete stack frames and static frames.
 
-## Features
-
-* Dynamical Bound Variables
-* Lexically Bound Variables
-* Scopes
-* Dynamic Call Frames
-* Reentrant Call Frames
-
-```
-(method foo (a b c)               ; new call frame with new scope (for a b c)
-  (lambda (x y) (+ a b c x y)))   ; has a reference to the call frame's scope
-```
-
 ## Design
+
+All executions allocate an execution object. Primarily this holds the stack, but also a reference to the root namespace of the system (e.g. type system, thread state, loaded modules).
+
+### Interpreter
+
+The interpreter is designed to execute the AST as given, with only the read time optimizations. It is designed as a fallback/bootstrap implementation. While code can extend and improve the compiler it *must* not do so without providing an interpreter implementation (no matter how slow it may be).
 
 The high level design of the interpreter uses a loop to interpret the top of the call stack. The primary reason for this is to allow a heap based stack. However it has the side effect of allowing an infinite stack. Of course JITed optimized code and native code may eschew this. Effectively it looks likes this:
 
@@ -23,9 +16,11 @@ The high level design of the interpreter uses a loop to interpret the top of the
 * Call the function.
 * Interpret the results.
 
-Everything that can be reached by an execution thread can be reached through the stack. At the root of the stack is the initial environment, interpreter, and type system. Some of these are mutable, some are not. Ideally the type system would be immutable...
+
 
 ### Scopes
+
+(Move this, this is a read time object/concept)
 
 The `Scope` object describes a lexical environment.
 
@@ -37,6 +32,17 @@ Ideally scopes would be a single direction linked list. However as a consequence
 
 If we can guarantee a scope contains no other scopes, as a consequence of **1**, we can reify that scope into a fixed size structure and push it onto the stack. This should be easy to guarantee, since macros can be expanded at compile time, and scopes are lexical.
 
-### Frames
 
-The `Frame` objects describes a dynamic(? ; or do the really just describe execution) environment; often created via executing a function.
+
+# [In Progress]
+
+#### Code about closures
+
+```
+(define foo
+  (fn (a b c)                   ; new call frame with new scope (for a b c)
+    (fn (x y)
+      (+ a b c x y))))          ; has a reference to the call frame's scope
+```
+
+## 
