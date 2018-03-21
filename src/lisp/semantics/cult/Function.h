@@ -14,6 +14,8 @@ namespace lisp
 		instance<SubroutineSignature> _signature;
 		instance<Sexpr> _body;
 
+		std::map<instance<lisp::types::Tuple>, instance<>> _cache;
+
 	public:
 		instance<> backend;
 

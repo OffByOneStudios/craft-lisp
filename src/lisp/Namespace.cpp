@@ -18,6 +18,11 @@ CRAFT_DEFINE(Namespace)
 Namespace::Namespace(instance<Environment> env)
 {
 	_environment = env;
+}
+
+void Namespace::craft_setupInstance()
+{
+	Object::craft_setupInstance();
 
 	define(instance<Binding>::make("*ns*", craft_instance()));
 }

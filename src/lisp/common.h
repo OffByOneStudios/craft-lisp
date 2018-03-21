@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lisp/defines.h"
+#include "defines.h"
 
 // C++
 #ifdef _MSC_VER

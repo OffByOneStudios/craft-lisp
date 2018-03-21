@@ -1,9 +1,8 @@
-#include "lisp/common.h"
-#include "lisp/lisp.h"
-#include "lisp/Environment.h"
+#include "common.h"
+#include "lisp.h"
+#include "Environment.h"
 
 using namespace craft::lisp;
-using namespace craft::lisp::types;
 
 
 CRAFT_DEFINE(Environment)

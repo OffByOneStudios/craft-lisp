@@ -18,9 +18,6 @@ namespace lisp
 
 		llvm::Function* func;
 
-
-		CRAFT_LISP_EXPORTED llvm::FunctionType* getLlvmType(instance<LlvmBackend> backend, instance<SubroutineSignature> signature);
-
 	public:
 
 		CRAFT_LISP_EXPORTED LlvmSubroutine(instance<LlvmModule>, instance<>);

@@ -1,11 +1,12 @@
-#include "lisp/common.h"
-#include "lisp/lisp.h"
+#include "common.h"
+#include "lisp.h"
 
 using namespace craft;
-using namespace craft::types;
 using namespace craft::lisp;
 
-CRAFT_DEFINE(PSubroutine) { _.defaults(); }
-CRAFT_DEFINE(SBinding) { _.defaults(); }
-CRAFT_DEFINE(SScope) { _.defaults(); }
+CRAFT_DEFINE(PSyntax) { _.defaults(); }
+CRAFT_DEFINE(PSemantics) { _.defaults(); }
+CRAFT_DEFINE(PBackend) { _.defaults(); }
+CRAFT_DEFINE(PExecutor) { _.defaults(); }
+CRAFT_DEFINE(PCompiler) { _.defaults(); }
 CRAFT_DEFINE(SFrame) { _.defaults(); }

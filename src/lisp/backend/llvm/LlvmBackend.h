@@ -16,8 +16,6 @@ namespace lisp
 		friend class LlvmModule;
 		friend class LlvmSubroutine;
 
-		llvm::LLVMContext _context;
-
 		std::unique_ptr<llvm::TargetMachine> _tm;
 		const llvm::DataLayout _dl;
 		llvm::orc::RTDyldObjectLinkingLayer _objectLayer;
@@ -25,11 +23,10 @@ namespace lisp
 
 		std::shared_ptr<llvm::JITSymbolResolver> _resolver;
 
-		llvm::Type* _type_anyPtr;
-		llvm::Type* _type_instance;
-
 	public:
 		instance<Namespace> lisp;
+
+		instance<LlvmCompiler> compiler;
 
 	public:
 		using ModuleHandle = decltype(_compileLayer)::ModuleHandleT;
@@ -37,6 +34,8 @@ namespace lisp
 	public:
 
 		CRAFT_LISP_EXPORTED LlvmBackend(instance<Namespace>);
+
+		CRAFT_LISP_EXPORTED void aquireBuiltins(instance<lisp::Module>);
 
 	public:
 

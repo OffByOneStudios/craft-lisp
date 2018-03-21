@@ -31,10 +31,11 @@ namespace lisp
 		//
 	public:
 		CRAFT_LISP_EXPORTED virtual std::string name() const override;
-		CRAFT_LISP_EXPORTED virtual instance<> getValue(instance<SFrame> frame) const override;
-		CRAFT_LISP_EXPORTED virtual instance<> getMeta(std::string metaKey, types::TypeId type = types::None) override;
 
-		CRAFT_LISP_EXPORTED virtual instance<> eval(instance<SFrame> frame) override;
+		CRAFT_LISP_EXPORTED virtual instance<SScope> getScope() const override;
+
+		CRAFT_LISP_EXPORTED virtual instance<> getAst() const override;
+		CRAFT_LISP_EXPORTED virtual instance<> getMeta(std::string metaKey, types::TypeId type = types::None) override;
 	};
 
 }}

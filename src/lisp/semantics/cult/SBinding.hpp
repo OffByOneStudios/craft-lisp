@@ -12,14 +12,14 @@ namespace lisp
 
 	public:
 		CRAFT_LISP_EXPORTED virtual std::string name() const = 0;
-		CRAFT_LISP_EXPORTED virtual instance<> getValue(instance<SFrame> frame) const = 0;
+
+		CRAFT_LISP_EXPORTED virtual instance<SScope> getScope() const = 0;
+
+		CRAFT_LISP_EXPORTED virtual instance<> getAst() const = 0;
 		CRAFT_LISP_EXPORTED virtual instance<> getMeta(std::string metaKey, types::TypeId type = types::None) = 0;
 		CRAFT_LISP_EXPORTED virtual void addMeta(std::string metaKey, instance<>) = 0;
 
-		CRAFT_LISP_EXPORTED virtual instance<> eval(instance<SFrame> frame) = 0;
-
 		template<typename T>
-    inline instance<T> getMeta(std::string metaKey) { return getMeta(metaKey, types::type<T>::typeId()).template asType<T>(); }
+		inline instance<T> getMeta(std::string metaKey) { return getMeta(metaKey, types::cpptype<T>::typeDesc()).template asType<T>(); }
 	};
-
 }}

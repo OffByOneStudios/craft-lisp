@@ -24,11 +24,11 @@ LlvmModule::LlvmModule(instance<LlvmBackend> backend, instance<lisp::Module> lis
 void LlvmModule::generate()
 {
 	auto s = _lisp->uri();
-	ir = std::make_unique<llvm::Module>(StringRef(s), _backend->_context);
+	ir = std::make_unique<llvm::Module>(StringRef(s), _backend->compiler->context);
 	ir->setDataLayout(_backend->_dl);
 
-	std::vector<Type*> functionTypeArgs_trampoline = { _backend->_type_anyPtr, llvm::PointerType::get(_backend->_type_instance, 0), llvm::Type::getInt64Ty(_backend->_context) };
-	auto functionType_trampoline = llvm::FunctionType::get(_backend->_type_instance, functionTypeArgs_trampoline, false);
+	std::vector<Type*> functionTypeArgs_trampoline = { _backend->compiler->type_anyPtr, llvm::PointerType::get(_backend->compiler->type_instance, 0), llvm::Type::getInt64Ty(_backend->compiler->context) };
+	auto functionType_trampoline = llvm::FunctionType::get(_backend->compiler->type_instance, functionTypeArgs_trampoline, false);
 	auto _function_trampoline = llvm::Function::Create(functionType_trampoline, llvm::Function::ExternalLinkage, "__trampoline_interpreter", ir.get());
 
 	for (auto b : _lisp->bindings())

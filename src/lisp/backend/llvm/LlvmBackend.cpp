@@ -30,17 +30,14 @@ CRAFT_DEFINE(LlvmBackend)
 }
 
 LlvmBackend::LlvmBackend(instance<Namespace> lisp)
-	: _context()
-	, _tm(EngineBuilder().selectTarget()) // from current process
+	: _tm(EngineBuilder().selectTarget()) // from current process
 	, _dl(_tm->createDataLayout())
 	, _objectLayer([]() { return std::make_shared<SectionMemoryManager>(); }) // lambda to make memory sections
 	, _compileLayer(_objectLayer, SimpleCompiler(*_tm))
 	, lisp(lisp)
+	, compiler(instance<LlvmCompiler>::make())
 {
 	llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr); // load the current process
-
-	_type_anyPtr = llvm::Type::getInt8PtrTy(_context);
-	_type_instance = llvm::StructType::get(_context, { _type_anyPtr, _type_anyPtr });
 
 	// Build our symbol resolver:
 	// Lambda 1: Look back into the JIT itself to find symbols that are part of the same "logical dylib".
@@ -57,6 +54,11 @@ LlvmBackend::LlvmBackend(instance<Namespace> lisp)
 			return JITSymbol(SymAddr, JITSymbolFlags::Exported);
 		return JITSymbol(nullptr);
 	});
+}
+
+void LlvmBackend::aquireBuiltins(instance<lisp::Module> builtins)
+{
+
 }
 
 void LlvmBackend::addModule(instance<LlvmModule> module)
@@ -100,6 +102,12 @@ instance<> LlvmBackendProvider::init(instance<Namespace> ns) const
 instance<> LlvmBackendProvider::addModule(instance<> backend_ns, instance<lisp::Module> lisp_module) const
 {
 	instance<LlvmBackend> ns = backend_ns;
+
+	if (lisp_module->uri() == "")
+	{
+		ns->aquireBuiltins(lisp_module);
+	}
+
 	instance<LlvmModule> module = instance<LlvmModule>::make(ns, lisp_module);
 
 	ns->addModule(module);

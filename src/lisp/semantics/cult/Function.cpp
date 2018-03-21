@@ -9,7 +9,7 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(Function)
 {
-	_.use<PSubroutine>().singleton<AutoSubroutine>();
+	_.use<SSubroutine>().singleton<AutoSubroutine>();
 
 	_.defaults();
 }

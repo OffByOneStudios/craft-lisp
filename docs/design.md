@@ -222,17 +222,29 @@ func_ptr = func_backend_handle->requireForCall( lisp::CultCall { ... } );
 
 This phase parses the code into a syntax data structure (e.g. AST). Each language can have it's own syntax, parser, and data structure. The output of this step is a syntax specific structure.
 
+This phase may execute reader macros, arbitrary code that parses strings and returns valid syntax data structures.
+
 ### Reading
 
 This phase takes a syntax specific data structure and an semantics specific data structure and transforms from the given syntax to the given semantics.
 
+This phase may execute macros, arbitrary code that mutates syntax data structures.
+
+### Semantic Phases (Analysis, Type Inferencing, Borrow Checking)
+
+Arbitrary semantic phases may be executed as required, this will typically be done automatically through checks in the semantic manipulation code.
+
+These phases may execute arbitrary code if the analysis features or the semantic data structure are extended by the user.
+
 ### Execution
 
-This phase takes a semantics specific data structure and executes it using an executor backend. Some executors may perform additional phases (such as compilation).
+This phase takes a semantics specific data structure and executes it using an executor backend. Some executors may perform additional phases (such as compilation). This phase is used to perform arbitrary execution.
 
 ### Compilation
 
 This phase takes a semantics specific data structure and compiles it using a compiler backend. Some compilers may perform additional phases (such as optimization).
+
+These phases may execute arbitrary code if the compilation features are extended by the user.
 
 ## Implementations
 
@@ -240,15 +252,26 @@ This phase takes a semantics specific data structure and compiles it using a com
 
 This is the default syntax structure, a simple C++ implemented lisp syntax. See [the syntax document](./syntax) for more details.
 
-Primarily compose of `Sexpr`s.
+The data structure this uses is a tree of `Sexpr`s with literals (as their literal type) and `Symbol`s as the leafs.
 
 ### CultSemantics
 
 This is the default semantic structure. See [the semantics document](./semantics) for more details.
 
+Cult supports "foreign semantics". Meaning that cult will search every layer of the module for symbols in foreign semantic layers (for example the cult CFFI module is a bunch of macros which manipulate the reading module's C++ semantics layer, so that later in the module, this system will find the foreign semantics).
+
+### CppSemantics
+
+This is a helper semantic structure for C++ code. It is for the following purposes:
+
+* Modules written entirely in C/C++ (for example for bootstrapping, or as an "interpreter" extension). In this case these semantics simply provide the type/call signature and the exact pointer.
+* Modules which wrap/expose C/C++ (e.g. through CFFI statements). In this case these semantics provide the expected type/call signature, and where to find the pointer (e.g. name/dll).
+* Eventually, this semantics will be used for loading actual C/C++ header files as modules.
+  * Finally, it might even be able to just compile C++ code using this object.
+
 ### BootstrapInterpreter
 
-This is the default executor. It is designed to always be an availble fallback. It must always be availble, and must always have implementations availble.
+This is the default executor. It is designed to always be an availble fallback. It must always be availble, and must always have implementations available. Primarily it is used to execute various macros and compiler extensions used to implement macros and compiler extensions.
 
 ### LlvmBackend
 

@@ -23,7 +23,7 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED virtual std::vector<instance<SBinding>> search(std::string const&) = 0;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) = 0;
-		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) = 0;
+		CRAFT_LISP_EXPORTED virtual void define(std::string name, instance<> expression) = 0;
 	};
 
 }}

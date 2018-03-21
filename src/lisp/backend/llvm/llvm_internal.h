@@ -60,6 +60,7 @@ namespace lisp
 	class LlvmSubroutine;
 }}
 
+#include "LlvmCompiler.h"
 #include "LlvmBackend.h"
 #include "LlvmModule.h"
 #include "LlvmSubroutine.h"

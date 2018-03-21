@@ -27,6 +27,7 @@ namespace lisp
 
 	public:
 		CRAFT_LISP_EXPORTED Namespace(instance<Environment> env);
+		CRAFT_LISP_EXPORTED void craft_setupInstance();
 
 		CRAFT_LISP_EXPORTED instance<Module> requireModule(std::string const& s, instance<> resolver_specific_extra = instance<>());
 

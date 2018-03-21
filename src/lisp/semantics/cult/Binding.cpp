@@ -39,16 +39,23 @@ instance<> Binding::value()
 	return _value;
 }
 
+/*
 instance<> Binding::eval(instance<SFrame> frame)
 {
 	_value = frame->getNamespace()->environment()->eval(frame, _expression);
 
 	return _value;
 }
+*/
 
-instance<> Binding::getValue(instance<SFrame> frame) const
+instance<SScope> Binding::getScope() const
 {
-	return _value;
+	return _scope;
+}
+
+instance<> Binding::getAst() const
+{
+	return _expression;
 }
 
 void Binding::addMeta(std::string metaKey, instance<> value)

@@ -29,13 +29,14 @@ std::string BlockBinding::name() const
 {
 	return _name;
 }
-instance<> BlockBinding::getValue(instance<SFrame> frame) const
+instance<> BlockBinding::getAst() const
 {
 	instance<Frame> block = frame.asType<Frame>();
 
 	return block->get(_pos);
 }
 
+/*
 instance<> BlockBinding::eval(instance<SFrame> frame)
 {
 	instance<Frame> block = frame.asType<Frame>();
@@ -45,6 +46,7 @@ instance<> BlockBinding::eval(instance<SFrame> frame)
 
 	return value;
 }
+*/
 
 void BlockBinding::addMeta(std::string metaKey, instance<> value)
 {

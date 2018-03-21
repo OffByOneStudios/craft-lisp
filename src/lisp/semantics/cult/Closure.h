@@ -11,14 +11,13 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Closure);
 	private:
 
-		PSubroutine* _provider;
-		instance<> _subroutine;
+		instance<SSubroutine> _subroutine;
 		instance<SFrame> _frame;
 
 	public:
 		CRAFT_LISP_EXPORTED Closure(instance<SFrame> frame, instance<> func);
 
-		CRAFT_LISP_EXPORTED instance<> subroutine();
+		CRAFT_LISP_EXPORTED instance<SSubroutine> subroutine();
 		CRAFT_LISP_EXPORTED instance<SFrame> closure();
 
 		CRAFT_LISP_EXPORTED instance<SubroutineSignature> signature();
