@@ -7,7 +7,6 @@ namespace lisp
 {
 	class Namespace
 		: public virtual craft::types::Object
-		, public types::Implements<SScope>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Namespace);
 	private:
@@ -16,36 +15,61 @@ namespace lisp
 		std::map<std::string, size_t> _module_cache;
 		std::vector<instance<Module>> _module_load_list;
 
-		std::map<std::string, instance<SBinding>> _lookup;
+		struct _Backend
+		{
+			instance<> instance;
+			PBackend* backend;
+			PExecutor* executor;
+			PCompiler* compiler;
+		};
 
+		std::map<types::TypeId, _Backend> _backends;
+
+
+		// Public components
 	public:
-		instance<BootstrapInterpreter> interpreter;
-		instance<PBackend> interpreter_provider;
+		Signal<void(instance<Module>)> on_moduleInit;
 
-		instance<> backend;
-		instance<PBackend> backend_provider;
-
+		// Setup
 	public:
 		CRAFT_LISP_EXPORTED Namespace(instance<Environment> env);
 		CRAFT_LISP_EXPORTED void craft_setupInstance();
 
+		// Language features
+	public:
+		CRAFT_LISP_EXPORTED instance<> get(types::TypeId type);
+
+		CRAFT_LISP_EXPORTED instance<> parse(std::string contents, types::TypeId type, PSyntax::ParseOptions const* opts = nullptr);
+
+		CRAFT_LISP_EXPORTED instance<> read(std::string contents, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr);
+		CRAFT_LISP_EXPORTED instance<> read(instance<> source, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr);
+
+		CRAFT_LISP_EXPORTED instance<> exec(instance<Module> module, std::string method, lisp::GenericCall const& call = {});
+
+		CRAFT_LISP_EXPORTED void compile(std::string path, instance<> compiler_options);
+		CRAFT_LISP_EXPORTED void compile(instance<Module> module, std::string path, instance<> compiler_options);
+
+		// Core features
+	public:
 		CRAFT_LISP_EXPORTED instance<Module> requireModule(std::string const& s, instance<> resolver_specific_extra = instance<>());
 
-		CRAFT_LISP_EXPORTED instance<SBinding> define(instance<SBinding>);
-
-		Signal<void(instance<Module>)> on_moduleInit;
-
+		// Templated helpers
 	public:
-		//
-		// SScope
-		//
-		CRAFT_LISP_EXPORTED virtual instance<Environment> environment() const override;
-		CRAFT_LISP_EXPORTED virtual instance<Namespace> namespace_() const override;
-		inline virtual bool isDynamicScope() const override { return false; }
-		CRAFT_LISP_EXPORTED virtual instance<SScope> parent() const override;
-		CRAFT_LISP_EXPORTED virtual std::vector<instance<SBinding>> search(std::string const&) override;
-		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) override;
-		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) override;
+		
+		template<typename T> // TODO, implements PBackend
+		inline instance<T> get()
+		{ return get(cpptype<T>::typeDesc()); }
+
+		template<typename T>
+		inline instance<T> parse(std::string contents, PSyntax::ParseOptions const* opts = nullptr)
+		{ return parse(contents, cpptype<T>::typeDesc(), opts); }
+
+		template<typename T>
+		inline instance<T> read(std::string contents, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr)
+		{ return read(contents, cpptype<T>::typeDesc(), opts); }
+		template<typename T>
+		inline instance<T> read(instance<> source, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr)
+		{ return read(source, cpptype<T>::typeDesc(), opts); }
 	};
 
 }}

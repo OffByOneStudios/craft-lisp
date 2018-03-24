@@ -9,8 +9,6 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(Namespace)
 {
-	_.use<SScope>().byCasting();
-
 	_.defaults();
 }
 
@@ -24,8 +22,55 @@ void Namespace::craft_setupInstance()
 {
 	Object::craft_setupInstance();
 
-	define(instance<Binding>::make("*ns*", craft_instance()));
+	for (auto type : PBackend::craft_s_featureManager()->supportedTypes())
+	{
+		auto backend = type.getFeature<PBackend>();
+
+		_backends[type] =
+		{
+			backend->init(craft_instance()),
+			backend,
+			type.getFeature<PExecutor>(),
+			type.getFeature<PCompiler>(),
+		};
+	}
+
+	// define(instance<Binding>::make("*ns*", craft_instance()));
 }
+
+ instance<> Namespace::get(types::TypeId type)
+ {
+
+ }
+
+instance<> Namespace::parse(std::string contents, types::TypeId type, PSyntax::ParseOptions const* opts = nullptr)
+{
+
+}
+
+instance<> Namespace::read(std::string contents, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr)
+{
+
+}
+instance<> Namespace::read(instance<> source, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr)
+{
+
+}
+
+instance<> Namespace::exec(instance<Module> module, std::string method, lisp::GenericCall const& call = {})
+{
+
+}
+
+void Namespace::compile(std::string path, instance<> compiler_options)
+{
+
+}
+void Namespace::compile(instance<Module> module, std::string path, instance<> compiler_options)
+{
+
+}
+
 
 instance<Module> Namespace::requireModule(std::string const& uri_, instance<> resolver_specific_extra)
 {
@@ -86,20 +131,6 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 
 	return ret;
 }
-
-instance<Environment> Namespace::environment() const
-{
-	return _environment;
-}
-instance<Namespace> Namespace::namespace_() const
-{
-	return craft_instance();
-}
-instance<SScope> Namespace::parent() const
-{
-	return instance<SScope>();
-}
-
 std::vector<instance<SBinding>> Namespace::search(std::string const & search)
 {
 	std::vector<instance<SBinding>> res;
@@ -116,24 +147,3 @@ std::vector<instance<SBinding>> Namespace::search(std::string const & search)
 	}
 	return res;
 }
-
-instance<SBinding> Namespace::lookup(std::string const& s)
-{
-	auto it = _lookup.find(s);
-	if (it == _lookup.end())
-		throw stdext::exception("Lookup failed, `{0}` not in scope.", s);
-
-	return it->second;
-}
-
-instance<SBinding> Namespace::define(std::string name, instance<> value)
-{
-	return define(instance<Binding>::make(name, value));
-}
-
-instance<SBinding> Namespace::define(instance<SBinding> binding)
-{
-	_lookup[binding->name()] = binding;
-	return binding;
-}
-
