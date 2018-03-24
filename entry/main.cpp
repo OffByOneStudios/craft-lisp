@@ -61,10 +61,39 @@ void repl(const std::string & prompt, instance<Environment> env)
 	}
 }
 
-int main()
+int main(int argc, char** argv)
 {
 	::craft::types::system().init();
 	instance<Environment> global_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"));
+	if (argc == 1)
+	{
+		repl("CULT> ", global_env);
+	}
+	else
+	{
+		std::string f;
+		try
+		{
+			f = fs::read<std::string>(path::normalize(argv[1]), fs::string_read).get();
+		}
+		catch (...)
+		{
+			global_env->log()->info("No Such File: {0}", argv[1]);
+		}
+		try
+		{
+			global_env->eval(f);
+		}
+		catch (std::exception e)
+		{
+			global_env->log()->error(e.what());
+			return -1;
+		}
+	}
+
+	return 0;
+	
+	
 	//add_globals(global_env);
-	repl("CULT> ", global_env);
+	
 }
