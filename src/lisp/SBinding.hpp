@@ -14,6 +14,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual std::string name() const = 0;
 		CRAFT_LISP_EXPORTED virtual instance<> getValue(instance<SFrame> frame) const = 0;
 		CRAFT_LISP_EXPORTED virtual instance<> getMeta(std::string metaKey, types::TypeId type = types::None) = 0;
+		CRAFT_LISP_EXPORTED virtual void addMeta(std::string metaKey, instance<>) = 0;
 
 		CRAFT_LISP_EXPORTED virtual instance<> eval(instance<SFrame> frame) = 0;
 

@@ -61,6 +61,11 @@ namespace lisp {
 			void make_fs_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_llvm_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_zmq_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_env_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_regex_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_http_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_meta_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_subprocess_globals(instance<Module>& m, instance<Namespace>& ns);
 		}
 	}
 

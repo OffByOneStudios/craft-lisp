@@ -2,6 +2,7 @@
 #include "lisp/lisp.h"
 #include "lisp/library/libraries.h"
 
+
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
@@ -431,13 +432,29 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	});
 	ret->define_eval("require", require);
 
+	auto eval = instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<std::string>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+		instance<Environment> env = frame->getNamespace()->environment();
+
+		return frame->getNamespace()->environment()->eval(frame, *a);
+	});
+	ret->define_eval("eval", eval);
+
 	
 	library::system::make_math_globals(ret, ns); // Quick Maths
 	library::system::make_string_globals(ret, ns);
 	library::system::make_shim_globals(ret, ns);
 	library::system::make_fs_globals(ret, ns);
+	library::system::make_env_globals(ret, ns);
 	library::system::make_llvm_globals(ret, ns);
 	library::system::make_zmq_globals(ret, ns);
+	library::system::make_regex_globals(ret, ns);
+	library::system::make_meta_globals(ret, ns);
+	library::system::make_http_globals(ret, ns);
+	library::system::make_subprocess_globals(ret, ns);
 
 	auto file_text = instance<MultiMethod>::make();
 	file_text->attach(env, instance<BuiltinFunction>::make(

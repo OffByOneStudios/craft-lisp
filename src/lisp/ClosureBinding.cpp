@@ -63,3 +63,9 @@ instance<> ClosureBinding::getMeta(std::string metaKey, TypeId type)
 {
 	return _base->getMeta(metaKey, type);
 }
+
+
+void ClosureBinding::addMeta(std::string metaKey, instance<> value)
+{
+	return _base->addMeta(metaKey, value);
+}

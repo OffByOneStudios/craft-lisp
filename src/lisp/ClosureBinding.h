@@ -30,6 +30,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual std::string name() const override;
 		CRAFT_LISP_EXPORTED virtual instance<> getValue(instance<SFrame> frame) const override;
 		CRAFT_LISP_EXPORTED virtual instance<> getMeta(std::string metaKey, types::TypeId type = types::None) override;
+		CRAFT_LISP_EXPORTED virtual void addMeta(std::string metaKey, instance<> value) override;
 
 		CRAFT_LISP_EXPORTED virtual instance<> eval(instance<SFrame> frame) override;
 	};

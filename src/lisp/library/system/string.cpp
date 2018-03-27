@@ -47,6 +47,21 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 	}));
 	ret->define_eval("str", str);
 
+	auto _print = instance<MultiMethod>::make();
+	_print->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeCollectArgs(),
+		[str](instance<SFrame> frame, std::vector<instance<>> args) mutable
+	{
+		for (auto i : args) {
+			std::cout << str->call(frame, { i }) << " ";
+		}
+
+		std::cout << "\n";
+		
+		return instance<>();
+	}));
+	ret->define_eval("print", _print);
+
 	auto fmt = instance<MultiMethod>::make();
 	fmt->attach(env, instance<BuiltinFunction>::make(
 		SubroutineSignature::makeCollectArgs(),

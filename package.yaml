@@ -3,6 +3,7 @@ namespace: OffByOneStudios
 name: Speech Problems
 version: "1.0.0"
 repo: http://github.com/OffByOneStudios/craft-lisp
+entry-name: cult
 dependencies:
   - Util
   - Types
