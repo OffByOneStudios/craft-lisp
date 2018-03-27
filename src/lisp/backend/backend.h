@@ -1,8 +1,7 @@
 #pragma once
 
-#include "PBackend.hpp"
-
-#include "BootstrapInterpreter.h"
+#include "lisp/common.h"
+#include "lisp/lisp.h"
 
 namespace craft {
 namespace lisp

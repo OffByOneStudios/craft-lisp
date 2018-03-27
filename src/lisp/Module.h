@@ -7,62 +7,68 @@ namespace lisp
 {
 	class Module
 		: public virtual craft::types::Object
-		, public types::Implements<SScope>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Module);
 	private:
+		friend class Namespace;
 
-		instance<Environment> _environment;
+		instance<> _value; // value of initing the module
 		instance<Namespace> _ns;
 		std::string _uri;
 
-		bool _inited;
-		std::map<std::string, size_t> _lookup;
-		std::vector<instance<SBinding>> _bindings;
+		instance<> _loader; // module specific loader
 
-	public:
-		instance<Sexpr> content; // lisp "source" code; used by interpreter
+		instance<> _syntax_instance;
+		PSyntax* _syntax_syntax;
 
-		instance<> loader; // module specific loader
-		instance<> backend; // module + backend specific object
+		struct _Semantic
+		{
+			instance<> instance;
+			PSemantics* semantics;
+		};
+		std::map<types::TypeId, _Semantic> _semantics;
 
+		instance<> _lastResult;
+
+		// Module management
 	public:
 
 		CRAFT_LISP_EXPORTED Module(instance<Namespace> ns, std::string uri);
 		CRAFT_LISP_EXPORTED void craft_setupInstance();
 
+		CRAFT_LISP_EXPORTED instance<> getNamespace() const;
+
 		CRAFT_LISP_EXPORTED bool isLoaded() const;
-		CRAFT_LISP_EXPORTED bool isInitalized() const;
+		CRAFT_LISP_EXPORTED void load();
+
+		CRAFT_LISP_EXPORTED bool isInitialized() const;
+		CRAFT_LISP_EXPORTED void initialize();
+
+		CRAFT_LISP_EXPORTED instance<> moduleValue() const;
+
+		CRAFT_LISP_EXPORTED instance<> lastExecutedResult() const;
 
 		CRAFT_LISP_EXPORTED std::string uri() const;
 
-		CRAFT_LISP_EXPORTED void setLive();
+		CRAFT_LISP_EXPORTED void appendModule(instance<lisp::Module>);
+		CRAFT_LISP_EXPORTED void mergeModule(instance<lisp::Module>);
 
-		CRAFT_LISP_EXPORTED void load(); // might be asynchronous
-		CRAFT_LISP_EXPORTED void init(); // must be in order
-
-		// Tells the module that this is the next thing to evaluate
-		CRAFT_LISP_EXPORTED instance<> liveContinueWith(instance<Sexpr>);
-
-		CRAFT_LISP_EXPORTED std::vector<instance<SBinding>> const& bindings() const;
-
+		// Language features
 	public:
-		/* Helper functions for people writing modules in C++
-		
-		*/
-		CRAFT_LISP_EXPORTED instance<SBinding> define_eval(std::string name, instance<> value);
+		CRAFT_LISP_EXPORTED instance<> get(types::TypeId type);
+		CRAFT_LISP_EXPORTED instance<> require(types::TypeId type, bool force_read = true);
 
+		CRAFT_LISP_EXPORTED instance<> exec(std::string method, lisp::GenericCall const& call = {});
+
+		// Templated helpers
 	public:
-		//
-		// SScope
-		//
-		CRAFT_LISP_EXPORTED virtual instance<Environment> environment() const override;
-		CRAFT_LISP_EXPORTED virtual instance<Namespace> namespace_() const override;
-		inline virtual bool isDynamicScope() const override { return false; }
-		CRAFT_LISP_EXPORTED virtual instance<SScope> parent() const override;
-		CRAFT_LISP_EXPORTED virtual std::vector<instance<SBinding>> search(std::string const&) override;
-		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) override;
-		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) override;
+		template<typename T> // TODO, implements PSemantics or PSyntax
+		inline instance<T> get()
+		{ return get(cpptype<T>::typeDesc()); }
+		template<typename T> // TODO, implements PSemantics or PSyntax
+		inline instance<T> require()
+		{ return require(cpptype<T>::typeDesc()); }
+
 	};
 
 }}

@@ -1,11 +1,14 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
-#include "lisp/Sexpr.h"
+#include "lisp/syntax/Sexpr.h"
 
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
+/******************************************************************************
+** Sexpr
+******************************************************************************/
 
 CRAFT_DEFINE(Sexpr)
 {

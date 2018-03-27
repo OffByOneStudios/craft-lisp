@@ -2,6 +2,9 @@
 #include "lisp/lisp.h"
 #include "lisp/Namespace.h"
 
+#include "lisp/backend/llvm/llvm_internal.h"
+#include "lisp/library/libraries.h"
+
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
@@ -12,10 +15,10 @@ CRAFT_DEFINE(Namespace)
 	_.defaults();
 }
 
-
 Namespace::Namespace(instance<Environment> env)
 {
 	_environment = env;
+	_loaderVar_anonCount = 0;
 }
 
 void Namespace::craft_setupInstance()
@@ -38,28 +41,51 @@ void Namespace::craft_setupInstance()
 	// define(instance<Binding>::make("*ns*", craft_instance()));
 }
 
- instance<> Namespace::get(types::TypeId type)
- {
+Namespace::_Backend Namespace::preferedBackend() const
+{
+	return _backends.at(cpptype<LlvmBackend>::typeDesc());
+}
 
+Namespace::_Backend Namespace::fallbackBackend() const
+{
+	return _backends.at(cpptype<BootstrapInterpreter>::typeDesc());
+}
+
+ instance<> Namespace::get(TypeId type)
+ {
+	 auto it = _backends.find(type);
+	 if (it == _backends.end())
+		 throw bad_projection_error("Cannot get a projection to `{1}` from {0}", craft_instance(), type.toString(false));
+
+	 return it->second.instance;
  }
 
-instance<> Namespace::parse(std::string contents, types::TypeId type, PSyntax::ParseOptions const* opts = nullptr)
+instance<> Namespace::parse(std::string contents, TypeId type, PSyntax::ParseOptions const* opts)
 {
+	// context variable with: ParseOptions
+	instance<Module> module = requireModule("anon:", instance<std::string>::make(contents));
 
+	return module->_syntax_instance;
 }
 
-instance<> Namespace::read(std::string contents, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr)
+instance<> Namespace::read(instance<> source, TypeId type, PSemantics::ReadOptions const* ropts)
 {
+	auto module = source.getFeature<PSyntax>()->getModule(source);
 
+	// context variable with: ReadOptions
+	return module->require(type);
 }
-instance<> Namespace::read(instance<> source, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr)
-{
 
+instance<> Namespace::read(std::string contents, TypeId type, PSyntax::ParseOptions const* popts, PSemantics::ReadOptions const* ropts)
+{
+	return read(parse(contents, type.getFeature<PSemantics>()->readsFrom()[0], popts), type, ropts);
 }
 
-instance<> Namespace::exec(instance<Module> module, std::string method, lisp::GenericCall const& call = {})
+instance<> Namespace::exec(instance<Module> module, std::string method, lisp::GenericCall const& call)
 {
+	auto backend = preferedBackend();
 
+	backend.executor->exec(backend.instance, module, method, call);
 }
 
 void Namespace::compile(std::string path, instance<> compiler_options)
@@ -86,16 +112,22 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 
 	try
 	{
+		// HACK: for the time being we assume cult syntax:
+		auto syntax = cpptype<CultLispSyntax>::typeDesc().getFeature<PSyntax>();
+
+		// TODO set uri to the canonical version of the uri from the resolver
+		uri = uri;
+
 		// TODO implement resolvers/loaders for these
 		// All of this should go somewhere else, and be made internal to Module
 		if (protocol == "builtin" && rest == "cult.system")
 			ret = make_library_globals(craft_instance());
-		if (protocol == "repl")
+		else if (protocol == "repl")
 		{
 			ret = instance<Module>::make(craft_instance(), uri);
-			ret->setLive();
+			ret->_loader = syntax->parse("", ret, nullptr); // hack
 		}
-		if (protocol == "file")
+		else if (protocol == "file")
 		{
 			auto s = path::normalize(path::absolute(rest));
 			if (!path::exists(s))
@@ -103,22 +135,27 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 
 			auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
 			ret = instance<Module>::make(craft_instance(), uri);
-			ret->content = _environment->read(ret, text);
+			ret->_loader = syntax->parse(text, ret, nullptr); // hack
 		}
+		else if (protocol == "anon")
+		{
+			uri = uri + std::to_string(++_loaderVar_anonCount);
 
-		// TODO set uri to the canonical version of the uri from the resolver
-		uri = uri;
+			ret = instance<Module>::make(craft_instance(), uri);
+			ret->_loader = syntax->parse(*resolver_specific_extra.asType<std::string>(), ret, nullptr); // hack
+		}
 	}
 	catch (std::exception const& ex)
 	{
-		throw stdext::exception(ex, "Failed to construct module `{0}`", uri);
+		throw module_resolve_error(ex, "Failed to construct module `{0}`", uri);
 	}
-
+	
 	if (ret)
 	{
 		ret->load();
-		ret->init();
 	}
+	else
+		throw module_resolve_error("Colud not resolve module `{0}`", uri);
 
 	// TODO: Lock when we do this (and the init above probably)
 	auto i = _module_load_list.size();
@@ -126,11 +163,9 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 	_module_cache[uri] = i;
 	on_moduleInit.emit(ret);
 
-	interpreter_provider->addModule(backend, ret);
-	ret->backend = backend_provider->addModule(backend, ret);
-
 	return ret;
 }
+
 std::vector<instance<SBinding>> Namespace::search(std::string const & search)
 {
 	std::vector<instance<SBinding>> res;

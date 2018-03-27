@@ -2,7 +2,7 @@
 
 #include "lisp/common.h"
 #include "lisp/lisp.h"
-#include "lisp/parser.h"
+#include "lisp/syntax/parser.h"
 
 using namespace craft;
 using namespace craft::types;
@@ -80,19 +80,25 @@ namespace lisp_grammar
 	template<>
 	struct lisp_action< sexpr_open >
 	{
-		static void apply0(ParseStack& ps)
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
 		{
-			ps.push(instance<Sexpr>::make());
+			auto new_expr = instance<Sexpr>::make();
+			new_expr->cell_locs.push_back(in.posisition().byte);
+
+			ps.push();
 		}
 	};
 
 	template<>
 	struct lisp_action< sexpr_close >
 	{
-		static void apply0(ParseStack& ps)
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
 		{
 			auto finished = ps.top();
 			ps.pop();
+			finished->cell_locs.push_back(in.posisition().byte);
 
 			ps.top()->cells.push_back(finished);
 		}
@@ -114,6 +120,7 @@ namespace lisp_grammar
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)
 		{
+			ps.top()->cell_locs.push_back(in.posisition().byte);
 			ps.top()->cells.push_back(instance<Symbol>::make(in.string()));
 		}
 	};
@@ -124,6 +131,7 @@ namespace lisp_grammar
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)
 		{
+			ps.top()->cell_locs.push_back(in.posisition().byte);
 			std::string s = in.string();
 			// TODO specialized parse function returning arbitrary percision number
 			// and/or deciding on the prefered type/size of the number
@@ -184,13 +192,14 @@ namespace lisp_grammar
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)
 		{
+			ps.top()->cell_locs.push_back(in.posisition().byte);
 			std::string pstr = in.string();
 			ps.top()->cells.push_back(instance<std::string>::make(pstr.substr(1, pstr.size() - 2)));
 		}
 	};
 }
 
-instance<Sexpr> craft::lisp::parse_lisp(std::string const& text)
+std::vector<instance<>> craft::lisp::parse_lisp(std::string const& text, bool add_source_locations)
 {
 	using namespace lisp_grammar;
 
@@ -204,7 +213,7 @@ instance<Sexpr> craft::lisp::parse_lisp(std::string const& text)
 	if (parse_stack.size() != 1)
 		throw stdext::exception("Parse went horribly wrong.");
 
-	return root;
+	return root->cells;
 }
 
 

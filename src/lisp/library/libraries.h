@@ -2,6 +2,8 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
 
+#include "lisp/semantics/cult/cult_semantics.h"
+
 //
 // globals.h
 namespace craft {
@@ -14,7 +16,7 @@ namespace lisp {
 	{
 		namespace helper
 		{
-			CRAFT_LISP_EXPORTED bool truth(instance<SFrame> frame, instance<PSubroutine> truth, instance<> code);
+			CRAFT_LISP_EXPORTED bool truth(instance<SFrame> frame, instance<SSubroutine> truth, instance<> code);
 		}
 	}
 

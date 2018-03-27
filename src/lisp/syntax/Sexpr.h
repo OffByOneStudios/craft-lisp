@@ -1,11 +1,11 @@
 #pragma once
 #include "lisp/common.h"
 #include "lisp/lisp.h"
+#include "lisp/syntax/syntax.h"
 
 namespace craft {
 namespace lisp
 {
-
 	class Sexpr
 		: public virtual craft::types::Object
 	{
@@ -16,25 +16,13 @@ namespace lisp
 		static instance<> _fromString(std::string);
 
 	public:
+
 		// TODO make this an actual immutable list
 		std::vector<instance<>> cells;
 
-		CRAFT_LISP_EXPORTED virtual std::string toString() const;
+		std::vector<size_t> cell_locs;
 
-		inline instance<> car() const
-		{
-			if (cells.size() == 0)
-				return { };
-
-			return cells.front();
-		}
-		inline std::vector<instance<>> cdr() const
-		{
-			if (cells.size() < 2)
-				return { };
-
-			return std::vector<instance<>>(cells.begin() + 1, cells.end());
-		}
+	public:
+		CRAFT_LISP_EXPORTED std::string toString() const;
 	};
-
 }}

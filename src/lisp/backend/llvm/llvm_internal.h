@@ -48,6 +48,8 @@
 
 #include "lisp/backend/backend.h"
 
+#include "lisp/semantics/cult/cult_semantics.h"
+
 //
 // Lisp Object
 //

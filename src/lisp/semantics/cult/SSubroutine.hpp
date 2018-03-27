@@ -1,6 +1,7 @@
 #pragma once
 #include "lisp/common.h"
 #include "lisp/lisp.h"
+#include "lisp/semantics/cult/cult_semantics.h"
 
 namespace craft {
 namespace lisp
@@ -25,11 +26,8 @@ namespace lisp
 
 	public:
 		// Module this was originally defined in
-		virtual instance<Module> getModule(instance<>) const = 0;
+		virtual instance<CultSemantics> getSemantics() const = 0;
 
-		virtual instance<SubroutineSignature> signature(instance<> subroutine) const = 0;
-
-		virtual instance<SFrame> call_frame() const = 0;
-		virtual instance<> call(instance<SFrame> const& call_frame, std::vector<instance<>> const&) const = 0;
+		virtual instance<SubroutineSignature> signature() const = 0;
 	};
 }}

@@ -1,6 +1,7 @@
 #pragma once
 #include "lisp/common.h"
 #include "lisp/lisp.h"
+#include "lisp/semantics/cult/cult_semantics.h"
 
 namespace craft {
 namespace lisp
@@ -11,10 +12,9 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SScope, "lisp.scope", types::FactoryAspectManager);
 
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<Environment> environment() const = 0;
-		CRAFT_LISP_EXPORTED virtual instance<Namespace> namespace_() const = 0;
+		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const = 0;
 
-		CRAFT_LISP_EXPORTED virtual instance<SScope> parent() const = 0;
+		CRAFT_LISP_EXPORTED virtual instance<SScope> getParent() const = 0;
 
 		// Indicates a dynamic lexical scope
 		// * Modules and Namespaces are not lexically dynamic
@@ -23,7 +23,7 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED virtual std::vector<instance<SBinding>> search(std::string const&) = 0;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) = 0;
-		CRAFT_LISP_EXPORTED virtual void define(std::string name, instance<> expression) = 0;
+		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> ast) = 0;
 	};
 
 }}

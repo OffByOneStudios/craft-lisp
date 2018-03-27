@@ -115,12 +115,12 @@ instance<lisp::Namespace> ns = env->ns_user;
 ns->eval("(+ 3 4)"); // Uses the default UserModule: `user:*defualt*`
 
 instance<lisp::Module> module = ns->requireModule("file:test.cult");
-instance<lisp::UserModule> user_module = ns->makeModule("my-foo-module");
+instance<lisp::OpenModule> user_module = ns->makeModule("my-foo-module");
 
 // -- Execution --
 instance<> res;
 
-// Evals into the user module (only possible on user modules)
+// Evals into the user module (only possible on open modules)
 user_module->eval("(define test (fn (x) (concat (str x) \"testing\")))"); 
 
 // Call a function in the module
@@ -144,8 +144,8 @@ Internal requests should go through namespace as well:
 PSyntax::ParseOptions parse_options;
 
 // Parsing (from string):
-instance<Sexpr> source = ns->parse<Sexpr>(some_string, &parse_options);
-instance<> source = ns->parse(some_string, cpptype<Sexpr>::typeDesc(), &parse_options);
+instance<CultLispSyntax> source = ns->parse<CultLispSyntax>(some_string, &parse_options);
+instance<> source = ns->parse(some_string, cpptype<CultLispSyntax>::typeDesc(), &parse_options);
 
 // -- Reading --
 PSyntax::ReadOptions read_options;

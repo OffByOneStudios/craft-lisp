@@ -15,6 +15,9 @@ namespace lisp
 
 }}
 
+#include "exceptions.hpp"
+
+#include "SymbolStore.hpp"
 #include "GenericCall.hpp"
 
 #include "PSyntax.hpp"
@@ -29,6 +32,7 @@ namespace lisp
 #include "Execution.h"
 #include "Environment.h"
 
+#include "lisp/syntax/syntax.h"
+
 #include "backend/backend.h"
 
-#include "lisp/library/libraries.h"

@@ -1,10 +1,27 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
+#include "lisp/backend/backend.h"
+#include "lisp/semantics/cult/cult_semantics.h"
 #include "lisp/backend/BootstrapInterpreter.h"
 
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
+
+/******************************************************************************
+** InterpreterFrame
+******************************************************************************/
+
+CRAFT_DEFINE(InterpreterFrame)
+{
+	_.use<SFrame>().byCasting();
+
+	_.defaults();
+}
+
+/******************************************************************************
+** BootstrapInterpreter
+******************************************************************************/
 
 CRAFT_DEFINE(BootstrapInterpreter)
 {
@@ -18,27 +35,7 @@ BootstrapInterpreter::BootstrapInterpreter(instance<Namespace> lisp)
 	_lisp = lisp;
 }
 
-BootstrapInterpreterProvider::BootstrapInterpreterProvider()
-{
-
-}
-
-instance<> BootstrapInterpreterProvider::init(instance<Namespace> ns) const
-{
-	return instance<BootstrapInterpreter>::make(ns);
-}
-
-instance<> BootstrapInterpreterProvider::addModule(instance<> backend_ns, instance<lisp::Module> lisp_module) const
-{
-	return instance<>();
-}
-
-instance<> BootstrapInterpreterProvider::addFunction(instance<> backend_module, instance<>) const
-{
-	return instance<>();
-}
-
-instance<> BootstrapInterpreterProvider::exec(instance<lisp::SFrame> frame, instance<> code) const
+instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string const& entry, GenericCall const&)
 {
 	if (code.typeId().hasFeature<SBinding>())
 		return code.asFeature<SBinding>()->getValue(frame);
@@ -81,4 +78,23 @@ instance<> BootstrapInterpreterProvider::exec(instance<lisp::SFrame> frame, inst
 	}
 	else
 		return code;
+}
+
+/******************************************************************************
+** BootstrapInterpreterProvider
+******************************************************************************/
+
+BootstrapInterpreterProvider::BootstrapInterpreterProvider()
+{
+
+}
+
+instance<> BootstrapInterpreterProvider::init(instance<Namespace> ns) const
+{
+	return instance<BootstrapInterpreter>::make(ns);
+}
+
+instance<> BootstrapInterpreterProvider::exec(instance<> backend, instance<lisp::Module> module, std::string const& entry, GenericCall const& call) const
+{
+	return backend.asType<BootstrapInterpreter>()->exec(module, entry, call);
 }

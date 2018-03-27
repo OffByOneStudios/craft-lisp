@@ -1,6 +1,7 @@
 #pragma once
 #include "lisp/common.h"
 #include "lisp/lisp.h"
+#include "lisp/syntax/syntax.h"
 
 namespace craft {
 namespace lisp
@@ -10,11 +11,20 @@ namespace lisp
 		: public virtual craft::types::Object
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Keyword)
+	private:
+		friend class Namespace;
+
+		Keyword() = default;
+		Keyword(Keyword const&) = delete;
+		~Keyword() = default;
+
 	public:
 
-		CRAFT_LISP_EXPORTED Keyword(std::string const& s);
+		size_t symbolStoreId;
 
-		std::string value;
+		CRAFT_LISP_EXPORTED std::string const& getValue() const;
+
+		static CRAFT_LISP_EXPORTED instance<Keyword> makeKeyword(std::string const&);
 	};
 
 }}

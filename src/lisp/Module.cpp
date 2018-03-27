@@ -11,25 +11,21 @@ CRAFT_DEFINE(Module)
 {
 	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Module> m) { return m->uri(); });
 
-	_.use<SScope>().byCasting();
-
 	_.defaults();
 }
 
 
 Module::Module(instance<Namespace> ns, std::string uri)
 {
-	_environment = ns->environment();
 	_ns = ns;
 	_uri = uri;
-	_inited = false;
 }
 
 void Module::craft_setupInstance()
 {
 	Object::craft_setupInstance();
 
-	define_eval("*module*", craft_instance());
+	//define_eval("*module*", craft_instance());
 }
 
 std::string Module::uri() const
@@ -37,22 +33,22 @@ std::string Module::uri() const
 	return _uri;
 }
 
-instance<Environment> Module::environment() const
-{
-	return _environment;
-}
-instance<Namespace> Module::namespace_() const
-{
-	return _ns;
-}
-instance<SScope> Module::parent() const
+instance<> Module::getNamespace() const
 {
 	return _ns;
 }
 
-std::vector<instance<SBinding>> const& Module::bindings() const
+bool Module::isLoaded() const
 {
-	return _bindings;
+	return _loader;
+}
+
+void Module::load()
+{
+	// TODO call loader
+	// For the time being, assume the loader is the syntax structure, and that the Namespace has set it for us
+	_syntax_instance = _loader;
+	_syntax_syntax = _syntax_instance.getFeature<PSyntax>();
 }
 
 std::vector<instance<SBinding>> Module::search(std::string const & search)
@@ -67,85 +63,111 @@ std::vector<instance<SBinding>> Module::search(std::string const & search)
 	}
 	return res;
 }
-
-instance<SBinding> Module::lookup(std::string const& s)
+bool Module::isInitialized() const
 {
-	auto it = _lookup.find(s);
-	if (it == _lookup.end())
+	return _value;
+}
+void Module::initialize()
+{
+	_value = exec("$init", { craft_instance() });
+}
+
+instance<> Module::moduleValue() const
+{
+	return _value;
+}
+
+instance<> Module::lastExecutedResult() const
+{
+	return _lastResult;
+}
+
+void Module::appendModule(instance<lisp::Module> moduleToAppend)
+{
+	_value = exec("$append", { moduleToAppend });
+}
+void Module::mergeModule(instance<lisp::Module> moduleToMerge)
+{
+	_value = exec("$merge", { moduleToMerge });
+}
+
+instance<> Module::get(types::TypeId type)
+{
+	if (_syntax_instance.isType(type))
+		return _syntax_instance;
+
+	auto it = _semantics.find(type);
+	if (it != _semantics.end())
+		return it->second.instance;
+
+	throw bad_projection_error("Cannot get a projection to `{1}` from {0}", craft_instance(), type.toString(false));
+}
+instance<> Module::require(types::TypeId type, bool force_read = true)
+{
+	auto ret = get(type);
+
+	if (!ret)
 	{
-		return _ns->lookup(s);
-	}
-
-	return _bindings[it->second];
-}
-
-instance<SBinding> Module::define(std::string name, instance<> value)
-{
-	auto binding = instance<Binding>::make(name, value);
-	binding->addMeta("module", craft_instance());
-	auto i = _bindings.size();
-	_bindings.push_back(binding);
-	_lookup[binding->name()] = i;
-	_ns->define(binding);
-	return binding;
-}
-
-instance<SBinding> Module::define_eval(std::string name, instance<> value)
-{
-	auto res = define(name, value);
-
-	res.asType<Binding>()->setValue(value);
-
-	return res;
-}
-
-bool Module::isLoaded() const
-{
-	return bool(content);
-}
-bool Module::isInitalized() const
-{
-	return _inited;
-}
-
-void Module::setLive()
-{
-	content = instance<Sexpr>::make();
-}
-
-void Module::load()
-{
-	// TODO call loader
-}
-
-void Module::init()
-{
-	auto env = _ns->environment();
-
-	auto frame = instance<Frame>::make(craft_instance());
-	Execution::execute(frame);
-
-	if (content)
-		for (auto c : content->cells)
+		if (type.hasFeature<PSemantics>())
 		{
-			env->eval(frame, c);
+			PSemantics* semantics = type.getFeature<PSemantics>();
+
+			// Search for read sources
+			auto read_targets = semantics->readsFrom();
+			std::vector<instance<>> valid_read_targets;
+
+			for (auto target : read_targets)
+			{
+				instance<> read_target;
+				try
+				{
+					read_target = get(target);
+				}
+				catch (bad_projection_error const&)
+				{
+					continue;
+				}
+
+				valid_read_targets.push_back(read_target);
+			}
+
+			// Search for transform targets
+			// TODO
+
+			// Choose
+			instance<> target;
+			bool isRead = true;
+
+			if (valid_read_targets.size() == 1) target = valid_read_targets[0];
+
+			// Report error
+			if (!target && force_read)
+				throw bad_projection_error("Cannot require a projection to `{1}` from {0}: no valid path to transform/read semantics from.", craft_instance(), type.toString(false));
+
+			// Perform
+			if (target)
+			{
+				instance<> semantics_instance;
+				try
+				{
+					semantics_instance = semantics->read(target, craft_instance(), nullptr);
+				}
+				catch (std::exception const& ex)
+				{
+					throw bad_projection_error(ex, "Cannot require a projection to `{1}` from {0}, failed reading", craft_instance(), type.toString(false));
+				}
+
+				_semantics[type] = { semantics_instance, semantics };
+			}
 		}
-}
 
-instance<> Module::liveContinueWith(instance<Sexpr> parsed_code)
-{
-	auto env = _ns->environment();
-	
-	instance<Sexpr> read_code = env->read(craft_instance(), parsed_code);
-
-	auto frame = instance<Frame>::make(craft_instance());
-	Execution::execute(frame);
-
-	instance<> last_result;
-	for (auto c : read_code->cells)
-	{
-		last_result = env->eval(frame, c);
+		throw bad_projection_error("Cannot require a projection to `{1}` from {0}: type does not implement PSemantics.", craft_instance(), type.toString(false));
 	}
 
-	return last_result;
+	return ret;
+}
+
+instance<> Module::exec(std::string method, lisp::GenericCall const& call = {})
+{
+	_ns->exec(craft_instance(), method, call);
 }

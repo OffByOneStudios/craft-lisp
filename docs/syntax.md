@@ -1,4 +1,6 @@
-## Syntax
+# Syntax
+
+## Design
 
 Eventually we plan to have multiple syntax transformations. For now the semantics of the language are available through a lisp style AST.
 
@@ -23,8 +25,8 @@ Simple syntax sugar ideas for the lisp:
 - `,` to group forms in forms. For example the following would be equivalent:
 
   ```
-  '((:key "value") (:foo 5))
-  '(:key "value", :foo 5)
+    '((:key "value") (:foo 5))
+    '(:key "value", :foo 5)
   ```
 
 - Some motivations include:
@@ -66,3 +68,20 @@ This is a way for macros to extend their "syntax", in general of the form:
 
 Which often builds into a dictionary (or list). The keywords can come from any library in the current namespace, and can be given in short form or specific form (e.g. `:foo` or `:module/foo`).
 
+## Implementation
+
+### CultLispSyntax
+
+The syntax object that provides `PParse`.
+
+### Sexpr
+
+The core data structure of cult syntax. An S-Expression form.
+
+### Symbol
+
+An object representing a symbol in the final system. Can be interned.
+
+### Keyword
+
+An object representing a keyword (an unbound symbol) in the final system. Can be interned.

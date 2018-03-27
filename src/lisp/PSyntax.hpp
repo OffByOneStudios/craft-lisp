@@ -13,6 +13,9 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::PSyntax, "lisp.syntax", types::SingletonProviderManager);
 
+	public:
+		CRAFT_LISP_EXPORTED virtual instance<lisp::Module> getModule(instance<> syntax) const = 0;
+
 		//
 		// Parse
 		//
@@ -25,17 +28,6 @@ namespace lisp
 		};
 
 		CRAFT_LISP_EXPORTED virtual instance<> parse(std::string const& s, instance<lisp::Module> into, ParseOptions const* opts) const = 0;
-
-		//
-		// Read
-		//
-	public:
-		struct ReadOptions
-		{
-			bool no_macros;
-		};
-
-		CRAFT_LISP_EXPORTED virtual instance<> read(instance<> syntax, instance<lisp::Module> into, ReadOptions const* opts) const = 0;
 
 		//
 		// Introspect
@@ -54,7 +46,10 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual std::string source_toString(instance<> syntax, SourceLocation const&) const = 0;
 
 		CRAFT_LISP_EXPORTED virtual std::vector<instance<>> node_children(instance<> syntax_node) const = 0;
+
+		// Tries to render usable syntax
 		CRAFT_LISP_EXPORTED virtual std::string node_toString(instance<> syntax_node) const = 0;
+		// Renders the AST
 		CRAFT_LISP_EXPORTED virtual std::string node_toVerboseString(instance<> syntax_node) const = 0;
 
 		CRAFT_LISP_EXPORTED virtual SourceLocation node_source(instance<> syntax_node) const = 0;

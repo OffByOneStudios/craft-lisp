@@ -25,9 +25,15 @@ namespace lisp
 
 		std::map<types::TypeId, _Backend> _backends;
 
+		size_t _loaderVar_anonCount;
+
+		CRAFT_LISP_EXPORTED _Backend preferedBackend() const;
+		CRAFT_LISP_EXPORTED _Backend fallbackBackend() const;
 
 		// Public components
 	public:
+		SymbolStore symbolStore;
+
 		Signal<void(instance<Module>)> on_moduleInit;
 
 		// Setup
@@ -40,9 +46,9 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> get(types::TypeId type);
 
 		CRAFT_LISP_EXPORTED instance<> parse(std::string contents, types::TypeId type, PSyntax::ParseOptions const* opts = nullptr);
-
-		CRAFT_LISP_EXPORTED instance<> read(std::string contents, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr);
-		CRAFT_LISP_EXPORTED instance<> read(instance<> source, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr);
+		
+		CRAFT_LISP_EXPORTED instance<> read(std::string contents, types::TypeId type, PSyntax::ParseOptions const* popts = nullptr, PSemantics::ReadOptions const* ropts = nullptr);
+		CRAFT_LISP_EXPORTED instance<> read(instance<> source, types::TypeId type, PSemantics::ReadOptions const* opts = nullptr);
 
 		CRAFT_LISP_EXPORTED instance<> exec(instance<Module> module, std::string method, lisp::GenericCall const& call = {});
 
@@ -65,10 +71,10 @@ namespace lisp
 		{ return parse(contents, cpptype<T>::typeDesc(), opts); }
 
 		template<typename T>
-		inline instance<T> read(std::string contents, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr)
+		inline instance<T> read(std::string contents, PSemantics::ReadOptions const* opts = nullptr)
 		{ return read(contents, cpptype<T>::typeDesc(), opts); }
 		template<typename T>
-		inline instance<T> read(instance<> source, types::TypeId type, PSyntax::ReadOptions const* opts = nullptr)
+		inline instance<T> read(instance<> source, PSemantics::ReadOptions const* opts = nullptr)
 		{ return read(source, cpptype<T>::typeDesc(), opts); }
 	};
 
