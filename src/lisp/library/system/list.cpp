@@ -93,17 +93,17 @@ CRAFT_OBJECT_DEFINE(List)
 		[](instance<List> l) -> std::string
 	{
 		std::ostringstream res;
-
+		auto s = *l->size();
 		res << "[";
-		for (auto i = 0; i < std::min(int64_t(10), *l->size()); i++)
+		for (auto i = 0; i < s; i++)
 		{
 			auto it = l->at(instance<int64_t>::make(i));
-			if (it.hasFeature<PStringer>()) res << it.getFeature<PStringer>()->toString(it);
+			if (it.hasFeature<PRepr>()) res << it.getFeature<PRepr>()->toRepr(it);
 			else
 			{
 				res << fmt::format("{0}<{1}>", it.getFeature<PIdentifier>()->identifier(), (void*)it.get());
 			}
-			if(i != std::min(int64_t(10), *l->size()) - 1) res << ", ";
+			if(i != s - 1) res << ", ";
 		}
 		res << "]";
 
