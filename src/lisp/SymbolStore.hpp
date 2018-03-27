@@ -40,7 +40,7 @@ namespace lisp
 			auto vit = _strings.insert(s);
 			size_t index = std::distance(_strings.begin(), vit);
 
-			_map.insert(mlb, LookupMap::value_type(_TempStringView{ *vit }, index));    // Use lb as a hint to insert,
+			_map.insert(mlb, { _TempStringView{ *vit }, index });    // Use lb as a hint to insert,
 
 			return index;
 		}

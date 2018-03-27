@@ -2,6 +2,7 @@
 #include "lisp/lisp.h"
 #include "lisp/Namespace.h"
 
+#include "lisp/backend/BootstrapInterpreter.h"
 #include "lisp/backend/llvm/llvm_internal.h"
 #include "lisp/library/libraries.h"
 
@@ -100,6 +101,10 @@ void Namespace::compile(instance<Module> module, std::string path, instance<> co
 
 instance<Module> Namespace::requireModule(std::string const& uri_, instance<> resolver_specific_extra)
 {
+	auto mlb = _module_cache.lower_bound(uri_);
+	if (mlb != _module_cache.end() && !(_module_cache.key_comp()(uri_, mlb->first)))
+		return _module_load_list[mlb->second]; // key already exists
+
 	auto uri = uri_;
 	auto protopos = uri.find(':');
 	if (protopos == std::string::npos)
@@ -160,7 +165,7 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 	// TODO: Lock when we do this (and the init above probably)
 	auto i = _module_load_list.size();
 	_module_load_list.push_back(ret);
-	_module_cache[uri] = i;
+	_module_cache.insert(mlb, { uri, i });
 	on_moduleInit.emit(ret);
 
 	return ret;
