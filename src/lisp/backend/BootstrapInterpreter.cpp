@@ -19,6 +19,26 @@ CRAFT_DEFINE(InterpreterFrame)
 	_.defaults();
 }
 
+InterpreterFrame::InterpreterFrame(instance<Execution> exec, instance<> backend, instance<Module> semanticsOwner, instance<SScope> scope)
+{
+	_execution = exec;
+	_backend = backend;
+	_entryModule = semanticsOwner;
+}
+
+instance<Execution> InterpreterFrame::getExecution() const
+{
+	return _execution;
+}
+instance<> InterpreterFrame::backend() const
+{
+	return _backend;
+}
+instance<Module> InterpreterFrame::entryModule() const
+{
+	return _entryModule;
+}
+
 /******************************************************************************
 ** BootstrapInterpreter
 ******************************************************************************/
@@ -35,7 +55,7 @@ BootstrapInterpreter::BootstrapInterpreter(instance<Namespace> lisp)
 	_lisp = lisp;
 }
 
-instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string const& entry, GenericCall const&)
+instance<> BootstrapInterpreter::exec_cult(instance<SSubroutine>, GenericCall const&)
 {
 	if (code.typeId().hasFeature<SBinding>())
 		return code.asFeature<SBinding>()->getValue(frame);
@@ -78,6 +98,13 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 	}
 	else
 		return code;
+}
+
+instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string const& entry, GenericCall const&)
+{
+	auto semantics = module->require<CultSemantics>();
+
+	auto value = module->moduleValue();
 }
 
 /******************************************************************************

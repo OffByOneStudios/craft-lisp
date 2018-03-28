@@ -86,7 +86,7 @@ instance<> Namespace::exec(instance<Module> module, std::string method, lisp::Ge
 {
 	auto backend = preferedBackend();
 
-	backend.executor->exec(backend.instance, module, method, call);
+	return backend.executor->exec(backend.instance, module, method, call);
 }
 
 void Namespace::compile(std::string path, instance<> compiler_options)
@@ -160,7 +160,7 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 		ret->load();
 	}
 	else
-		throw module_resolve_error("Colud not resolve module `{0}`", uri);
+		throw module_resolve_error("Could not resolve module `{0}`", uri);
 
 	// TODO: Lock when we do this (and the init above probably)
 	auto i = _module_load_list.size();

@@ -28,6 +28,7 @@ namespace lisp
 		// Module this was originally defined in
 		virtual instance<CultSemantics> getSemantics() const = 0;
 
+		// Signature of the module
 		virtual instance<SubroutineSignature> signature() const = 0;
 	};
 }}

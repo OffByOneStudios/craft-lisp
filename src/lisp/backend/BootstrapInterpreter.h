@@ -13,16 +13,19 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::InterpreterFrame);
 	private:
+		friend class BootstrapInterpreter;
+
 		instance<Execution> _execution;
+		instance<> _backend;
+		instance<> _entryModule;
 
 		instance<SScope> _scope;
 		std::map<instance<SBinding>, instance<>> _values;
 
 	public:
-		CRAFT_LISP_EXPORTED InterpreterFrame(instance<Execution> exec, instance<Module> semanticsOwner, instance<SScope> scope);
+		CRAFT_LISP_EXPORTED InterpreterFrame(instance<Execution> exec, instance<> backend, instance<Module> semanticsOwner, instance<SScope> scope);
 
 		CRAFT_LISP_EXPORTED virtual instance<Execution> getExecution() const override;
-
 		CRAFT_LISP_EXPORTED virtual instance<> backend() const override;
 		CRAFT_LISP_EXPORTED virtual instance<Module> entryModule() const override;
 	};
@@ -32,12 +35,13 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::BootstrapInterpreter);
 	private:
-
 		instance<Namespace> _lisp;
 
 	public:
 
 		CRAFT_LISP_EXPORTED BootstrapInterpreter(instance<Namespace> lisp);
+
+		CRAFT_LISP_EXPORTED instance<> exec_cult(instance<SSubroutine>, GenericCall const&);
 
 		CRAFT_LISP_EXPORTED instance<> exec(instance<lisp::Module> module, std::string const& entry, GenericCall const&);
 	};

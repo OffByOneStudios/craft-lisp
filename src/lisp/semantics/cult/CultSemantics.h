@@ -14,13 +14,15 @@ namespace lisp
 		instance<lisp::Module> _module;
 		instance<> _source;
 
+
+
 	public:
 		CRAFT_LISP_EXPORTED CultSemantics(instance<lisp::Module> forModule);
 
 		inline instance<lisp::Module> getModule() const { return _module; }
 		inline instance<> getSource() const { return _source; }
 
-		CRAFT_LISP_EXPORTED void read(std::string const& s, PSemantics::ReadOptions const* opts = nullptr);
+		CRAFT_LISP_EXPORTED void read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts = nullptr);
 	};
 
 

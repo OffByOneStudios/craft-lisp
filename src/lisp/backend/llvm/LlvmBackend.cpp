@@ -19,7 +19,7 @@ CRAFT_LISP_EXPORTED instance<> __trampoline_interpreter(LlvmSubroutine* subrouti
 
 	auto frame = Execution::getCurrent();
 	auto ns = frame->getNamespace();
-	return ns->interpreter_provider->exec(frame, sexpr);
+	return ns->get<BootstrapInterpreter>()->exec();
 }
 
 CRAFT_DEFINE(LlvmBackend)
