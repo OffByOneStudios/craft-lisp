@@ -87,10 +87,31 @@ void system::make_fs_globals(instance<Module>& ret, instance<Namespace>& ns)
 		
 		std::ofstream outfile;
 		outfile.open(*a);
-		outfile << b.get()->c_str();
+		outfile.write(b->c_str(), b->size());
 		outfile.close();
 
 		return instance<>();
 	}));
+	write->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<std::string, std::string, std::string>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+		instance<std::string> c(expect<std::string>(args[1]));
+		instance<std::string> b(expect<std::string>(args[2]));
+
+		std::ofstream::openmode op;
+		if (*c == "b") op = std::ofstream::binary;
+		else if (*c == "a") op = std::ofstream::app;
+		else if (*c == "ba" || *c == "ba") op = std::ofstream::app | std::ofstream::binary;
+		else throw stdext::exception("Unknown File Open Mode: {0}", *c);
+		std::ofstream outfile;
+		outfile.open(*a, op);
+		outfile.write(b->c_str(), b->size());
+		outfile.close();
+
+		return instance<>();
+	}));
+
 	ret->define_eval("write", write);
 }
