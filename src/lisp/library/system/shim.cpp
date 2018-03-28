@@ -29,7 +29,30 @@ void system::make_shim_globals(instance<Module>& ret, instance<Namespace>& ns)
 	ret->define_eval("new", _new);
 
 	auto _parse = instance<MultiMethod>::make();
+
 	_parse->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, int64_t>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+		
+		auto parsers = types::system().getManager<PParse>();
+		return ((PParse*)parsers->getProvider(types::type<int64_t>::typeId()))->parse(*a);
+	}));
+
+	_parse->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, double>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+
+		auto parsers = types::system().getManager<PParse>();
+		return ((PParse*)parsers->getProvider(types::type<double>::typeId()))->parse(*a);
+	}));
+
+	ret->define_eval("parse", _parse);
+
+	/*_parse->attach(env, instance<BuiltinFunction>::make(
 		[](auto frame, auto args)
 	{
 		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
@@ -41,7 +64,7 @@ void system::make_shim_globals(instance<Module>& ret, instance<Namespace>& ns)
 		return parse->parse(*b);
 
 	}));
-	ret->define_eval("parse", _parse);
+	ret->define_eval("parse", _parse);*/
 
 	auto _call = instance<MultiMethod>::make();
 	_call->attach(env, instance<BuiltinFunction>::make(
