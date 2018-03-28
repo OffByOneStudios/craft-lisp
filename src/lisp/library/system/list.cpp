@@ -137,10 +137,10 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		[](auto frame, auto args)
 	{
 		instance<List> a(expect<List>(args[0]));
-		instance<int64_t> b(expect<List>(args[1]));
+		instance<int64_t> b(expect<int64_t>(args[1]));
 		return a->at(b);
 	}));
-	ret->define_eval("get", get);
+	ret->define_eval("lget", get);
 
 	auto insert = instance<MultiMethod>::make();
 	insert->attach(env, instance<BuiltinFunction>::make(
@@ -151,7 +151,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		a->insert(b, args[2]);
 		return instance<>();
 	}));
-	ret->define_eval("insert", insert);
+	ret->define_eval("linsert", insert);
 
 
 	auto erase = instance<MultiMethod>::make();
@@ -165,7 +165,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		a->erase(b);
 		return instance<>();
 	}));
-	ret->define_eval("erase", erase);
+	ret->define_eval("lerase", erase);
 
 	auto pop = instance<MultiMethod>::make();
 	pop->attach(env, instance<BuiltinFunction>::make(
@@ -175,7 +175,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		instance<List> a(expect<List>(args[0]));
 		return a->pop();
 	}));
-	ret->define_eval("pop", pop);
+	ret->define_eval("lpop", pop);
 
 	auto push = instance<MultiMethod>::make();
 	push->attach(env, instance<BuiltinFunction>::make(
@@ -185,7 +185,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		a->push(args[1]);
 		return instance<>();
 	}));
-	ret->define_eval("push", push);
+	ret->define_eval("lpush", push);
 
 	auto slice = instance<MultiMethod>::make();
 	slice->attach(env, instance<BuiltinFunction>::make(
@@ -197,7 +197,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		instance<int64_t> c(expect<int64_t>(args[2]));
 		return a->slice(b, c);
 	}));
-	ret->define_eval("slice", slice);
+	ret->define_eval("lslice", slice);
 
 	auto reverse = instance<MultiMethod>::make();
 	reverse->attach(env, instance<BuiltinFunction>::make(
@@ -208,5 +208,5 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		a->reverse();
 		return instance<>();
 	}));
-	ret->define_eval("reverse", reverse);
+	ret->define_eval("lreverse", reverse);
 }
