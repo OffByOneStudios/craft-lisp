@@ -142,6 +142,20 @@ void logic(instance<Module>& ret, instance<Namespace>& ns)
 		instance<double> a(expect<double>(args[0])), b(expect<double>(args[1]));
 		return instance<bool>::make(*a == *b);
 	}));
+	eq->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<bool, bool, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<bool> a(expect<bool> (args[0])), b(expect<bool>(args[1]));
+		return instance<bool>::make(*a == *b);
+	}));
+	eq->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
+		return instance<bool>::make(*a == *b);
+	}));
 	ret->define_eval("==", eq);
 
 	auto neq = instance<MultiMethod>::make();
@@ -158,6 +172,20 @@ void logic(instance<Module>& ret, instance<Namespace>& ns)
 	{
 		instance<double> a(expect<double>(args[0])), b(expect<double>(args[1]));
 		return instance<bool>::make(*a != *b);
+	}));
+	neq->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<bool, bool, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<bool> a(expect<bool>(args[0])), b(expect<bool>(args[1]));
+		return instance<bool>::make(*a != *b);
+	}));
+	neq->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
+		return instance<bool>::make(*a == *b);
 	}));
 	ret->define_eval("!=", neq);
 
@@ -194,6 +222,35 @@ void logic(instance<Module>& ret, instance<Namespace>& ns)
 		return instance<bool>::make(*a > *b);
 	}));
 	ret->define_eval(">", gt);
+
+
+	auto not = instance<MultiMethod>::make();
+	not->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<int64_t, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<int64_t> a(expect<int64_t>(args[0]));
+
+		return instance<bool>::make(!(*a));
+	}));
+	not->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<double, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<int64_t> a(expect<double>(args[0]));
+
+		return instance<bool>::make(!(*a));
+	}));
+	not->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<bool, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<bool> a(expect<bool>(args[0]));
+
+		return instance<bool>::make(!(*a));
+	}));
+	ret->define_eval("!", not);
+
 }
 
 
