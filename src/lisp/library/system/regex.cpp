@@ -30,4 +30,26 @@ void system::make_regex_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 	}));
 	ret->define_eval("rmatch", _rmatch);
+
+	auto _rfind = instance<MultiMethod>::make();
+	_rfind->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<std::string, std::string>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
+
+		std::regex r(*a);
+
+		std::smatch sm;    // same as std::match_results<string::const_iterator> sm;
+		std::regex_match(*b, sm, r);
+
+		std::vector<instance<>> res;
+		for (auto i : sm)
+		{
+			res.push_back(instance<std::string>::make(i.str()));
+		}
+
+		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, res);
+	}));
+	ret->define_eval("rfind", _rfind);
 }
