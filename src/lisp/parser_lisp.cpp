@@ -41,9 +41,14 @@ namespace lisp_grammar
 	struct keyword : seq< one< ':' >, lisp_ident > {};
 
 	struct number : seq< opt< one < '-' > >, digit, star < lisp_ident_char > > {};
+	
+	struct null : tao::pegtl::string< 'n', 'u', 'l', 'l' > {};
+	struct true_ : tao::pegtl::string< 't', 'r', 'u', 'e' > {};
+	struct false_ : tao::pegtl::string < 'f', 'a', 'l', 's', 'e'> {};
+	
 	struct string : if_must< one< '"' >, until< one< '"' >, star < utf8::not_one < '"' > > > > {};
 
-	struct atom : sor< string, number, keyword, symbol > {};
+	struct atom : sor<null, true_, false_, string, number, keyword, symbol > {};
 
 	// List type
 	struct sexpr : if_must< sexpr_open, until< sexpr_close, anything > >{};
@@ -118,6 +123,39 @@ namespace lisp_grammar
 				ps.top()->cells.push_back(craft::types::type<double>::typeId().getFeature<PParse>()->parse(in.string()));
 			else
 				ps.top()->cells.push_back(craft::types::type<int64_t>::typeId().getFeature<PParse>()->parse(in.string()));
+		}
+	};
+
+	template<>
+	struct lisp_action< false_ >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			std::string pstr = in.string();
+			ps.top()->cells.push_back(instance<bool>::make(false));
+		}
+	};
+
+	template<>
+	struct lisp_action< true_ >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			std::string pstr = in.string();
+			ps.top()->cells.push_back(instance<bool>::make(true));
+		}
+	};
+
+	template<>
+	struct lisp_action< null >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			std::string pstr = in.string();
+			ps.top()->cells.push_back(instance<void>());
 		}
 	};
 
