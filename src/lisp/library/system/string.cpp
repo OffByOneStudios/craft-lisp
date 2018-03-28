@@ -23,6 +23,27 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 	}));
 	ret->define_eval("cat", concat);
 
+	auto split = instance<MultiMethod>::make();
+	split->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<std::string, std::string>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
+
+		std::vector<std::string> sm;
+		stdext::split(*a, *b, std::back_inserter(sm));
+
+		std::vector<instance<>> res;
+		for (auto i : sm)
+		{
+			res.push_back(instance<std::string>::make(i));
+		}
+
+		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, res);
+	}));
+	ret->define_eval("split", split);
+
+
 	auto str = instance<MultiMethod>::make();
 	str->attach(env, instance<BuiltinFunction>::make(
 		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string>(),
