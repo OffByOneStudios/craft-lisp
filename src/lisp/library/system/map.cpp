@@ -105,7 +105,7 @@ CRAFT_OBJECT_DEFINE(Map)
 			if (it.first.hasFeature<PRepr>()) f = it.first.getFeature<PRepr>()->toRepr(it.first);
 			else f = fmt::format("{0}<{1}>", it.first.getFeature<PIdentifier>()->identifier(), (void*)it.first.get());
 
-			if (it.second.hasFeature<PStringer>()) s = it.second.getFeature<PStringer>()->toString(it.second);
+			if (it.second.hasFeature<PRepr>()) s = it.second.getFeature<PRepr>()->toRepr(it.second);
 			else s = fmt::format("{0}<{1}>", it.second.getFeature<PIdentifier>()->identifier(), (void*)it.second.get());
 			
 
