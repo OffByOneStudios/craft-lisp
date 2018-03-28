@@ -15,18 +15,17 @@ BasicSlots::BasicSlots(instance<> representing, size_t size)
 {
 	this->representing = representing;
 	this->size = size;
-	this->slots = new instance<>[size];
+	this->slots.reserve(size);
 }
 BasicSlots::~BasicSlots()
 {
-	delete[] this->slots;
 }
 
 size_t BasicSlots::getSize(instance<>* inst)
 {
 	return inst->asType<BasicSlots>()->size;
 }
-instance<>* BasicSlots::getSlots(instance<>* inst)
+instance<>* BasicSlots::getSlot(instance<>* inst, size_t index)
 {
-	return inst->asType<BasicSlots>()->slots;
+	return &*(inst->asType<BasicSlots>()->slots.get_iterator_from_index(index));
 }
