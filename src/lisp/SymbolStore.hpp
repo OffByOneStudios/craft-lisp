@@ -24,7 +24,14 @@ namespace lisp
 		typedef std::map<_TempStringView, size_t> LookupMap;
 		LookupMap _map;
 
+		size_t _anon_count;
+
 	public:
+
+		inline SymbolStore()
+		{
+			_anon_count = 0;
+		}
 
 		inline size_t intern(std::string const& s)
 		{
@@ -43,6 +50,11 @@ namespace lisp
 			_map.insert(mlb, { _TempStringView{ *vit }, index });    // Use lb as a hint to insert,
 
 			return index;
+		}
+
+		inline size_t generate(std::string const& s_prefix = "ANON")
+		{
+			return intern(fmt::format("$SYM-{0}-{1}", s_prefix, ++_anon_count));
 		}
 
 		std::string const& getValue(size_t value) const

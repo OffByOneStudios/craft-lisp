@@ -104,7 +104,9 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 {
 	auto semantics = module->require<CultSemantics>();
 
-	auto value = module->moduleValue();
+	auto frame = instance<InterpreterFrame>::make();
+
+	Execution::getCurrent()->push_frame();
 }
 
 /******************************************************************************

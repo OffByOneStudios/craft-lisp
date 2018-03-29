@@ -10,6 +10,9 @@ namespace lisp
 		: public virtual craft::types::Object
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::LlvmBackend);
+	public:
+		typedef void(*f_specialFormHandler)();
+
 	private:
 		friend class LlvmBackendProvider;
 
@@ -35,8 +38,6 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED LlvmBackend(instance<Namespace>);
 
-		CRAFT_LISP_EXPORTED void aquireBuiltins(instance<lisp::Module>);
-
 	public:
 
 		CRAFT_LISP_EXPORTED void addModule(instance<LlvmModule> module);
@@ -45,6 +46,11 @@ namespace lisp
 		CRAFT_LISP_EXPORTED llvm::JITTargetAddress getSymbolAddress(std::string const& name);
 
 		CRAFT_LISP_EXPORTED void removeModule(ModuleHandle module);
+
+	public:
+		CRAFT_LISP_EXPORTED void builtin_addSpecialFormHandler(std::string const&, f_specialFormHandler handler);
+
+		CRAFT_LISP_EXPORTED void builtin_validateSpecialForms(instance<lisp::Module> module);
 	};
 
 	class LlvmBackendProvider final

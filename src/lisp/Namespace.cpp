@@ -125,8 +125,13 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 
 		// TODO implement resolvers/loaders for these
 		// All of this should go somewhere else, and be made internal to Module
-		if (protocol == "builtin" && rest == "cult.system")
-			ret = make_library_globals(craft_instance());
+		if (protocol == "builtin")
+		{
+			if (rest == "cult.system")
+				ret = library::make_module_builtin_cult_system(craft_instance());
+			else if (rest == "cult.core")
+				ret = library::make_module_builtin_cult_core(craft_instance());
+		}
 		else if (protocol == "repl")
 		{
 			ret = instance<Module>::make(craft_instance(), uri);

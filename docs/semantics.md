@@ -2,6 +2,8 @@ Here we describe the core semantics of the cult language.
 
 # Cult Semantics
 
+The below are all part of `cult.system`.
+
 ## Special Forms
 
 Here we describe the special forms.
@@ -14,9 +16,17 @@ This primitive binds a value to a name in the current scope. The default require
 
 With simple analysis the compiler can improve the performance of things around define by exploiting the mechanics of the interactions of scopes and the things being bound. For example, in a `do` scope a `define` creates a name for a value that will be accessible within that `do` block; if that value is analyzed to be a `Variable` then a compiler might push it along with all the other variables in a single stack frame.
 
+### `proclaim`
+
+A form for talking to the semantics/compiler/etc.
+
 ### `do`
 
-Creates a new scope, executes it's sub-forms in sequence.
+Executes it's sub-forms in sequence. Creates a scope for variables, and provides RAII gaurntees.
+
+#### Notes
+
+Using `proclaim` can prevent the creation of a scope, and instead provide just the sequence semantics.
 
 ### `quote`
 
@@ -30,19 +40,57 @@ Pairs of conditions and branches, with an optional else branch. Executes conditi
 
 A condition and an implicit `do` block. Executes the condition, if it is truthy, executes the block, then starts over.
 
-### `fn`
+### `variable`
 
-Creates an anonymous lambda. A scope that takes arguments. An object that is an executable.
+Creates a slot requirement. Can be placed in a define to represent a mutable slot. Can be followed by optional Type and other information (state hints).
 
-The first form is a binding form, the rest is an implicit do block. There are two scopes in a function
+### `function`
+
+Creates a function. A scope that takes arguments. An object that is an executable.
+
+The first form is a binding form, the rest is an implicit do block. There are two scopes in a function (the argument scope, and the execution scope).
 
 #### Notes
 
 Functions can be *internally* named by defines. If the scope is eventually a module, then the name is just as defined. If the scope is eventually a function then the name should perpend that function's name. Actually resolved anonymous functions should use a line number, or at least a sequence number, for their own name. Functions must always know the module they are from.
 
-Functions might also acquire their name through macros and the structures they are added to. For example, by default, a function for a multi-method would typically be an anonymous method-level function (e.g. `(attach ~multimethod (fn ...))`)
+Functions might also acquire their name through macros and the structures they are added to. For example, by default, a function for a multi-method would typically be an anonymous method-level function (e.g. `(attach ~multimethod (function ...))`)
+
+### `type`
+
+
 
 ## Concepts
+
+### Helper Macros
+
+#### `var`
+
+`(var <name> [<value>] [<Type>])
+
+Uses `variable`.
+
+Roughly equal to:
+
+`(define <name> (variable <value> <Type>))`
+
+#### `fn`
+
+`(fn [<name>] [<...>])
+
+Uses `function`.
+
+(If the name is provided) roughly equal to:
+
+`(define <name> (fn [<...>]))`
+
+#### `struct`
+
+Uses `type`
+
+#### `feature`
+
+Uses `type`
 
 ### Eqaulity / Match
 

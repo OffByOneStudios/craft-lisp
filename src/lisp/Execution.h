@@ -17,6 +17,7 @@ namespace lisp
 
 		static thread_local instance<Execution> _tl_current;
 
+		// Lifecycle
 	public:
 
 		CRAFT_LISP_EXPORTED Execution(instance<Namespace> ns);
@@ -25,12 +26,13 @@ namespace lisp
 		CRAFT_LISP_EXPORTED static instance<Execution> getCurrent();
 		CRAFT_LISP_EXPORTED void clearFromCurrent();
 
-		CRAFT_LISP_EXPORTED static instance<Execution> execute(instance<SFrame>);
-
+		// Instance members
+	public:
 		CRAFT_LISP_EXPORTED instance<Namespace> getNamespace() const;
 
 		CRAFT_LISP_EXPORTED std::vector<instance<SFrame>> const& stack() const;
 		CRAFT_LISP_EXPORTED void push_frame(instance<SFrame> _push);
 		CRAFT_LISP_EXPORTED void pop();
+
 	};
 }}

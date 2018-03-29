@@ -60,7 +60,9 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED instance<> exec(std::string method, lisp::GenericCall const& call = {});
 
-		// Templated helpers
+		CRAFT_LISP_EXPORTED void builtin_setSemantics(instance<> semantics);
+
+		// Templated/inline helpers
 	public:
 		template<typename T> // TODO, implements PSemantics or PSyntax
 		inline instance<T> get()
@@ -68,6 +70,8 @@ namespace lisp
 		template<typename T> // TODO, implements PSemantics or PSyntax
 		inline instance<T> require()
 		{ return require(cpptype<T>::typeDesc()); }
+
+		inline bool isBuiltin() { return stdext::starts_with(uri(), std::string("builtin")); }
 
 	};
 

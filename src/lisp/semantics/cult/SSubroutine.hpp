@@ -10,7 +10,7 @@ namespace lisp
 	** SSubroutine
 	******************************************************************************/
 
-	/* Provides an interface for executable objects.
+	/* Provides an interface for executable cult objects.
 
 	Should cover:
 	  * How the object should be executed.

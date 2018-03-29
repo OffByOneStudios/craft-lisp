@@ -37,6 +37,14 @@ Mix lispier julia with more c++.
       * Improved safety using assertions.
       * Improved power in dispatch when.
 
+### Limitations
+
+Here we list some explicit limitations we have no plan to work around:
+
+* Module top levels are special:
+  At the moment some things can only be placed in the top-level of modules: macros, methods, types, module-variables, and dependencies (and other scope modifying calls).
+  They can't be executed dynamically in a function scope at runtime. We provide sufficient workarounds for this at the moment, between letting top levels be fully executable (able to require code and run it at the top level) and the arbitrary code creating macros, there should be no effective limitation here.
+
 # Implementation Design
 
 This project is an implementation of this lisp. Here we will describe the basic design.

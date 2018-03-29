@@ -55,7 +55,7 @@ namespace lisp {
 			CRAFT_LISP_EXPORTED instance<SubroutineSignature> binding_expr_to_signature(instance<SScope> scope, instance<Sexpr>);
 		}
 
-		namespace system
+		namespace core
 		{
 			void make_string_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_shim_globals(instance<Module>& m, instance<Namespace>& ns);
@@ -78,10 +78,10 @@ namespace lisp {
 			void make_repl_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_json_globals(instance<Module>& m, instance<Namespace>& ns);
 		}
+
+		instance<Module> make_module_builtin_cult_system(instance<Namespace> ns);
+		instance<Module> make_module_builtin_cult_core(instance<Namespace> ns);
 	}
-
-	instance<Module> make_library_globals(instance<Namespace> ns);
-
 }}
 
 //

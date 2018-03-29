@@ -23,17 +23,20 @@ namespace lisp
 		std::map<instance<SBinding>, instance<>> _values;
 
 	public:
-		CRAFT_LISP_EXPORTED InterpreterFrame(instance<Execution> exec, instance<> backend, instance<Module> semanticsOwner, instance<SScope> scope);
+		CRAFT_LISP_EXPORTED InterpreterFrame(instance<Execution> exec, instance<> backend, instance<Module> semanticsOwner, instance<SSubroutine>);
 
-		CRAFT_LISP_EXPORTED virtual instance<Execution> getExecution() const override;
-		CRAFT_LISP_EXPORTED virtual instance<> backend() const override;
-		CRAFT_LISP_EXPORTED virtual instance<Module> entryModule() const override;
+		CRAFT_LISP_EXPORTED virtual instance<Execution> getExecution() const;
+		CRAFT_LISP_EXPORTED virtual instance<> backend() const;
+		CRAFT_LISP_EXPORTED virtual instance<Module> entryModule() const;
 	};
 
 	class BootstrapInterpreter
 		: public virtual craft::types::Object
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::BootstrapInterpreter);
+	public:
+		typedef void(*f_specialFormHandler)();
+
 	private:
 		instance<Namespace> _lisp;
 
@@ -44,6 +47,12 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> exec_cult(instance<SSubroutine>, GenericCall const&);
 
 		CRAFT_LISP_EXPORTED instance<> exec(instance<lisp::Module> module, std::string const& entry, GenericCall const&);
+
+	public:
+
+		CRAFT_LISP_EXPORTED void builtin_addSpecialFormHandler(std::string const&, f_specialFormHandler handler);
+
+		CRAFT_LISP_EXPORTED void builtin_validateSpecialForms(instance<lisp::Module> module);
 	};
 
 	class BootstrapInterpreterProvider final

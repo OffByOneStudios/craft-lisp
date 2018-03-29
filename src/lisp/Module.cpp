@@ -69,6 +69,9 @@ bool Module::isInitialized() const
 }
 void Module::initialize()
 {
+	if (isInitialized())
+		return;
+
 	_value = exec("$init", { craft_instance() });
 }
 
@@ -169,5 +172,14 @@ instance<> Module::require(types::TypeId type, bool force_read = true)
 
 instance<> Module::exec(std::string method, lisp::GenericCall const& call = {})
 {
-	_ns->exec(craft_instance(), method, call);
+	return _ns->exec(craft_instance(), method, call);
+}
+
+void Module::builtin_setSemantics(instance<> semantics)
+{
+	// TODO build a syntax "representation" of the semantics
+	// TODO fill in the loader correctly
+	_loader = semantics;
+
+	_semantics[semantics.typeId()] = { semantics, semantics.getFeature<PSemantics>() };
 }
