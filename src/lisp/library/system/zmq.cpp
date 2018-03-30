@@ -1,14 +1,21 @@
 #include "lisp/common.h"
 
-#include "../libraries.h"
-#include "./zmq.h"
-
 #include "zmq/zmq.h"
+
+#include "lisp/common.h"
+#include "lisp/library/libraries.h"
 #include "prelude.h"
 
+#include "zmq.h"
+
+
+
+
 using namespace craft;
-using namespace craft::lisp;
 using namespace craft::types;
+using namespace craft::lisp;
+using namespace craft::lisp::library;
+using namespace craft::lisp::library::helper;
 
 
 CRAFT_OBJECT_DEFINE(ZMessage)
@@ -173,7 +180,84 @@ instance<ZSocket> ZContext::connect(instance<std::string> kind, instance<std::st
 	return res;
 }
 
-void lisp::library::system::make_zmq_globals(instance<Module>& m, instance<Namespace>& ns)
+void lisp::library::system::make_zmq_globals(instance<Module>& ret, instance<Namespace>& ns)
 {
+	auto env = ns->environment();
 
+	auto zcontext = instance<MultiMethod>::make();
+	zcontext->attach(env, instance<BuiltinFunction>::make(
+		[](auto frame, auto args)
+	{
+		return instance<ZContext>::make();
+	}));
+	ret->define_eval("zcontext", zcontext);
+
+
+	auto zbind = instance<MultiMethod>::make();
+	zbind->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<ZContext, std::string, int64_t, ZSocket>(),
+		[](auto frame, auto args)
+	{
+		instance<ZContext> a(expect<ZContext>(args[0]));
+		instance<std::string> b(expect<std::string>(args[1]));
+		instance<int64_t> c(expect<int64_t>(args[2]));
+
+		return a->bind(b, c);
+	}));
+	ret->define_eval("zbind", zbind);
+
+	auto zconnect = instance<MultiMethod>::make();
+	zconnect->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<ZContext, std::string, std::string, ZSocket>(),
+		[](auto frame, auto args)
+	{
+		instance<ZContext> a(expect<ZContext>(args[0]));
+		instance<std::string> b(expect<std::string>(args[1]));
+		instance<std::string> c(expect<std::string>(args[2]));
+
+		return a->connect(b, c);
+	}));
+	ret->define_eval("zconnect", zconnect);
+
+	auto zmsg = instance<MultiMethod>::make();
+	zmsg->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, ZMessage>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+
+		auto res = instance<ZMessage>::make();
+		res->fill(a);
+		return res;
+	}));
+	zmsg->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<ZMessage, std::string>(),
+		[](auto frame, auto args)
+	{
+		instance<ZMessage> a(expect<ZMessage>(args[0]));
+		return a->get();
+	}));
+	ret->define_eval("zmsg", zmsg);
+
+	auto zsend = instance<MultiMethod>::make();
+	zsend->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<ZSocket, ZMessage>(),
+		[](auto frame, auto args)
+	{
+		instance<ZSocket> a(expect<ZSocket>(args[0]));
+		instance<ZMessage> b(expect<ZMessage>(args[1]));
+		a->send(b);
+		return instance<>();
+	}));
+	ret->define_eval("zsend", zsend);
+
+	auto zrecv = instance<MultiMethod>::make();
+	zrecv->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<ZSocket, ZMessage>(),
+		[](auto frame, auto args)
+	{
+		instance<ZSocket> a(expect<ZSocket>(args[0]));
+		return a->recv();
+	}));
+	ret->define_eval("zrecv", zrecv);
 }
