@@ -3,7 +3,7 @@
 #include "lisp/library/libraries.h"
 
 #include "lisp/backend/llvm/llvm_internal.h"
-
+#include "prelude.h"
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;

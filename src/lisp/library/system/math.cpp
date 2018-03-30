@@ -1,7 +1,7 @@
 
 #include "lisp/common.h"
 #include "lisp/library/libraries.h"
-
+#include "prelude.h"
 
 using namespace craft;
 using namespace craft::types;
@@ -250,7 +250,6 @@ void logic(instance<Module>& ret, instance<Namespace>& ns)
 		return instance<bool>::make(!(*a));
 	}));
 	ret->define_eval("!", not);
-
 }
 
 

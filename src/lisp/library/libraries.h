@@ -68,6 +68,7 @@ namespace lisp {
 			void make_subprocess_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_list_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_map_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_platform_globals(instance<Module>& m, instance<Namespace>& ns);
 		}
 	}
 

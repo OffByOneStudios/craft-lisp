@@ -1,7 +1,7 @@
 
 #include "lisp/common.h"
 #include "lisp/library/libraries.h"
-
+#include "prelude.h"
 
 using namespace craft;
 using namespace craft::types;
@@ -10,72 +10,64 @@ using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
 
-namespace craft {
-namespace lisp {
-namespace library {
-	class List
-		: public virtual types::Object
+instance<int64_t> List::size()
+{
+	return instance<int64_t>::make(_data.size());
+}
+
+instance<> List::at(instance<int64_t> i)
+{
+	if ((*i) < _data.size()) return _data[*i];
+	throw stdext::exception("List Index Out Of Bounds");
+}
+
+void List::insert(instance<int64_t> i, instance<> v) {
+	_data.insert(_data.begin() + *i, v);
+}
+
+void List::erase(instance<int64_t> i) {
+	_data.erase(_data.begin() + *i);
+}
+
+void List::reverse() {
+	std::reverse(_data.begin(), _data.end());
+}
+
+void List::push(instance<> i)
+{
+	_data.push_back(i);
+}
+
+instance<> List::pop()
+{
+	if (!_data.size()) return instance<>();
+
+	auto res = _data.back();
+	_data.pop_back();
+	return res;
+}
+
+std::vector<instance<>>& List::data()
+{
+	return _data;
+}
+
+instance<List> List::slice(instance<int64_t> i, instance<int64_t> j)
+{
+	auto res = instance<List>::make();
+	auto ti = *i; auto tj = std::min(int64_t(_data.size()), *j);
+	auto s = _data.size();
+
+	if (ti > tj || ti < 0 || ti >= s || tj < 0) return res;
+
+	for (auto it = ti; it < tj; it++)
 	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::List);
-	private:
-		std::vector<instance<>> _data;
+		res->_data.push_back(_data[it]);
+	}
 
-	public:
+	return res;
+}
 
-		instance<int64_t> size()
-		{
-			return instance<int64_t>::make(_data.size());
-		}
-
-		instance<> at(instance<int64_t> i)
-		{
-			if ((*i) < _data.size()) return _data[*i];
-			throw stdext::exception("List Index Out Of Bounds");
-		}
-
-		void insert(instance<int64_t> i, instance<> v) {
-			_data.insert(_data.begin()+ *i, v);
-		}
-
-		void erase(instance<int64_t> i) {
-			_data.erase(_data.begin() + *i);
-		}
-
-		void reverse() {
-			std::reverse(_data.begin(), _data.end());
-		}
-
-		void push(instance<> i)
-		{
-			_data.push_back(i);
-		}
-
-		instance<> pop()
-		{
-			if (!_data.size()) return instance<>();
-
-			auto res = _data.back();
-			_data.pop_back();
-			return res;
-		}
-
-		instance<List> slice(instance<int64_t> i, instance<int64_t> j)
-		{
-			auto res = instance<List>::make();
-			auto ti = *i; auto tj = std::min(int64_t(_data.size()), *j);
-			auto s = _data.size();
-
-			if (ti > tj || ti < 0 || ti >= s || tj < 0) return res;
-
-			for (auto it = ti; it < tj; it++)
-			{
-				res->_data.push_back(_data[it]);
-			}
-
-			return res;
-		}
-	};
-}}}
 
 CRAFT_OBJECT_DEFINE(List)
 {
@@ -109,6 +101,12 @@ CRAFT_OBJECT_DEFINE(List)
 
 		return res.str();
 
+	});
+
+	_.use<PRepr>().singleton<FunctionalRepr>(
+		[](instance<List> l) -> std::string
+	{
+		return l.getFeature<PStringer>()->toString(l);
 	});
 	_.defaults();
 }
@@ -209,4 +207,23 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		return instance<>();
 	}));
 	ret->define_eval("lreverse", reverse);
+
+
+	auto fmap = instance<MultiMethod>::make();
+	fmap->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<List, Function>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<List> a(expect<List>(args[0]));
+		instance<Function> b(expect<Function>(args[1]));
+
+		auto res = instance<List>::make();
+
+		for (auto& i : a->data())
+		{
+			res->push(b->call(frame, { i }));
+		}
+		return res;
+	}));
+	ret->define_eval("lfmap", fmap);
 }

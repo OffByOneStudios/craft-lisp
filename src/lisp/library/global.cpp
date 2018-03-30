@@ -457,6 +457,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	library::system::make_subprocess_globals(ret, ns);
 	library::system::make_list_globals(ret, ns);
 	library::system::make_map_globals(ret, ns);
+	library::system::make_platform_globals(ret, ns);
 
 	auto file_text = instance<MultiMethod>::make();
 	file_text->attach(env, instance<BuiltinFunction>::make(
@@ -573,6 +574,17 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 		return expr->cells[0];
 	});
 	ret->define_eval("timeit", timeit);
-	
+
+
+	auto failure = instance<MultiMethod>::make();
+	failure->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<std::string>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+		throw stdext::exception("FAILURE: {0}", *a);
+		return instance<>();
+	}));
+	ret->define_eval("failure", failure);
 	return ret;
 }

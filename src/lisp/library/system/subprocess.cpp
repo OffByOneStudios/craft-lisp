@@ -1,7 +1,7 @@
 
 #include "lisp/common.h"
 #include "lisp/library/libraries.h"
-
+#include "prelude.h"
 
 using namespace craft;
 using namespace craft::types;
@@ -10,6 +10,7 @@ using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
 namespace _impl {
+#ifdef _WIN32
 	std::string GetLastErrorAsString()
 	{
 		//Get the error message, if any.
@@ -28,6 +29,7 @@ namespace _impl {
 
 		return message;
 	}
+#endif
 }
 
 namespace craft {
@@ -45,7 +47,7 @@ namespace library
 		virtual void kill() = 0;
 		virtual instance<std::string> read(instance<int64_t> bytes) = 0;
 		virtual instance<int64_t> write(instance<std::string> s) = 0;
-		virtual void block(instance<int> ms) = 0;
+		virtual void block(instance<int64_t> ms) = 0;
 	};
 
 #ifdef _WIN32
@@ -142,7 +144,7 @@ namespace library
 			TerminateProcess(pi.hProcess, 0);
 		}
 
-		virtual void block(instance<int> ms)
+		virtual void block(instance<int64_t> ms)
 		{
 			WaitForSingleObject(pi.hProcess, (*ms == 0) ? INFINITE : *ms);
 		}
@@ -199,7 +201,7 @@ void system::make_subprocess_globals(instance<Module>& ret, instance<Namespace>&
 
 		auto res = instance<Subprocess>::make();
 
-		res->exec(a);
+		res->exec(instance<std::string>::make(path::normalize(*a)));
 		return res;
 	}));
 	ret->define_eval("subexec", exec);
@@ -215,9 +217,21 @@ void system::make_subprocess_globals(instance<Module>& ret, instance<Namespace>&
 	}));
 	ret->define_eval("subrunning", running);
 
+	auto block = instance<MultiMethod>::make();
+	running->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<Subprocess, int64_t>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<Subprocess> a(expect<Subprocess>(args[0]));
+		instance<int64_t> b(expect<int64_t>(args[1]));
+		a->block(b);
+		return instance<>();
+	}));
+	ret->define_eval("subblock", running);
+
 	auto kill = instance<MultiMethod>::make();
 	kill->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Subprocess>(),
+		SubroutineSignature::makeFromArgs<Subprocess, int64_t>(),
 		[](instance<SFrame> frame, auto args)
 	{
 		instance<Subprocess> a(expect<Subprocess>(args[0]));

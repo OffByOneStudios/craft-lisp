@@ -4,6 +4,7 @@
 #include "./zmq.h"
 
 #include "zmq/zmq.h"
+#include "prelude.h"
 
 using namespace craft;
 using namespace craft::lisp;

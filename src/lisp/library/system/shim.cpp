@@ -1,6 +1,7 @@
 
 #include "lisp/common.h"
 #include "lisp/library/libraries.h"
+#include "prelude.h"
 
 using namespace craft;
 using namespace craft::types;
@@ -124,4 +125,19 @@ void system::make_shim_globals(instance<Module>& ret, instance<Namespace>& ns)
 		return instance<std::string>::make(stdext::join(' ', res.begin(), res.end()));
 	}));
 	ret->define_eval("ctypes", ctypes);
+
+
+	auto kind = instance<MultiMethod>::make();
+	kind->attach(env, instance<BuiltinFunction>::make(
+		[](auto frame, auto args)
+	{
+		if (args.size())
+		{
+			instance<> a = args[0];
+			return (instance<>)instance<std::string>::make(a.getFeature<PIdentifier>()->identifier());
+		}
+
+		return instance<>();
+	}));
+	ret->define_eval("kind", kind);
 }
