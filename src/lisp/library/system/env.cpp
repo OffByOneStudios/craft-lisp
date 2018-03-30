@@ -44,6 +44,30 @@ namespace _impl {
 		return instance<std::string>::make(std::string(pPath));
 #endif
 	}
+	instance<Map> listEnv()
+	{
+#ifdef _WIN32
+		char* strings = (char*)GetEnvironmentStringsA();
+		char* b = strings;
+#else
+		char* b = (char*) environ;
+#endif
+		auto res = instance<Map>::make();
+
+		bool found = false;
+		while (*b)
+		{
+			auto kv = std::string(b);
+			b += kv.size() + 1;
+			auto i = kv.find('=');
+			res->insert(instance<std::string>::make(kv.substr(0, i)), instance<std::string>::make(kv.substr(i + 1)));
+		}
+			
+#ifdef _WIN32
+		FreeEnvironmentStringsA((LPCH)strings);
+#endif
+		return res;
+	}
 }
 
 
@@ -71,5 +95,12 @@ void system::make_env_globals(instance<Module>& ret, instance<Namespace>& ns)
 	}));
 	ret->define_eval("setenv", _setenv);
 
-	
+	auto _listenv = instance<MultiMethod>::make();
+	_listenv->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<Map>(),
+		[](auto frame, auto args)
+	{
+		return _impl::listEnv();
+	}));
+	ret->define_eval("listenv", _listenv);
 }
