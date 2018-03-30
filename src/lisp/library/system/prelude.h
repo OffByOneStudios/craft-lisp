@@ -5,6 +5,23 @@ namespace craft {
 namespace lisp {
 namespace library
 {
+
+	class Buffer
+		: public virtual types::Object
+	{
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::Buffer);
+	protected:
+		std::vector<uint8_t> _data;
+
+	public:
+		Buffer(instance<int64_t> size);
+		instance<int64_t> size();
+		instance<int64_t> at(instance<int64_t> i);
+		void set(instance<int64_t> i, instance<int64_t> d);
+		std::vector<uint8_t>& data(); 
+		instance<Buffer> join(instance<Buffer> other);
+	};
+
 	class List
 		: public virtual types::Object
 	{
