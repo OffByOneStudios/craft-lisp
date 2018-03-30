@@ -11,6 +11,7 @@ dependencies:
 vendor-dependencies:
   x86_64-pc-windows-msvccoff:
     - "zmq"
+    - "libsodium"
     - "LLVMX86Info"
     - "LLVMX86Utils"
     - "LLVMXRay"

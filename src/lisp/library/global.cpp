@@ -458,6 +458,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	library::system::make_list_globals(ret, ns);
 	library::system::make_map_globals(ret, ns);
 	library::system::make_platform_globals(ret, ns);
+	library::system::make_security_globals(ret, ns);
 
 	auto file_text = instance<MultiMethod>::make();
 	file_text->attach(env, instance<BuiltinFunction>::make(
