@@ -41,7 +41,7 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 			res.push_back(instance<std::string>::make(i));
 		}
 
-		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, res);
+    return frame->getNamespace()->lookup("list")->getValue(frame).template asType<MultiMethod>()->call(frame, res);
 	}));
 	ret->define_eval("split", split);
 

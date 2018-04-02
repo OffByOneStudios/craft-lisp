@@ -175,6 +175,55 @@ namespace library
 			return instance<int64_t>::make(dwWritten);
 		}
 	};
+#else
+  class Subprocess
+    : public virtual craft::types::Object
+    , public types::Implements<SSubprocess>
+  {
+    CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::Subprocess);
+  private:
+  public:
+    Subprocess()
+    {
+      
+    }
+    ~Subprocess()
+    {
+    }
+
+    virtual void exec(instance<std::string> s) override
+    {
+      throw stdext::exception("Not Implemented On Posix");
+
+      return;
+    }
+
+    virtual instance<bool> running() override
+    {
+      throw stdext::exception("Not Implemented On Posix");
+    }
+
+    virtual void kill() override
+    {
+      throw stdext::exception("Not Implemented On Posix");
+    }
+
+    virtual void block(instance<int64_t> ms) override
+    {
+     throw stdext::exception("Not Implemented On Posix");
+    }
+
+
+    virtual instance<std::string> read(instance<int64_t> bytes) override
+    {
+      throw stdext::exception("Not Implemented On Posix");
+    }
+
+    virtual instance<int64_t> write(instance<std::string> s) override
+    {
+      throw stdext::exception("Not Implemented On Posix");
+    }
+  };
 #endif
 }}}
 
@@ -254,7 +303,7 @@ void system::make_subprocess_globals(instance<Module>& ret, instance<Namespace>&
 
 	auto write = instance<MultiMethod>::make();
 	write->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<Subprocess, std::string, size_t>(),
+		SubroutineSignature::makeFromArgsAndReturn<Subprocess, std::string, int64_t>(),
 		[](instance<SFrame> frame, auto args)
 	{
 		instance<Subprocess> a(expect<Subprocess>(args[0]));

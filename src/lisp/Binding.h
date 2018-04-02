@@ -24,7 +24,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED void setValue(instance<> value);
 		CRAFT_LISP_EXPORTED instance<> value();
 
-		CRAFT_LISP_EXPORTED void addMeta(std::string metaKey, instance<> value);
+		CRAFT_LISP_EXPORTED void addMeta(std::string metaKey, instance<> value) override;
 
 		//
 		// SBinding

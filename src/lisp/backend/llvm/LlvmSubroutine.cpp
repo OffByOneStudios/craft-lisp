@@ -57,7 +57,8 @@ void LlvmSubroutine::generate()
 	builder.CreateRet(ret);
 
 	std::string verify_str;
-	verifyFunction(*func, &llvm::raw_string_ostream(verify_str));
+  /// XXX Clang Err: Taking the address of a temporary object
+	verifyFunction(*func, nullptr);
 	if (!verify_str.empty())
 		backend->lisp->environment()->log()->info(verify_str);
 }

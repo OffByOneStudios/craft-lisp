@@ -120,9 +120,9 @@ namespace lisp_grammar
 			// TODO specialized parse function returning arbitrary percision number
 			// and/or deciding on the prefered type/size of the number
 			if (s.find('.', 0) != std::string::npos)
-				ps.top()->cells.push_back(craft::types::type<double>::typeId().getFeature<PParse>()->parse(in.string()));
+				ps.top()->cells.push_back(craft::types::type<double>::typeId().getFeature<PParse>()->parse(s));
 			else
-				ps.top()->cells.push_back(craft::types::type<int64_t>::typeId().getFeature<PParse>()->parse(in.string()));
+				ps.top()->cells.push_back(craft::types::type<int64_t>::typeId().getFeature<PParse>()->parse(s));
 		}
 	};
 

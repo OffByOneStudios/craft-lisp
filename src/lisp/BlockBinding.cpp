@@ -31,14 +31,14 @@ std::string BlockBinding::name() const
 }
 instance<> BlockBinding::getValue(instance<SFrame> frame) const
 {
-	instance<Frame> block = frame;
+	instance<Frame> block = frame.asType<Frame>();
 
 	return block->get(_pos);
 }
 
 instance<> BlockBinding::eval(instance<SFrame> frame)
 {
-	instance<Frame> block = frame;
+	instance<Frame> block = frame.asType<Frame>();
 
 	auto value = frame->getNamespace()->environment()->eval(frame, _expression);
 	block->set(_pos, value);

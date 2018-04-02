@@ -9,9 +9,11 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
+#ifndef _WIN32
+  extern char** environ;
+#endif
 
 namespace _impl {
-
 	instance<std::string> getEnv(instance<std::string> s)
 	{
 #ifdef _WIN32
@@ -21,7 +23,7 @@ namespace _impl {
 		return instance<std::string>::make(res);
 #else
 		char* pPath;
-		pPath = getenv(a->c_str());
+		pPath = getenv(s->c_str());
 		return instance<std::string>::make(std::string(pPath));
 #endif
 	}
@@ -37,7 +39,7 @@ namespace _impl {
 		return instance<std::string>::make(res);
 #else
 		char* pPath;
-		pPath = getenv(a->c_str());
+		pPath = getenv(k->c_str());
 
 		setenv(k->c_str(), v->c_str(), 1);
 

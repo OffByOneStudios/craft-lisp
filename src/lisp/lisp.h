@@ -20,6 +20,38 @@ namespace lisp
 	class Binding;
 }}
 
+namespace craft {
+namespace types
+{
+  template <> struct type<craft::lisp::Environment>
+    : public type<void>
+  {
+    static constexpr bool isObject = true;
+    inline static TypeId typeId();// { return lisp::PBackend::craft_s_typeId(); }
+  };
+  
+  template <> struct type<craft::lisp::Execution>
+    : public type<void>
+  {
+    static constexpr bool isObject = true;
+    inline static TypeId typeId();// { return lisp::PBackend::craft_s_typeId(); }
+  };
+  
+  template <> struct type<craft::lisp::BootstrapInterpreter>
+    : public type<void>
+  {
+    static constexpr bool isObject = true;
+    inline static TypeId typeId();// { return lisp::PBackend::craft_s_typeId(); }
+  };
+  
+  template <> struct type<craft::lisp::PBackend>
+    : public type<void>
+  {
+    static constexpr bool isObject = true;
+    inline static FeatureId featureId();// { return lisp::PBackend::craft_s_typeId(); }
+  };
+}}
+
 #include "SBinding.hpp"
 #include "SScope.hpp"
 #include "SFrame.hpp"
@@ -58,3 +90,14 @@ namespace lisp
 #include "backend/backend.h"
 
 #include "lisp/library/libraries.h"
+
+inline craft::types::TypeId craft::types::type<craft::lisp::Environment>::typeId()
+{
+  return craft::lisp::Environment::craft_s_typeId();
+};
+
+inline craft::types::TypeId craft::types::type<craft::lisp::Execution>::typeId()
+{
+  return craft::lisp::Execution::craft_s_typeId();
+};
+

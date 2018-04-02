@@ -38,7 +38,7 @@ void system::make_fs_globals(instance<Module>& ret, instance<Namespace>& ns)
 			res.push_back(instance<std::string>::make(f));
 		}
 
-		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, res);
+    return frame->getNamespace()->lookup("list")->getValue(frame).template asType<MultiMethod>()->call(frame, res);
 		
 	}));
 	ret->define_eval("ls", ls);
@@ -63,7 +63,7 @@ void system::make_fs_globals(instance<Module>& ret, instance<Namespace>& ns)
 			res.push_back(instance<std::string>::make(f));
 		}
 
-		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, res);
+    return frame->getNamespace()->lookup("list")->getValue(frame).template asType<MultiMethod>()->call(frame, res);
 	}));
 	ret->define_eval("ls", ls);
 
@@ -198,7 +198,7 @@ void system::make_fs_globals(instance<Module>& ret, instance<Namespace>& ns)
 			}
 		}
 
-		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, res);
+    return frame->getNamespace()->lookup("list")->getValue(frame).template asType<MultiMethod>()->call(frame, res);
 	}));
 	ret->define_eval("glob", glob);
 

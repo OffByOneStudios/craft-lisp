@@ -224,8 +224,8 @@ void logic(instance<Module>& ret, instance<Namespace>& ns)
 	ret->define_eval(">", gt);
 
 
-	auto not = instance<MultiMethod>::make();
-	not->attach(env, instance<BuiltinFunction>::make(
+	auto _not = instance<MultiMethod>::make();
+	_not->attach(env, instance<BuiltinFunction>::make(
 		SubroutineSignature::makeFromArgsAndReturn<int64_t, bool>(),
 		[](auto frame, auto args)
 	{
@@ -233,7 +233,7 @@ void logic(instance<Module>& ret, instance<Namespace>& ns)
 
 		return instance<bool>::make(!(*a));
 	}));
-	not->attach(env, instance<BuiltinFunction>::make(
+	_not->attach(env, instance<BuiltinFunction>::make(
 		SubroutineSignature::makeFromArgsAndReturn<double, bool>(),
 		[](auto frame, auto args)
 	{
@@ -241,7 +241,7 @@ void logic(instance<Module>& ret, instance<Namespace>& ns)
 
 		return instance<bool>::make(!(*a));
 	}));
-	not->attach(env, instance<BuiltinFunction>::make(
+	_not->attach(env, instance<BuiltinFunction>::make(
 		SubroutineSignature::makeFromArgsAndReturn<bool, bool>(),
 		[](auto frame, auto args)
 	{
@@ -249,7 +249,7 @@ void logic(instance<Module>& ret, instance<Namespace>& ns)
 
 		return instance<bool>::make(!(*a));
 	}));
-	ret->define_eval("!", not);
+	ret->define_eval("!", _not);
 }
 
 

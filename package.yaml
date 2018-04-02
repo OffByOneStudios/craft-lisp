@@ -7,7 +7,7 @@ entry-name: cult
 dependencies:
   - Util
   - Types
-  
+
 vendor-dependencies:
   x86_64-pc-windows-msvccoff:
     - "zmq"
@@ -70,7 +70,66 @@ vendor-dependencies:
     - "LLVMX86Desc"
     - "LLVMX86Disassembler"
   osx_x64_clang:
+    - "z"
     - "zmq"
+    - "sodium"
+    - "LLVMX86Info"
+    - "LLVMX86Utils"
+    - "LLVMXRay"
+    - "LLVMAnalysis"
+    - "LLVMAsmParser"
+    - "LLVMAsmPrinter"
+    - "LLVMBinaryFormat"
+    - "LLVMBitReader"
+    - "LLVMBitWriter"
+    - "LLVMCodeGen"
+    - "LLVMCore"
+    - "LLVMCoroutines"
+    - "LLVMCoverage"
+    - "LLVMDebugInfoCodeView"
+    - "LLVMDebugInfoDWARF"
+    - "LLVMDebugInfoMSF"
+    - "LLVMDebugInfoPDB"
+    - "LLVMDemangle"
+    - "LLVMDlltoolDriver"
+    - "LLVMExecutionEngine"
+    - "LLVMGlobalISel"
+    - "LLVMInstCombine"
+    - "LLVMInstrumentation"
+    - "LLVMInterpreter"
+    - "LLVMipo"
+    - "LLVMIRReader"
+    - "LLVMLibDriver"
+    - "LLVMLineEditor"
+    - "LLVMLinker"
+    - "LLVMLTO"
+    - "LLVMMC"
+    - "LLVMMCDisassembler"
+    - "LLVMMCJIT"
+    - "LLVMMCParser"
+    - "LLVMMIRParser"
+    - "LLVMObjCARCOpts"
+    - "LLVMObject"
+    - "LLVMObjectYAML"
+    - "LLVMOption"
+    - "LLVMOrcJIT"
+    - "LLVMPasses"
+    - "LLVMProfileData"
+    - "LLVMRuntimeDyld"
+    - "LLVMScalarOpts"
+    - "LLVMSelectionDAG"
+    - "LLVMSupport"
+    - "LLVMSymbolize"
+    - "LLVMTableGen"
+    - "LLVMTarget"
+    - "LLVMTestingSupport"
+    - "LLVMTransformUtils"
+    - "LLVMVectorize"
+    - "LLVMX86AsmParser"
+    - "LLVMX86AsmPrinter"
+    - "LLVMX86CodeGen"
+    - "LLVMX86Desc"
+    - "LLVMX86Disassembler"
   debian_x64_gcc:
     - "zmq"
 
@@ -78,18 +137,18 @@ platform-dependencies:
   x86_64-pc-windows-msvccoff: []
   osx_x64_clang: []
   debian_x64_gcc: []
-  
+
 platform-flags:
   x86_64-pc-windows-msvccoff: []
-  osx_x64_clang: 
+  osx_x64_clang:
     - "-std=c++1z"
     - "-stdlib=libc++"
     - "-Wc++11-extensions"
-  debian_x64_gcc: 
+  debian_x64_gcc:
     - "-std=gnu++1z"
     - "-pthread"
     - "-fpermissive"
-  
+
 platform-link-flags:
   x86_64-pc-windows-msvccoff:
     - "/ignore:4099"

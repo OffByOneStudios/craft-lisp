@@ -121,7 +121,7 @@ instance<SFrame> SubroutineSignature::set_frame(instance<SFrame> const& frame, s
 {
 	check(frame->getNamespace()->environment(), args);
 
-	instance<Frame> call_frame = frame;
+	instance<Frame> call_frame = frame.asType<Frame>();
 
 	size_t i = 0;
 	for (auto actual : args)

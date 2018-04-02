@@ -1,4 +1,4 @@
-﻿#include "lisp/common.h"
+#include "lisp/common.h"
 #include "lisp/lisp.h"
 #include "lisp/library/libraries.h"
 
@@ -464,7 +464,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	file_text->attach(env, instance<BuiltinFunction>::make(
 		[](instance<SFrame> frame, auto args)
 	{
-		auto s = path::normalize(path::absolute(*args[0].asType<std::string>()));
+    auto s = path::normalize(path::absolute(*args[0].template asType<std::string>()));
 		auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
 
 		return instance<std::string>::make(text);

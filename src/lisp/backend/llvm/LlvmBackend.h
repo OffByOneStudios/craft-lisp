@@ -48,7 +48,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED void removeModule(ModuleHandle module);
 	};
 
-	class LlvmBackendProvider sealed
+	class LlvmBackendProvider final
 		: public types::Implements<PBackend>::For<LlvmBackend>
 	{
 	public:

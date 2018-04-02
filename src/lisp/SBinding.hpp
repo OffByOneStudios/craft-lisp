@@ -19,7 +19,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<> eval(instance<SFrame> frame) = 0;
 
 		template<typename T>
-		inline instance<T> getMeta(std::string metaKey) { return getMeta(metaKey, types::type<T>::typeId()).asType<T>(); }
+    inline instance<T> getMeta(std::string metaKey) { return getMeta(metaKey, types::type<T>::typeId()).template asType<T>(); }
 	};
 
 }}

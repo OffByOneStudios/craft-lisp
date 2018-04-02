@@ -20,3 +20,8 @@ namespace lisp
 	};
 
 }}
+
+inline craft::types::FeatureId craft::types::type<craft::lisp::PBackend>::featureId()
+{
+  return craft::lisp::PBackend::craft_s_featureId();
+};

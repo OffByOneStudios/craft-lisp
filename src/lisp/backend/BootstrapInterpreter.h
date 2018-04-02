@@ -20,7 +20,7 @@ namespace lisp
 
 	};
 
-	class BootstrapInterpreterProvider sealed
+	class BootstrapInterpreterProvider final
 		: public types::Implements<PBackend>::For<BootstrapInterpreter>
 	{
 	public:
@@ -35,3 +35,8 @@ namespace lisp
 		virtual instance<> exec(instance<lisp::SFrame> frame, instance<> code) const override;
 	};
 }}
+
+inline craft::types::TypeId craft::types::type<craft::lisp::BootstrapInterpreter>::typeId()
+{
+  return craft::lisp::BootstrapInterpreter::craft_s_typeId();
+};

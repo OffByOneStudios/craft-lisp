@@ -5,9 +5,7 @@
 #include <queue>
 
 #include <spdlog/spdlog.h>
-#include <bandit/bandit.h>
 
-using namespace bandit;
 using namespace craft;
 using namespace craft::lisp;
 
