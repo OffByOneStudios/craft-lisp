@@ -99,7 +99,7 @@ std::vector<instance<>> Map::values()
 	}
 	return res;
 }
-	
+
 void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 {
 	auto env = ns->environment();
@@ -191,7 +191,7 @@ void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 		for (auto& i : a->data())
 		{
-			res->push(b->call(frame, { i.first, i.second }));
+			res->push(b->call(frame, { i.first, i.second}));
 		}
 		return res;
 	}));

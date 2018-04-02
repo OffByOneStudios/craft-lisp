@@ -80,7 +80,7 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 		}
 
 		std::cout << "\n";
-		
+
 		return instance<>();
 	}));
 	ret->define_eval("print", _print);
@@ -105,8 +105,8 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 			{
 				std::string match = m.substr(1, m.size() - 2);
 				instance<> target;
-				
-				
+
+
 				ssize_t i = -1;
 				try
 				{
