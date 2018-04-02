@@ -90,7 +90,7 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 		SubroutineSignature::makeCollectArgs(),
 		[str](instance<SFrame> frame, std::vector<instance<>> args) mutable
 	{
-		std::regex re("\\{[^\\}]+\\}");
+		std::regex re("%\\{[^\\}]+\\}");
 		std::ostringstream s;
 		instance<std::string> a(expect<std::string>(args[0]));
 
@@ -103,7 +103,7 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 			if (std::regex_match(m, re))
 			{
-				std::string match = m.substr(1, m.size() - 2);
+				std::string match = m.substr(2, m.size() - 2);
 				instance<> target;
 
 
