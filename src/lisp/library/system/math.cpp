@@ -10,11 +10,14 @@ using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
 
+#ifdef _MSC_FULL_VER 
+#pragma warning(disable: 4018 4805 4804)
+#endif
 
 void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 {
-  auto env = ns->environment();
+	auto env = ns->environment();
   //MultiMethods Declarations
     auto _gt = instance<MultiMethod>::make();
     auto _gte = instance<MultiMethod>::make();
@@ -28,12 +31,12 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     auto _sub = instance<MultiMethod>::make();
     auto _not = instance<MultiMethod>::make();
     auto _uint64 = instance<MultiMethod>::make();
-    auto _int32 = instance<MultiMethod>::make();
-    auto _int16 = instance<MultiMethod>::make();
-    auto _int64 = instance<MultiMethod>::make();
+    auto _mint32 = instance<MultiMethod>::make();
+    auto _mint16 = instance<MultiMethod>::make();
+    auto _mint64 = instance<MultiMethod>::make();
     auto _uint16 = instance<MultiMethod>::make();
     auto _uint32 = instance<MultiMethod>::make();
-    auto _int8 = instance<MultiMethod>::make();
+    auto _mtint8 = instance<MultiMethod>::make();
     auto _uint8 = instance<MultiMethod>::make();
 
   //Binary Operators
@@ -4642,7 +4645,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<uint64_t>::make(uint64_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int8_t, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -4650,7 +4653,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int16_t, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -4658,7 +4661,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int32_t, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -4666,7 +4669,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int64_t, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -4674,7 +4677,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int8_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -4682,7 +4685,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int16_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -4690,7 +4693,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int32_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -4698,7 +4701,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int64_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -4706,7 +4709,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int8_t, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -4714,7 +4717,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int64_t>::make(int64_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int16_t, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -4722,7 +4725,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int64_t>::make(int64_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int32_t, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -4730,7 +4733,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int64_t>::make(int64_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int64_t, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -4802,7 +4805,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<uint32_t>::make(uint32_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int8_t, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -4810,7 +4813,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int8_t>::make(int8_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int16_t, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -4818,7 +4821,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int8_t>::make(int8_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int32_t, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -4826,7 +4829,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int8_t>::make(int8_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int64_t, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -4898,7 +4901,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<uint64_t>::make(uint64_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint8_t, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -4906,7 +4909,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint16_t, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -4914,7 +4917,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint32_t, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -4922,7 +4925,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint64_t, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -4930,7 +4933,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint8_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -4938,7 +4941,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint16_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -4946,7 +4949,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint32_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -4954,7 +4957,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint64_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -4962,7 +4965,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint8_t, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -4970,7 +4973,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int64_t>::make(int64_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint16_t, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -4978,7 +4981,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int64_t>::make(int64_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint32_t, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -4986,7 +4989,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int64_t>::make(int64_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint64_t, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -5058,7 +5061,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<uint32_t>::make(uint32_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint8_t, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -5066,7 +5069,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int8_t>::make(int8_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint16_t, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -5074,7 +5077,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int8_t>::make(int8_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint32_t, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -5082,7 +5085,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int8_t>::make(int8_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint64_t, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -5138,7 +5141,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<uint64_t>::make(uint64_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<float, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -5146,7 +5149,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int32->attach(env, instance<BuiltinFunction>::make(
+    _mint32->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<double, int32_t>(),
     	[](auto frame, auto args)
     {
@@ -5154,7 +5157,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(int32_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<float, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -5162,7 +5165,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int16->attach(env, instance<BuiltinFunction>::make(
+    _mint16->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<double, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -5170,7 +5173,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(int16_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<float, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -5178,7 +5181,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int64_t>::make(int64_t(*a));
     }));
 
-    _int64->attach(env, instance<BuiltinFunction>::make(
+    _mint64->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<double, int64_t>(),
     	[](auto frame, auto args)
     {
@@ -5218,7 +5221,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<uint32_t>::make(uint32_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<float, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -5226,7 +5229,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int8_t>::make(int8_t(*a));
     }));
 
-    _int8->attach(env, instance<BuiltinFunction>::make(
+    _mtint8->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<double, int8_t>(),
     	[](auto frame, auto args)
     {
@@ -5262,12 +5265,12 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     ret->define_eval("/", _div);
     ret->define_eval("-", _sub);
     ret->define_eval("uint64", _uint64);
-    ret->define_eval("int32", _int32);
-    ret->define_eval("int16", _int16);
-    ret->define_eval("int64", _int64);
+    ret->define_eval("int32", _mint32);
+    ret->define_eval("int16", _mint16);
+    ret->define_eval("int64", _mint64);
     ret->define_eval("uint16", _uint16);
     ret->define_eval("uint32", _uint32);
-    ret->define_eval("int8", _int8);
+    ret->define_eval("int8", _mtint8);
     ret->define_eval("uint8", _uint8);
     ret->define_eval("!", _not);
 

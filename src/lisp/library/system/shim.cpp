@@ -112,17 +112,18 @@ void system::make_shim_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 	auto ctypes = instance<MultiMethod>::make();
 	ctypes->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<List>(),
 		[](auto frame, auto args)
 	{
-		std::vector<std::string> res;
+		auto res = instance<List>::make();
 		auto ids = types::system().getManager<PIdentifier>();
 		for (auto tid : ids->supportedTypes())
 		{
 			auto p = ((PIdentifier*)ids->getProvider(tid))->identifier();
 			
-			res.push_back(p);
+			res->push(instance<std::string>::make(p));
 		}
-		return instance<std::string>::make(stdext::join(' ', res.begin(), res.end()));
+		return res;
 	}));
 	ret->define_eval("ctypes", ctypes);
 
