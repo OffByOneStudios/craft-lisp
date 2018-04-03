@@ -103,7 +103,7 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 			if (std::regex_match(m, re))
 			{
-				std::string match = m.substr(2, m.size() - 2);
+				std::string match = m.substr(2, m.size() - 3);
 				instance<> target;
 
 
