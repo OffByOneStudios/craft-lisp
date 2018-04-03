@@ -189,9 +189,34 @@ void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 		auto res = instance<List>::make();
 
+		auto count = instance<int64_t>::make(0);
+
 		for (auto& i : a->data())
 		{
-			res->push(b->call(frame, { i.first, i.second}));
+			auto call = instance<Sexpr>::make();
+			call->cells = { b, i.first, i.second, count };
+			res->push(frame->getNamespace()->environment()->eval(frame, call));
+			(*count)++;
+		}
+		return res;
+	}));
+	fmap->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<Map, Closure>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<Map> a(expect<List>(args[0]));
+		instance<Closure> b(expect<Closure>(args[1]));
+
+		auto res = instance<List>::make();
+
+		auto count = instance<int64_t>::make(0);
+
+		for (auto& i : a->data())
+		{
+			auto call = instance<Sexpr>::make();
+			call->cells = { b, i.first, i.second, count };
+			res->push(frame->getNamespace()->environment()->eval(frame, call));
+			(*count)++;
 		}
 		return res;
 	}));

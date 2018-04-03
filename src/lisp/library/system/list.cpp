@@ -90,7 +90,8 @@ CRAFT_OBJECT_DEFINE(List)
 		for (auto i = 0; i < s; i++)
 		{
 			auto it = l->at(instance<int64_t>::make(i));
-			if (it.hasFeature<PRepr>()) res << it.getFeature<PRepr>()->toRepr(it);
+			if (it.get() == nullptr) res << "null";
+			else if (it.hasFeature<PRepr>()) res << it.getFeature<PRepr>()->toRepr(it);
 			else
 			{
 				res << fmt::format("{0}<{1}>", it.getFeature<PIdentifier>()->identifier(), (void*)it.get());
@@ -219,9 +220,35 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 		auto res = instance<List>::make();
 
+		auto count = instance<int64_t>::make(0);
+
 		for (auto& i : a->data())
 		{
-			res->push(b->call(frame, { i }));
+			auto call = instance<Sexpr>::make();
+			call->cells = { b, i, count };
+			res->push(frame->getNamespace()->environment()->eval(frame, call));
+			(*count)++;
+		}
+
+		return res;
+	}));
+	fmap->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<List, Closure>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<List> a(expect<List>(args[0]));
+		instance<Closure> b(expect<Closure>(args[1]));
+
+		auto res = instance<List>::make();
+
+		auto count = instance<int64_t>::make(0);
+
+		for (auto& i : a->data())
+		{
+			auto call = instance<Sexpr>::make();
+			call->cells = { b, i, count };
+			res->push(frame->getNamespace()->environment()->eval(frame, call));
+			(*count)++;
 		}
 		return res;
 	}));
