@@ -16,7 +16,7 @@ void system::make_meta_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 	auto meta = instance<MultiMethod>::make();
 	meta->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Symbol, std::string> (),
+		SubroutineSignature::makeFromArgs<Symbol, std::string>(),
 		[](instance<SFrame> frame, auto args)
 	{
 		instance<Symbol> a(expect<Symbol>(args[0]));
@@ -27,6 +27,7 @@ void system::make_meta_globals(instance<Module>& ret, instance<Namespace>& ns)
 		return t->getMeta(*b);
 	}));
 	meta->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeCollectArgs(),
 		[](auto frame, std::vector<instance<>> args)
 	{
 		instance<Symbol> a(expect<Symbol>(args[0]));

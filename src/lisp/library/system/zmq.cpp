@@ -91,9 +91,10 @@ ZSocket::~ZSocket()
 	}
 }
 
-void ZSocket::send(instance<ZMessage> s)
+void ZSocket::send(instance<ZMessage> s, instance<bool> more)
 {
-	auto errval = zmq_sendmsg(_socket, (zmq_msg_t*)s->_msg, 0);
+	auto flags = (*more) ? ZMQ_SNDMORE : 0;
+	auto errval = zmq_sendmsg(_socket, (zmq_msg_t*)s->_msg, flags);
 	if (errval == -1) throw stdext::exception("{0}", zmq_strerror(zmq_errno()));
 }
 
@@ -107,6 +108,15 @@ instance<ZMessage> ZSocket::recv()
 	if (errval == -1) throw stdext::exception("{0}", zmq_strerror(zmq_errno()));
 
 	return res;
+}
+
+instance<bool> craft::lisp::ZSocket::recv_more()
+{
+	int more;
+	size_t more_size = sizeof(more);
+
+	auto rc = zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &more_size);
+	return instance<bool>::make((more != 0));
 }
 
 
@@ -135,6 +145,10 @@ instance<ZSocket> ZContext::bind(instance<std::string> kind, instance<int64_t> p
 	else if ((*kind) == "REP")
 	{
 		zmq_type = ZMQ_REP;
+	}
+	else if ((*kind) == "STREAM")
+	{
+		zmq_type = ZMQ_STREAM;
 	}
 	else
 	{
@@ -246,7 +260,17 @@ void lisp::library::system::make_zmq_globals(instance<Module>& ret, instance<Nam
 	{
 		instance<ZSocket> a(expect<ZSocket>(args[0]));
 		instance<ZMessage> b(expect<ZMessage>(args[1]));
-		a->send(b);
+		a->send(b, instance<bool>::make(false));
+		return instance<>();
+	}));
+	zsend->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<ZSocket, ZMessage, bool>(),
+		[](auto frame, auto args)
+	{
+		instance<ZSocket> a(expect<ZSocket>(args[0]));
+		instance<ZMessage> b(expect<ZMessage>(args[1]));
+		instance<bool> c(expect<bool>(args[2]));
+		a->send(b, c);
 		return instance<>();
 	}));
 	ret->define_eval("zsend", zsend);
@@ -260,4 +284,14 @@ void lisp::library::system::make_zmq_globals(instance<Module>& ret, instance<Nam
 		return a->recv();
 	}));
 	ret->define_eval("zrecv", zrecv);
+
+	auto zmore = instance<MultiMethod>::make();
+	zmore->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<ZSocket>(),
+		[](auto frame, auto args)
+	{
+		instance<ZSocket> a(expect<ZSocket>(args[0]));
+		return a->recv_more();
+	}));
+	ret->define_eval("zmore", zmore);
 }

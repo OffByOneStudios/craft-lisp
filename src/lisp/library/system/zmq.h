@@ -40,8 +40,9 @@ namespace lisp
 		CRAFT_LISP_EXPORTED ZSocket();
 		~ZSocket();
 
-		CRAFT_LISP_EXPORTED void send(instance<ZMessage> s);
+		CRAFT_LISP_EXPORTED void send(instance<ZMessage> s, instance<bool> more);
 		CRAFT_LISP_EXPORTED instance<ZMessage> recv();
+		CRAFT_LISP_EXPORTED instance<bool> recv_more();
 
 		friend class ZContext;
 	};

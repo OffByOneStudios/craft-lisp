@@ -164,7 +164,7 @@ int main(int argc, char** argv)
 		rx.set_max_line_size(128);
 		// set the max number of hint rows to show
 		rx.set_max_hint_rows(8);
-
+		
 		/*Replxx::completions_t hook_completion(std::string const& context, int index, void* user_data);
 		Replxx::hints_t hook_hint(std::string const& context, int index, Replxx::Color& color, void* user_data);
 		void hook_color(std::string const& str, Replxx::colors_t& colors, void* user_data);*/
@@ -218,9 +218,13 @@ int main(int argc, char** argv)
 		};
 		rx.set_highlighter_callback(colors, &live_module);
 
+
+
 		for (;;) {
 			// display the prompt and retrieve input from the user
-			auto input = std::string(rx.input("CULT>"));
+			auto cinp = rx.input("CULT>");
+			if (cinp == nullptr) break;
+			auto input = std::string(cinp);
 
 			instance<Sexpr> top_level;
 			try

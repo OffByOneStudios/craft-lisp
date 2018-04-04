@@ -11,6 +11,33 @@ using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
 
+CRAFT_OBJECT_DEFINE(craft::lisp::library::HttpServer)
+{
+	_.defaults();
+}
+
+namespace craft {
+namespace lisp {
+namespace library {
+
+	HttpServer::HttpServer(std::shared_ptr<spdlog::logger> logger, int port)
+		: craft::net::HttpServer(logger, port)
+	{
+
+	}
+
+	bool HttpEchoServer::handle(net::HTTPRequest& req, net::HttpResponse& rep)
+	{
+		req.path = req.path.substr(1);
+
+		rep.code = 200;
+		rep.content_type = "text/html";
+		rep.data << "<h1>Hello World</h1>";
+
+		return true;
+	}
+}}}
+
 void system::make_http_globals(instance<Module>& ret, instance<Namespace>& ns)
 {
 	auto env = ns->environment();
@@ -42,4 +69,23 @@ void system::make_http_globals(instance<Module>& ret, instance<Namespace>& ns)
 	}));
 
 	ret->define_eval("fetch", fetch);
+
+	
+	
+
+	auto httpserver = instance<MultiMethod>::make();
+	httpserver->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<int64_t, HttpServer>(),
+		[&env](auto frame, auto args)
+	{
+		instance<int64_t> a(expect<int64_t>(args[0]));
+		auto server = instance<HttpServer>::make(spdlog::stdout_color_mt("http"), int32_t(*a));
+		auto hands = new HttpEchoServer();
+		server->handlers.push_back(hands);
+		server->init();
+
+		return server;
+	}));
+
+	ret->define_eval("httpserver", httpserver);
 }

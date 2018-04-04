@@ -444,6 +444,12 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	ret->define_eval("eval", eval);
 
 	
+	auto _true = instance<BuiltinFunction>::make([](auto f, auto a) {return instance<bool>::make(true); });
+	auto _false = instance<BuiltinFunction>::make([](auto f, auto a) {return instance<bool>::make(false); });
+
+	ret->define_eval("#t", _true);
+	ret->define_eval("#f", _false);
+
 	library::system::make_math_globals(ret, ns); // Quick Maths
 	library::system::make_string_globals(ret, ns);
 	library::system::make_shim_globals(ret, ns);
