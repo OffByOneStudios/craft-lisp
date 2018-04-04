@@ -50,6 +50,19 @@ std::vector<instance<SBinding>> const& Module::bindings() const
 	return _bindings;
 }
 
+std::vector<instance<SBinding>> Module::search(std::string const & search)
+{
+	std::vector<instance<SBinding>> res;
+	for (auto& it : _lookup)
+	{
+		if (it.first.find(search) != it.first.npos)
+		{
+			res.push_back(_bindings[it.second]);
+		}
+	}
+	return res;
+}
+
 instance<SBinding> Module::lookup(std::string const& s)
 {
 	auto it = _lookup.find(s);

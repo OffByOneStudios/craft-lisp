@@ -21,6 +21,7 @@ namespace lisp
 		// * Function and Class scopes are
 		CRAFT_LISP_EXPORTED virtual bool isDynamicScope() const = 0;
 
+		CRAFT_LISP_EXPORTED virtual std::vector<instance<SBinding>> search(std::string const&) = 0;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) = 0;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) = 0;
 	};

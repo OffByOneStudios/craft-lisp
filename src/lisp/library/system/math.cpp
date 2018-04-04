@@ -40,7 +40,6 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     auto _uint8 = instance<MultiMethod>::make();
 
   //Binary Operators
-
     _mul->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int8_t, int8_t, int8_t>(),
     	[](auto frame, auto args)
@@ -50,41 +49,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int8_t>::make(*a * *b);
     }));
 
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int16_t, int16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int16_t>::make(*a * *b);
-    }));
 
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int32_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int32_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int8_t, int16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int16_t>::make(*a * *b);
-    }));
 
     _mul->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int16_t, int16_t, int16_t>(),
@@ -95,41 +60,6 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(*a * *b);
     }));
 
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int32_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int32_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int8_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int32_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int16_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int32_t>::make(*a * *b);
-    }));
 
     _mul->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int32_t, int32_t, int32_t>(),
@@ -138,42 +68,6 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	instance<int32_t> a(expect<int32_t>(args[0]));
     	instance<int32_t> b(expect<int32_t>(args[1]));
     	return instance<int32_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int8_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int16_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int32_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int64_t>::make(*a * *b);
     }));
 
     _mul->attach(env, instance<BuiltinFunction>::make(
@@ -195,42 +89,6 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     }));
 
     _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int16_t, int16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int16_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int32_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int32_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int8_t, int16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int16_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int16_t, int16_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -239,42 +97,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(*a + *b);
     }));
 
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int32_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int32_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int8_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int32_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int16_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int32_t>::make(*a + *b);
-    }));
-
+  
     _add->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int32_t, int32_t, int32_t>(),
     	[](auto frame, auto args)
@@ -282,42 +105,6 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	instance<int32_t> a(expect<int32_t>(args[0]));
     	instance<int32_t> b(expect<int32_t>(args[1]));
     	return instance<int32_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int8_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int64_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int16_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int64_t>::make(*a + *b);
-    }));
-
-    _add->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int32_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int64_t>::make(*a + *b);
     }));
 
     _add->attach(env, instance<BuiltinFunction>::make(
@@ -339,42 +126,6 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     }));
 
     _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int16_t, int16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int16_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int32_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int32_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int8_t, int16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int16_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int16_t, int16_t, int16_t>(),
     	[](auto frame, auto args)
     {
@@ -383,42 +134,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int16_t>::make(*a / *b);
     }));
 
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int32_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int32_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int8_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int32_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int16_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int32_t>::make(*a / *b);
-    }));
-
+   
     _div->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int32_t, int32_t, int32_t>(),
     	[](auto frame, auto args)
@@ -428,42 +144,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(*a / *b);
     }));
 
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int8_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int64_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int16_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int64_t>::make(*a / *b);
-    }));
-
-    _div->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int32_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int64_t>::make(*a / *b);
-    }));
-
+   
     _div->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int64_t, int64_t, int64_t>(),
     	[](auto frame, auto args)
@@ -482,42 +163,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int8_t>::make(*a - *b);
     }));
 
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int16_t, int16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int16_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int32_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int32_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int8_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int8_t> a(expect<int8_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int8_t, int16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int16_t>::make(*a - *b);
-    }));
-
+   
     _sub->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int16_t, int16_t, int16_t>(),
     	[](auto frame, auto args)
@@ -525,42 +171,6 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	instance<int16_t> a(expect<int16_t>(args[0]));
     	instance<int16_t> b(expect<int16_t>(args[1]));
     	return instance<int16_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int32_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int32_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int16_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int16_t> a(expect<int16_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int8_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int32_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int16_t, int32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int32_t>::make(*a - *b);
     }));
 
     _sub->attach(env, instance<BuiltinFunction>::make(
@@ -572,42 +182,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<int32_t>::make(*a - *b);
     }));
 
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int32_t, int64_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int32_t> a(expect<int32_t>(args[0]));
-    	instance<int64_t> b(expect<int64_t>(args[1]));
-    	return instance<int64_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int8_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int8_t> b(expect<int8_t>(args[1]));
-    	return instance<int64_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int16_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int16_t> b(expect<int16_t>(args[1]));
-    	return instance<int64_t>::make(*a - *b);
-    }));
-
-    _sub->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<int64_t, int32_t, int64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<int64_t> a(expect<int64_t>(args[0]));
-    	instance<int32_t> b(expect<int32_t>(args[1]));
-    	return instance<int64_t>::make(*a - *b);
-    }));
-
+   
     _sub->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<int64_t, int64_t, int64_t>(),
     	[](auto frame, auto args)
@@ -626,42 +201,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<uint8_t>::make(*a * *b);
     }));
 
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint8_t, uint16_t, uint16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint8_t> a(expect<uint8_t>(args[0]));
-    	instance<uint16_t> b(expect<uint16_t>(args[1]));
-    	return instance<uint16_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint8_t, uint32_t, uint32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint8_t> a(expect<uint8_t>(args[0]));
-    	instance<uint32_t> b(expect<uint32_t>(args[1]));
-    	return instance<uint32_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint8_t, uint64_t, uint64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint8_t> a(expect<uint8_t>(args[0]));
-    	instance<uint64_t> b(expect<uint64_t>(args[1]));
-    	return instance<uint64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint16_t, uint8_t, uint16_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint16_t> a(expect<uint16_t>(args[0]));
-    	instance<uint8_t> b(expect<uint8_t>(args[1]));
-    	return instance<uint16_t>::make(*a * *b);
-    }));
-
+    
     _mul->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint16_t, uint16_t, uint16_t>(),
     	[](auto frame, auto args)
@@ -669,42 +209,6 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	instance<uint16_t> a(expect<uint16_t>(args[0]));
     	instance<uint16_t> b(expect<uint16_t>(args[1]));
     	return instance<uint16_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint16_t, uint32_t, uint32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint16_t> a(expect<uint16_t>(args[0]));
-    	instance<uint32_t> b(expect<uint32_t>(args[1]));
-    	return instance<uint32_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint16_t, uint64_t, uint64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint16_t> a(expect<uint16_t>(args[0]));
-    	instance<uint64_t> b(expect<uint64_t>(args[1]));
-    	return instance<uint64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint32_t, uint8_t, uint32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint32_t> a(expect<uint32_t>(args[0]));
-    	instance<uint8_t> b(expect<uint8_t>(args[1]));
-    	return instance<uint32_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint32_t, uint16_t, uint32_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint32_t> a(expect<uint32_t>(args[0]));
-    	instance<uint16_t> b(expect<uint16_t>(args[1]));
-    	return instance<uint32_t>::make(*a * *b);
     }));
 
     _mul->attach(env, instance<BuiltinFunction>::make(
@@ -716,42 +220,7 @@ void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns)
     	return instance<uint32_t>::make(*a * *b);
     }));
 
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint32_t, uint64_t, uint64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint32_t> a(expect<uint32_t>(args[0]));
-    	instance<uint64_t> b(expect<uint64_t>(args[1]));
-    	return instance<uint64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint64_t, uint8_t, uint64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint64_t> a(expect<uint64_t>(args[0]));
-    	instance<uint8_t> b(expect<uint8_t>(args[1]));
-    	return instance<uint64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint64_t, uint16_t, uint64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint64_t> a(expect<uint64_t>(args[0]));
-    	instance<uint16_t> b(expect<uint16_t>(args[1]));
-    	return instance<uint64_t>::make(*a * *b);
-    }));
-
-    _mul->attach(env, instance<BuiltinFunction>::make(
-    	SubroutineSignature::makeFromArgsAndReturn<uint64_t, uint32_t, uint64_t>(),
-    	[](auto frame, auto args)
-    {
-    	instance<uint64_t> a(expect<uint64_t>(args[0]));
-    	instance<uint32_t> b(expect<uint32_t>(args[1]));
-    	return instance<uint64_t>::make(*a * *b);
-    }));
-
+    
     _mul->attach(env, instance<BuiltinFunction>::make(
     	SubroutineSignature::makeFromArgsAndReturn<uint64_t, uint64_t, uint64_t>(),
     	[](auto frame, auto args)

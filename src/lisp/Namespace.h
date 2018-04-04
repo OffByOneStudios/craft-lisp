@@ -42,6 +42,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<Namespace> namespace_() const override;
 		inline virtual bool isDynamicScope() const override { return false; }
 		CRAFT_LISP_EXPORTED virtual instance<SScope> parent() const override;
+		CRAFT_LISP_EXPORTED virtual std::vector<instance<SBinding>> search(std::string const&) override;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> lookup(std::string const&) override;
 		CRAFT_LISP_EXPORTED virtual instance<SBinding> define(std::string name, instance<> value) override;
 	};

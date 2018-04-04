@@ -71,6 +71,7 @@ namespace lisp {
 			void make_platform_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_buffer_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_security_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_repl_globals(instance<Module>& m, instance<Namespace>& ns);
 		}
 	}
 

@@ -140,4 +140,49 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 		return instance<std::string>::make(s.str());
 	}));
 	ret->define_eval("fmt", fmt);
+
+	auto join = instance<MultiMethod>::make();
+	join->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<List, std::string>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<List> a(expect<List>(args[0]));
+		instance<std::string> b(expect<std::string>(args[1]));
+
+		std::ostringstream res;
+
+		auto count = 0;
+		for (auto& i : a->data())
+		{
+			if (i.typeId() == type<std::string>().typeId())
+			{
+				res << *i.asType<std::string>();
+			}
+			else if (i.hasFeature<PStringer>())
+			{
+				res << i.asFeature<PStringer>()->toString(i);
+			}
+			else
+			{
+				res << i.asFeature<PIdentifier>()->identifier() << fmt::format("{0}", (uint64_t)i.get());
+			}
+			if (count != (*a->size()) - 1) res << *b;
+			count++;
+		}
+
+		return instance<std::string>::make(res.str());
+	}));
+
+	join->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<List>(),
+		[join](instance<SFrame> frame, auto args)
+	{
+		instance<List> a(expect<List>(args[0]));
+		auto b = instance<std::string>::make("\n"); 
+		auto call = instance<Sexpr>::make();
+		call->cells = { join, a, b};
+		return frame->getNamespace()->environment()->eval(frame, call);
+	}));
+	
+	ret->define_eval("join", join);
 }

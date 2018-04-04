@@ -95,6 +95,20 @@ instance<SScope> Namespace::parent() const
 	return instance<SScope>();
 }
 
+std::vector<instance<SBinding>> Namespace::search(std::string const & search)
+{
+	std::vector<instance<SBinding>> res;
+	for (auto& it : _lookup)
+	{
+		if (it.first.find(search) != it.first.npos)
+		{
+			res.push_back(it.second);
+		}
+	}
+	return res;
+
+}
+
 instance<SBinding> Namespace::lookup(std::string const& s)
 {
 	auto it = _lookup.find(s);

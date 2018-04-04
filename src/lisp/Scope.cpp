@@ -41,6 +41,19 @@ instance<SScope> Scope::parent() const
 	return _parent;
 }
 
+std::vector<instance<SBinding>> Scope::search(std::string const & search)
+{
+	std::vector<instance<SBinding>> res;
+	for (auto& it : _lookup)
+	{
+		if (it.first.find(search) != it.first.npos)
+		{
+			res.push_back(it.second);
+		}
+	}
+	return res;
+}
+
 instance<SBinding> Scope::lookup(std::string const& s)
 {
 	auto it = _lookup.find(s);

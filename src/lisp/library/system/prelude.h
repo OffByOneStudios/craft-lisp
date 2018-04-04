@@ -14,12 +14,12 @@ namespace library
 		std::vector<uint8_t> _data;
 
 	public:
-		Buffer(instance<int64_t> size);
-		instance<int64_t> size();
-		instance<int64_t> at(instance<int64_t> i);
-		void set(instance<int64_t> i, instance<int64_t> d);
-		std::vector<uint8_t>& data(); 
-		instance<Buffer> join(instance<Buffer> other);
+		CRAFT_LISP_EXPORTED Buffer(instance<int64_t> size);
+		CRAFT_LISP_EXPORTED instance<int64_t> size();
+		CRAFT_LISP_EXPORTED instance<int64_t> at(instance<int64_t> i);
+		CRAFT_LISP_EXPORTED void set(instance<int64_t> i, instance<int64_t> d);
+		CRAFT_LISP_EXPORTED std::vector<uint8_t>& data();
+		CRAFT_LISP_EXPORTED instance<Buffer> join(instance<Buffer> other);
 	};
 
 	class List
@@ -31,15 +31,15 @@ namespace library
 
 	public:
 
-		instance<int64_t> size();
-		instance<> at(instance<int64_t> i);
-		void insert(instance<int64_t> i, instance<> v);
-		void erase(instance<int64_t> i);
-		void reverse();
-		void push(instance<> i);
-		instance<> pop();
-		instance<List> slice(instance<int64_t> i, instance<int64_t> j);
-		std::vector<instance<>>& data();
+		CRAFT_LISP_EXPORTED instance<int64_t> size();
+		CRAFT_LISP_EXPORTED instance<> at(instance<int64_t> i);
+		CRAFT_LISP_EXPORTED void insert(instance<int64_t> i, instance<> v);
+		CRAFT_LISP_EXPORTED void erase(instance<int64_t> i);
+		CRAFT_LISP_EXPORTED void reverse();
+		CRAFT_LISP_EXPORTED void push(instance<> i);
+		CRAFT_LISP_EXPORTED instance<> pop();
+		CRAFT_LISP_EXPORTED instance<List> slice(instance<int64_t> i, instance<int64_t> j);
+		CRAFT_LISP_EXPORTED std::vector<instance<>>& data();
 	};
 
 	class Map
@@ -63,14 +63,14 @@ namespace library
 
 	public:
 
-		instance<int64_t> size();
+		CRAFT_LISP_EXPORTED instance<int64_t> size();
 
-		instance<> at(instance<> i);
+		CRAFT_LISP_EXPORTED instance<> at(instance<> i);
 
-		void insert(instance<> i, instance<> v);
-		void erase(instance<> i);
-		std::map<instance<>, instance<>, cmpByInstanceSemantics>& data();
-		std::vector<instance<>> keys();
-		std::vector<instance<>> values();
+		CRAFT_LISP_EXPORTED void insert(instance<> i, instance<> v);
+		CRAFT_LISP_EXPORTED void erase(instance<> i);
+		CRAFT_LISP_EXPORTED std::map<instance<>, instance<>, cmpByInstanceSemantics>& data();
+		CRAFT_LISP_EXPORTED std::vector<instance<>> keys();
+		CRAFT_LISP_EXPORTED std::vector<instance<>> values();
 	};
 }}}

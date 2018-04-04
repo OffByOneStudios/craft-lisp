@@ -1,0 +1,72 @@
+(define typeNames (list "int8" "int16" "int32" "int64" "uint8" "uint16" "uint32" "uint64" "float" "double"))
+(define numTypes (list "int8_t" "int16_t" "int32_t" "int64_t" "uint8_t" "uint16_t" "uint32_t" "uint64_t" "float" "double"))
+(define gmpTypes (list "mpz_class" "mpq_class" "mpf_class"))
+(define ringops (map "plu" "+"  "div" "/" "mul" "*" "sub" "-"))
+
+
+(define castTemplate "  %{0}->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<%{1}, %{2}>(),[](auto frame, auto args){instance<%{0}> a(expect<%{1}>(args[0]));return instance<%{2}>::make(%{2}(*a));}))")
+
+(define ringTemplate "
+%{0}->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<%{1}, %{1}, %{1}>(),[](auto frame, auto args){
+  instance<%{1}> a(expect<int8_t>(args[0]));
+  instance<%{1}> b(expect<int16_t>(args[1]));
+  return instance<%{1}>::make(*a * *b);
+}));")
+
+
+(define prelude 
+  (lfmap numTypes 
+    (fn (ntype i) 
+      (fmt "		auto %{0} = instance<MultiMethod>::make();" (fmt "_cast_%{0}" ntype))
+    )
+  )
+)
+
+(define rings (mfmap ringops 
+  (fn (opname opkey i) 
+    (do
+      (define ts (lfmap numTypes 
+        (fn (typename j) 
+          (do
+            (fmt ringTemplate (fmt "_%{0}" opname) typename)
+          )
+        )
+      ))
+      (join ts)
+    )
+  )
+))
+
+(define casters (lfmap numTypes 
+  (fn (e i) 
+    (do
+      (define ts (lfmap numTypes 
+        (fn (f j) 
+          (do
+            (fmt castTemplate (fmt "_cast_%{0}" e) e f)
+          )
+        )
+      ))
+      (join ts)
+    )
+  )
+))
+
+(define epilogue 
+  (lfmap numTypes 
+    (fn (ntype i) 
+      (fmt "		ret->define_eval(%{0}, %{1});" ntype (fmt "_cast_%{0}" ntype))
+    )
+  )
+)
+
+
+; (print "void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns) {")
+(print (join prelude))
+(print (join casters))
+(print (join epilogue))
+
+;(print (join rings))
+; (print "}")
+
+

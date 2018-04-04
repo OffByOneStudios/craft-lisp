@@ -19,7 +19,7 @@ namespace lisp
 		// TODO make this an actual immutable list
 		std::vector<instance<>> cells;
 
-		virtual std::string toString() const;
+		CRAFT_LISP_EXPORTED virtual std::string toString() const;
 
 		inline instance<> car() const
 		{
