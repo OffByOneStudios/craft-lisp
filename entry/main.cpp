@@ -156,7 +156,7 @@ int main(int argc, char** argv)
 
 		Replxx rx;
 		rx.install_window_change_handler();
-		std::string history_file{ "./replxx_history.txt" };
+		std::string history_file(path::join(path::system_data_path(), "culthistory.cult"));
 		rx.history_load(history_file);
 		// set the max history size
 		rx.set_max_history_size(12);
@@ -164,11 +164,14 @@ int main(int argc, char** argv)
 		rx.set_max_line_size(128);
 		// set the max number of hint rows to show
 		rx.set_max_hint_rows(8);
+		rx.set_beep_on_ambiguous_completion(false);
+		rx.set_word_break_characters("() ");
+		//rx.set_special_prefixes("()");
 		
 		/*Replxx::completions_t hook_completion(std::string const& context, int index, void* user_data);
 		Replxx::hints_t hook_hint(std::string const& context, int index, Replxx::Color& color, void* user_data);
 		void hook_color(std::string const& str, Replxx::colors_t& colors, void* user_data);*/
-		std::function<Replxx::hints_t(std::string const& context, int index, void* user_data)> complete = [](std::string const& context, int index, void* user_data)->Replxx::hints_t { 
+		std::function<Replxx::completions_t(std::string const& context, int index, void* user_data)> complete = [](std::string const& context, int index, void* user_data)->Replxx::hints_t {
 			auto module = *static_cast<instance<Module>*>(user_data);
 			Replxx::completions_t completions;
 

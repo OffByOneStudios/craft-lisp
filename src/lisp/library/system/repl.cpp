@@ -20,16 +20,33 @@ void system::make_repl_globals(instance<Module>& ret, instance<Namespace>& ns)
 		[](instance<SFrame> frame, auto args)
 	{
 		instance<std::string> a(expect<std::string>(args[0]));
-		instance<std::string> b(expect<int64_t>(args[1]));
+		instance<int64_t> b(expect<int64_t>(args[1]));
 
-		auto query = std::regex_replace(*a, std::regex("[()]"), "");
-		auto choices = frame->getNamespace()->search(query);
+
 		auto res = instance<List>::make();
-		for (auto s : choices)
+
+		if (size_t(*b) < a->length())
 		{
-			res->push(instance<std::string>::make(s->name()));
+			auto query = a->substr(size_t(*b));
+			auto choices = frame->getNamespace()->search(query);
+			for (auto s : choices)
+			{
+				res->push(instance<std::string>::make(s->name()));
+			}
+		}
+		else
+		{
+			auto lp = a->rfind('(');
+			if (lp != a->npos)
+			{
+				auto n = a->find(' ', lp);
+				auto symbol = a->substr(lp + 1, n);
+			}
+			
+
 		}
 		return res;
+		
 
 	}));
 	ret->define_eval("replcomplete", _complete);
