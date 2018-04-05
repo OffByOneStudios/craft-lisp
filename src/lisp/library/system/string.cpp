@@ -88,7 +88,7 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 	auto fmt = instance<MultiMethod>::make();
 	fmt->attach(env, instance<BuiltinFunction>::make(
 		SubroutineSignature::makeCollectArgs(),
-		[str](instance<SFrame> frame, std::vector<instance<>> args) mutable
+		[str, env](instance<SFrame> frame, std::vector<instance<>> args) mutable
 	{
 		std::regex re("%\\{[^\\}]+\\}");
 		std::ostringstream s;
@@ -126,7 +126,7 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 				}
 				else
 				{
-					target = frame->getNamespace()->lookup(match)->getValue(frame);
+					target = env->eval(match);
 				}
 
 				instance<std::string> c = str->call(frame, { target });
