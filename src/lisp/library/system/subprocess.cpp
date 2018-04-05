@@ -57,7 +57,7 @@ namespace library
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::Subprocess);
 	private:
-		STARTUPINFO si;
+		STARTUPINFOA si;
 		PROCESS_INFORMATION pi;
 
 		HANDLE _stdinRead = NULL;
@@ -107,14 +107,14 @@ namespace library
 				throw stdext::exception("Failed to set stdin Pipe's security info {0}", _impl::GetLastErrorAsString());
 			}
 			
-			si.cb = sizeof(STARTUPINFO);
+			si.cb = sizeof(STARTUPINFOA);
 			si.hStdError = _stdoutWrite;
 			si.hStdOutput = _stdoutWrite;
 			si.hStdInput = _stdinRead;
 			si.dwFlags |= STARTF_USESTDHANDLES;
 
 
-			if (!CreateProcess(NULL,   // No module name (use command line)
+			if (!CreateProcessA(NULL,   // No module name (use command line)
 				(LPSTR)s->c_str(),        // Command line
 				NULL,           // Process handle not inheritable
 				NULL,           // Thread handle not inheritable

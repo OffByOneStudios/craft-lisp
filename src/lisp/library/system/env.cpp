@@ -3,6 +3,9 @@
 #include "lisp/library/libraries.h"
 #include "prelude.h"
 
+#include <locale> 
+#include <codecvt>
+
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
@@ -18,7 +21,7 @@ namespace _impl {
 	{
 #ifdef _WIN32
 		std::string res(32767, '\0');
-		auto rsize = GetEnvironmentVariable(s->c_str(), (LPSTR)res.data(), 32767);
+		auto rsize = GetEnvironmentVariableA(s->c_str(), (LPSTR)res.data(), 32767);
 		res.resize(rsize);
 		return instance<std::string>::make(res);
 #else
@@ -32,10 +35,10 @@ namespace _impl {
 	{
 #ifdef _WIN32
 		std::string res(32767, '\0');
-		auto rsize = GetEnvironmentVariable(k->c_str(), (LPSTR)res.data(), 32767);
+		auto rsize = GetEnvironmentVariableA(k->c_str(), (LPSTR)res.data(), 32767);
 		res.resize(rsize);
 
-		SetEnvironmentVariable(k->c_str(), v->c_str());
+		SetEnvironmentVariableA(k->c_str(), v->c_str());
 		return instance<std::string>::make(res);
 #else
 		char* pPath;
@@ -49,8 +52,8 @@ namespace _impl {
 	instance<Map> listEnv()
 	{
 #ifdef _WIN32
-		char* strings = (char*)GetEnvironmentStringsA();
-		char* b = strings;
+		wchar_t* strings = (wchar_t*)GetEnvironmentStrings();
+		wchar_t* b = strings;
 #else
 		char* b = (char*) environ;
 #endif
@@ -59,14 +62,14 @@ namespace _impl {
 		bool found = false;
 		while (*b)
 		{
-			auto kv = std::string(b);
+			auto kv = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(b);//std::string(b);
 			b += kv.size() + 1;
 			auto i = kv.find('=');
 			res->insert(instance<std::string>::make(kv.substr(0, i)), instance<std::string>::make(kv.substr(i + 1)));
 		}
 			
 #ifdef _WIN32
-		FreeEnvironmentStringsA((LPCH)strings);
+		FreeEnvironmentStringsW((LPWCH)strings);
 #endif
 		return res;
 	}
