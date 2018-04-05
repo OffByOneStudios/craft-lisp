@@ -86,15 +86,6 @@ namespace library
 
 		inline virtual ~HttpServer() {};
 	};
-
-	class HttpEchoServer
-		: public craft::net::HTTPRequestHandler
-	{
-		
-	private:
-	public:
-		CRAFT_LISP_EXPORTED virtual bool handle(net::HTTPRequest& req, net::HttpResponse& rep) override;
-	};
 }}}
 
 namespace json {
