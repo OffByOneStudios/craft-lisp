@@ -1,0 +1,52 @@
+; Hello Server
+
+(define posts (list "First Post" "Second Post" "Third Post"))
+
+(define routes (map
+  "/posts" (fn (req rep) 
+    (do
+      (mset rep "content-type" "application/json")
+      (fmt "%{0}" (list 
+        (map "id" 0 "likes" 2234 "content" "Lorum Ipsum... 4")
+        (map "id" 1 "likes" 2534 "content" "Lorum Ipsum... 3")
+        (map "id" 2 "likes" 1234 "content" "Lorum Ipsum... 2")
+      ))
+    )
+  )
+  "404" (fn (req rep) 
+    (do
+      (mset rep "code" 404)
+      (mset rep "content-type" "application/json")
+      (fmt "%{0}" (map "error" "Not Found" "code" 404))
+    )
+  )
+))
+
+
+
+
+(define handler (fn (req rep) 
+  (do
+    (define route (mget routes (mget req "path")))
+    
+    (cond (! (isnull route))
+      (route req rep)
+      (do
+        ; Error Handler
+        (define err (mget routes "404"))
+        (cond (! (isnull route))
+          (err req rep)
+          (do
+            ; Missing Error Handler (For Whatever Reason)
+            (mset rep "code" 404)
+            (mset rep "content-type" "application/json")
+            "Not Found"
+          )
+        )
+      )
+    )
+  )
+))
+(print "Serving on http://127.0.0.1:6112")
+(define server (httpserver 6112 handler))
+(httpforever server)

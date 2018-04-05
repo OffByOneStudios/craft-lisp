@@ -204,6 +204,20 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	ret->define_eval("truth", truth);
 	ret->define_eval("?", truth);
 
+	auto isNull = instance<MultiMethod>::make();
+	isNull->attach(env, instance<BuiltinFunction>::make(
+		[](auto frame, std::vector<instance<>> const& args)
+	{
+		for (auto i : args)
+		{
+			if(i.get() == nullptr) return instance<bool>::make(true);
+		}
+		return instance<bool>::make(false);
+	}));
+	ret->define_eval("isnull", isNull);
+
+
+
 	// -- Special Forms --
 	auto do_ = instance<SpecialForm>::make(
 		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>

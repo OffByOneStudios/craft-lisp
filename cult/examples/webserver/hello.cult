@@ -1,0 +1,6 @@
+; Hello Server
+
+(define handler  (fn (req rep) "Hello World"))
+(print "Serving on http://127.0.0.1:6112")
+(define server (httpserver 6112 handler))
+(httpforever server)

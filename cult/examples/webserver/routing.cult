@@ -1,0 +1,106 @@
+; Hello Server
+
+(define posts (list "First Post" "Second Post" "Third Post"))
+
+(define routes (map
+  "/index" (fn (req rep) 
+    (do
+      (mset rep "content-type" "text/html")
+      (fmt '
+        <!DOCTYPE html>
+          <html lang="en">
+            <title> </title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+            <body>
+              <article class="mw7 center ph3 ph5-ns tc br2 pv5 bg-washed-green dark-green mb5">
+                <h1 class="fw6 f3 f2-ns lh-title mt0 mb3">
+                  This is a Demo of Cultlangs WebServer
+                </h1>
+                <h2 class="fw2 f4 lh-copy mt0 mb3">
+                  This Code was copied from The Components page of Tachyons.
+                </h2>
+                <p class="fw1 f5 mt0 mb3">
+                  learn more by clicking below
+                </p>
+                <div>
+                  <a class="f6 br-pill bg-dark-green no-underline washed-green ba b--dark-green grow pv2 ph3 dib mr3"
+                    href="/posts">
+                    Posts
+                  </a>
+                  <a class="f6 br-pill dark-green no-underline ba grow pv2 ph3 dib"
+                    href="/fishtacos">
+                    See the Error Page
+                  </a>
+                </div>
+              </article>
+            </body>
+          </html>
+      ')
+    )
+  )
+  "/posts" (fn (req rep) 
+    (do
+      (mset rep "content-type" "text/html")
+      (define postbody (join (lfmap posts (fn (e i) (fmt "<li>%{0}</li>" e)))))
+      (fmt '
+        <!DOCTYPE html>
+          <html lang="en">
+            <title> </title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+            <body>
+              %{0}
+            </body>
+          </html>
+      ' postbody)
+    )
+  )
+  "404" (fn (req rep) 
+    (do
+      (mset rep "code" 404)
+      (mset rep "content-type" "text/html")
+      (fmt '
+        <!DOCTYPE html>
+          <html lang="en">
+            <title>You Messed Up</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+            <body>
+              I Do not have any routes. did you even read the source code bro?
+            </body>
+          </html>
+      ')
+    )
+  )
+))
+
+
+
+
+(define handler (fn (req rep) 
+  (do
+    (print (mget req "path"))
+    (define route (mget routes (mget req "path")))
+    
+    (cond (! (isnull route))
+      (route req rep)
+      (do
+        ; Error Handler
+        (define err (mget routes "404"))
+        (cond (! (isnull route))
+          (err req rep)
+          (do
+            ; Missing Error Handler (For Whatever Reason)
+            (mset rep "code" 404)
+            (mset rep "content-type" "text/html")
+            "Not Found"
+          )
+        )
+      )
+    )
+  )
+))
+(print "Serving on http://127.0.0.1:6112")
+(define server (httpserver 6112 handler))
+(httpforever server)
