@@ -1,8 +1,9 @@
-#include "lisp/common.h"
+﻿#include "lisp/common.h"
 #include "lisp/lisp.h"
 
 #include <stack>
 #include <queue>
+
 
 #include "replxx/replxx.hxx"
 #include "lisp/library/system/prelude.h"
@@ -11,57 +12,6 @@
 using namespace craft;
 using namespace craft::lisp;
 
-
-//
-//// the default read-eval-print-loop
-//void repl(const std::string & prompt, instance<Environment> env)
-//{
-//	std::string long_line = "";
-//
-//	auto live_module = env->ns_user->requireModule("repl:console");
-//
-//	for (;;)
-//	{
-//		if (long_line.empty())
-//			std::cout << prompt;
-//		else
-//			std::cout << std::string(prompt.size(), '.');
-//
-//		std::string line;
-//		std::getline(std::cin, line);
-//		long_line += line;
-//
-//		instance<Sexpr> top_level;
-//		try
-//		{
-//			top_level = env->parse(env->ns_user, long_line);
-//		}
-//		catch (std::exception const& e)
-//		{
-//			if (line.empty())
-//			{
-//				long_line = "";
-//				std::cout << "parser: " << e.what() << '\n';
-//			}
-//
-//			continue;
-//		}
-//
-//		long_line = "";
-//
-//		try
-//		{
-//			if (top_level)
-//			{
-//				std::cout << live_module->liveContinueWith(top_level).toString() << '\n';
-//			}
-//		}
-//		catch (std::exception const& e)
-//		{
-//			std::cout << e.what() << '\n';
-//		}
-//	}
-//}
 
 namespace _impl {
 	using cl = replxx::Replxx::Color;
@@ -125,6 +75,7 @@ namespace _impl {
 
 int main(int argc, char** argv)
 {
+
 	::craft::types::system().init();
 	instance<Environment> global_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"));
 	
@@ -141,9 +92,11 @@ int main(int argc, char** argv)
 		}
 		try
 		{
-			global_env->eval(f);
+			auto live_module = global_env->ns_user->requireModule("repl:console");
+			auto top_level = global_env->parse(global_env->ns_user, f);
+			live_module->liveContinueWith(top_level);
 		}
-		catch (std::exception e)
+		catch (stdext::exception e)
 		{
 			global_env->log()->error(e.what());
 			return -1;
@@ -166,6 +119,7 @@ int main(int argc, char** argv)
 		rx.set_max_hint_rows(8);
 		rx.set_beep_on_ambiguous_completion(false);
 		rx.set_word_break_characters("() ");
+		
 		//rx.set_special_prefixes("()");
 		
 		/*Replxx::completions_t hook_completion(std::string const& context, int index, void* user_data);
@@ -225,7 +179,7 @@ int main(int argc, char** argv)
 
 		for (;;) {
 			// display the prompt and retrieve input from the user
-			auto cinp = rx.input("CULT>");
+			auto cinp = rx.input("CμλΤ>");
 			if (cinp == nullptr) break;
 			auto input = std::string(cinp);
 
