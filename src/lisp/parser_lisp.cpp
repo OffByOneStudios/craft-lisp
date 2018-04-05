@@ -46,12 +46,17 @@ namespace lisp_grammar
 	struct true_ : tao::pegtl::string< 't', 'r', 'u', 'e' > {};
 	struct false_ : tao::pegtl::string < 'f', 'a', 'l', 's', 'e'> {};
 	
-	struct string : sor<
-		if_must< one< '\'' >, until< one< '\'' >, star < utf8::not_one < '\'' > > > >,
-		if_must< one< '"' >, until< one< '"' >, star < utf8::not_one < '"' > > > >
+
+	struct triplequote : tao::pegtl::string<'"', '"', '"'> {};
+
+	struct triplestring : if_must< triplequote, until<triplequote> > {};
+	struct singlestring : if_must< one< '"' >, until< one< '"' > > > {};
+	struct strings : sor<
+		triplestring,
+		singlestring
 	>{};
 
-	struct atom : sor<null, true_, false_, string, number, keyword, symbol > {};
+	struct atom : sor<null, true_, false_, strings, number, keyword, symbol > {};
 
 	// List type
 	struct sexpr : if_must< sexpr_open, until< sexpr_close, anything > >{};
@@ -163,7 +168,18 @@ namespace lisp_grammar
 	};
 
 	template<>
-	struct lisp_action< string >
+	struct lisp_action< triplestring >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			std::string pstr = in.string();
+			ps.top()->cells.push_back(instance<std::string>::make(pstr.substr(1 * 3, pstr.size() - 2 * 3)));
+		}
+	};
+
+	template<>
+	struct lisp_action< singlestring >
 	{
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)

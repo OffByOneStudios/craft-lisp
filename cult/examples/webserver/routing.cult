@@ -6,7 +6,7 @@
   "/index" (fn (req rep) 
     (do
       (mset rep "content-type" "text/html")
-      (fmt '
+      (fmt """
         <!DOCTYPE html>
           <html lang="en">
             <title> </title>
@@ -36,14 +36,14 @@
               </article>
             </body>
           </html>
-      ')
+      """)
     )
   )
   "/posts" (fn (req rep) 
     (do
       (mset rep "content-type" "text/html")
       (define postbody (join (lfmap posts (fn (e i) (fmt "<li>%{0}</li>" e)))))
-      (fmt '
+      (fmt """
         <!DOCTYPE html>
           <html lang="en">
             <title> </title>
@@ -53,14 +53,14 @@
               %{0}
             </body>
           </html>
-      ' postbody)
+      """ postbody)
     )
   )
   "404" (fn (req rep) 
     (do
       (mset rep "code" 404)
       (mset rep "content-type" "text/html")
-      (fmt '
+      (fmt """
         <!DOCTYPE html>
           <html lang="en">
             <title>You Messed Up</title>
@@ -70,7 +70,7 @@
               I Do not have any routes. did you even read the source code bro?
             </body>
           </html>
-      ')
+      """)
     )
   )
 ))
