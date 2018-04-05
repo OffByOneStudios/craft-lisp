@@ -37,7 +37,7 @@ void system::make_platform_globals(instance<Module>& ret, instance<Namespace>& n
 		instance<std::string> a = expect<std::string>(args[0]);
 		auto target = path::normalize(*a);
 #ifdef _WIN32
-		auto handle = LoadLibrary(target.c_str());
+		auto handle = LoadLibraryA(target.c_str());
 		if (handle == nullptr) throw stdext::exception(_impl::GetLastErrorAsString());
 		return instance<int64_t>::make(int64_t(handle));
 #endif
