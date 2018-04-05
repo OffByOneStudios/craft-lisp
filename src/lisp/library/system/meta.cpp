@@ -14,34 +14,31 @@ void system::make_meta_globals(instance<Module>& ret, instance<Namespace>& ns)
 {
 	auto env = ns->environment();
 
-	auto meta = instance<MultiMethod>::make();
-	meta->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Symbol, std::string>(),
-		[](instance<SFrame> frame, auto args)
+	auto getmeta = instance<Macro>::make(
+		[](instance<SScope> scope, std::vector<instance<>> const& code)
 	{
-		instance<Symbol> a(expect<Symbol>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
+		instance<Symbol> a(expect<Symbol>(code[1]));
+		instance<std::string> b(expect<std::string>(code[2]));
 
 
-		auto t = frame->getNamespace()->lookup(a->value);
+		auto t = scope->namespace_()->lookup(a->value);
 		return t->getMeta(*b);
-	}));
-	meta->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeCollectArgs(),
-		[](auto frame, std::vector<instance<>> args)
+	});
+	ret->define_eval("getmeta", getmeta);
+	
+	auto setmeta = instance<Macro>::make(
+		[](instance<SScope> scope, std::vector<instance<>> const& code)
 	{
-		instance<Symbol> a(expect<Symbol>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
+		instance<Symbol> a(expect<Symbol>(code[1]));
+		instance<std::string> b(expect<std::string>(code[2]));
 
-		instance<std::string> c = args[2].asType<std::string>();
-
-		auto t = frame->getNamespace()->lookup(a->value);
+		auto t = scope->namespace_()->lookup(a->value);
 
 		auto res = t->getMeta(*b);
-		t->addMeta(*b, c);
+		t->addMeta(*b, code[3]);
 
 		return res;
-	}));
-
-	ret->define_eval("meta", meta);
+	});
+	ret->define_eval("setmeta", setmeta);
+	
 }
