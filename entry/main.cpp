@@ -101,6 +101,11 @@ int main(int argc, char** argv)
 			global_env->log()->error(e.what());
 			return -1;
 		}
+		catch (std::exception e)
+		{
+			global_env->log()->error(e.what());
+			return -1;
+		}
 	}
 	else
 	{
