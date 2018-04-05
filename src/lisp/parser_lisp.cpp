@@ -46,7 +46,10 @@ namespace lisp_grammar
 	struct true_ : tao::pegtl::string< 't', 'r', 'u', 'e' > {};
 	struct false_ : tao::pegtl::string < 'f', 'a', 'l', 's', 'e'> {};
 	
-	struct string : if_must< one< '"' >, until< one< '"' >, star < utf8::not_one < '"' > > > > {};
+	struct string : sor<
+		if_must< one< '\'' >, until< one< '\'' >, star < utf8::not_one < '\'' > > > >,
+		if_must< one< '"' >, until< one< '"' >, star < utf8::not_one < '"' > > > >
+	>{};
 
 	struct atom : sor<null, true_, false_, string, number, keyword, symbol > {};
 
