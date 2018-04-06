@@ -205,7 +205,7 @@ void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 		SubroutineSignature::makeFromArgs<Map, Closure>(),
 		[](instance<SFrame> frame, auto args)
 	{
-		instance<Map> a(expect<List>(args[0]));
+		instance<Map> a(expect<Map>(args[0]));
 		instance<Closure> b(expect<Closure>(args[1]));
 
 		auto res = instance<List>::make();
