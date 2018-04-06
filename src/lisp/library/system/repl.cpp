@@ -40,7 +40,39 @@ void system::make_repl_globals(instance<Module>& ret, instance<Namespace>& ns)
 			if (lp != a->npos)
 			{
 				auto n = a->find(' ', lp);
-				auto symbol = a->substr(lp + 1, n);
+				auto symbol = a->substr(lp + 1, n - 1);
+				try
+				{
+					auto b = frame->getNamespace()->lookup(symbol);
+					auto completer = b->getMeta("completion");
+
+					instance<Function> target;
+					if (completer.typeId().isType<Symbol>())
+					{
+						auto s = frame->getNamespace()->lookup(completer.asType<Symbol>()->value)->getValue(frame);
+						auto kind = s.getFeature<PIdentifier>()->identifier();
+						if (s.typeId().isType<MultiMethod>())
+						{
+							auto _res = s.asType<MultiMethod>()->call(frame, {});
+							if (_res.typeId().isType<List>()) return _res.asType<List>();
+							else return res;
+						}
+						else if (s.typeId().isType<Function>())
+						{
+							auto _res = s.asType<Function>()->call(frame, {});
+							if (_res.typeId().isType<List>()) return _res.asType<List>();
+							else return res;
+						}
+						else
+						{
+							return res;
+						}	
+					}
+				}
+				catch(stdext::exception e)
+				{
+					frame->getNamespace()->environment()->log()->error(e.what());
+				}
 			}
 			
 

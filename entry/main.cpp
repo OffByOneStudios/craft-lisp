@@ -20,12 +20,6 @@ namespace _impl {
 		{ "\\`", cl::BRIGHTCYAN },
 		{ "\\'", cl::BRIGHTBLUE },
 		{ "\\\"", cl::BRIGHTBLUE },
-		{ "\\-", cl::BRIGHTBLUE },
-		{ "\\+", cl::BRIGHTBLUE },
-		{ "\\=", cl::BRIGHTBLUE },
-		{ "\\/", cl::BRIGHTBLUE },
-		{ "\\*", cl::BRIGHTBLUE },
-		{ "\\^", cl::BRIGHTBLUE },
 		{ "\\.", cl::BRIGHTMAGENTA },
 		{ "\\(", cl::BRIGHTMAGENTA },
 		{ "\\)", cl::BRIGHTMAGENTA },
@@ -34,33 +28,6 @@ namespace _impl {
 		{ "\\{", cl::BRIGHTMAGENTA },
 		{ "\\}", cl::BRIGHTMAGENTA },
 
-		// color keywords
-		{ "color_black", cl::BLACK },
-		{ "color_red", cl::RED },
-		{ "color_green", cl::GREEN },
-		{ "color_brown", cl::BROWN },
-		{ "color_blue", cl::BLUE },
-		{ "color_magenta", cl::MAGENTA },
-		{ "color_cyan", cl::CYAN },
-		{ "color_lightgray", cl::LIGHTGRAY },
-		{ "color_gray", cl::GRAY },
-		{ "color_brightred", cl::BRIGHTRED },
-		{ "color_brightgreen", cl::BRIGHTGREEN },
-		{ "color_yellow", cl::YELLOW },
-		{ "color_brightblue", cl::BRIGHTBLUE },
-		{ "color_brightmagenta", cl::BRIGHTMAGENTA },
-		{ "color_brightcyan", cl::BRIGHTCYAN },
-		{ "color_white", cl::WHITE },
-		{ "color_normal", cl::NORMAL },
-
-		// commands
-		{ "\\.help", cl::BRIGHTMAGENTA },
-		{ "\\.history", cl::BRIGHTMAGENTA },
-		{ "\\.quit", cl::BRIGHTMAGENTA },
-		{ "\\.exit", cl::BRIGHTMAGENTA },
-		{ "\\.clear", cl::BRIGHTMAGENTA },
-		{ "\\.prompt", cl::BRIGHTMAGENTA },
-
 		// numbers
 		{ "[\\-|+]{0,1}[0-9]+", cl::YELLOW }, // integers
 		{ "[\\-|+]{0,1}[0-9]*\\.[0-9]+", cl::YELLOW }, // decimals
@@ -68,7 +35,7 @@ namespace _impl {
 
 																 // strings
 		{ "\".*?\"", cl::BRIGHTGREEN }, // double quotes
-		{ "\'.*?\'", cl::BRIGHTGREEN }, // single quotes
+		{ "\"\"\".*?\"\"\"", cl::BROWN }, // double quotes
 	};
 }
 
