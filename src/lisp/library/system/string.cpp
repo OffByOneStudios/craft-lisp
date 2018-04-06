@@ -185,4 +185,35 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 	}));
 	
 	ret->define_eval("join", join);
+
+
+	auto slice = instance<MultiMethod>::make();
+	slice->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, int64_t, int64_t, std::string>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+		instance<int64_t> b(expect<int64_t>(args[1]));
+		instance<int64_t> c(expect<int64_t>(args[2]));
+
+		return instance<std::string>::make(a->substr(*b, *c));
+	}));
+
+	ret->define_eval("slice", slice);
+
+
+	auto reverse = instance<MultiMethod>::make();
+	reverse->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+
+		auto res = instance<std::string>::make(*a);
+		std::reverse(res->begin(), res->end());
+		
+		return res;
+	}));
+
+	ret->define_eval("reverse", reverse);
 }
