@@ -1,72 +1,131 @@
-(define typeNames (list "int8" "int16" "int32" "int64" "uint8" "uint16" "uint32" "uint64" "float" "double"))
-(define numTypes (list "int8_t" "int16_t" "int32_t" "int64_t" "uint8_t" "uint16_t" "uint32_t" "uint64_t" "float" "double"))
-(define gmpTypes (list "mpz_class" "mpq_class" "mpf_class"))
+(define numTypes (map 
+  "int8" "int8_t" 
+  "int16" "int16_t"
+  "int32" "int32_t"
+  "int64" "int64_t"
+  "uint8" "uint8_t"
+  "uint16" "uint16_t"
+  "uint32" "uint32_t"
+  "uint64" "uint64_t"
+  "float32" "float" 
+  "float64" "double"
+))
+
+(define gmpTypes (map 
+  "int" "mpz_class"
+  "decimal" "mpq_class"
+  "float" "mpf_class"
+))
+
 (define ringops (map "plu" "+"  "div" "/" "mul" "*" "sub" "-"))
+(define logicops (map 
+  "lt" "<"
+  "lte" "<=" 
+  "eq" "==" 
+  "neq" "!=" 
+  "gte" ">="
+  "gt" ">"
+))
 
 
-(define castTemplate "  %{0}->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<%{1}, %{2}>(),[](auto frame, auto args){instance<%{0}> a(expect<%{1}>(args[0]));return instance<%{2}>::make(%{2}(*a));}))")
-
-(define ringTemplate "
-%{0}->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<%{1}, %{1}, %{1}>(),[](auto frame, auto args){
-  instance<%{1}> a(expect<int8_t>(args[0]));
-  instance<%{1}> b(expect<int16_t>(args[1]));
-  return instance<%{1}>::make(*a * *b);
-}));")
+(define castTemplate "		%{0}->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<%{1}, %{2}>(),[](auto frame, auto args){instance<%{1}> a(expect<%{1}>(args[0]));return instance<%{2}>::make(%{2}(*a));}));")
+(define ringTemplate "		%{0}->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<%{1}, %{1}, %{1}>(),[](auto frame, auto args){ instance<%{1}> a(expect<%{1}>(args[0])); instance<%{1}> b(expect<%{1}>(args[1])); return instance<%{1}>::make(*a %{2} *b); }));" )
+(define logicTemplate "		%{0}->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<%{1}, %{1}, bool>(),[](auto frame, auto args){ instance<%{1}> a(expect<%{1}>(args[0])); instance<%{1}> b(expect<%{1}>(args[1])); return instance<bool>::make(*a %{2} *b); }));" )
 
 
-(define prelude 
-  (lfmap numTypes 
-    (fn (ntype i) 
-      (fmt "		auto %{0} = instance<MultiMethod>::make();" (fmt "_cast_%{0}" ntype))
+(define declareMultimethod (fn (opMap)
+  (mfmap opMap 
+    (fn (key ntype i) 
+      (fmt "		auto %{0} = instance<MultiMethod>::make();" (fmt "_operator_%{0}" key))
     )
   )
-)
+))
+
+(define castMulti (declareMultimethod numTypes))
+(define ringMulti (declareMultimethod ringops))
+(define logicMulti (declareMultimethod logicops))
+
+
+
+(define casters (mfmap numTypes 
+  (fn (k1 e i) 
+    (do
+      (join (mfmap numTypes 
+        (fn (k2 f j) 
+          (do
+            (fmt castTemplate (fmt "_operator_%{0}" k1) f e)
+          )
+        )
+      ))
+    )
+  )
+))
 
 (define rings (mfmap ringops 
-  (fn (opname opkey i) 
+  (fn (opname opsymbol i) 
     (do
-      (define ts (lfmap numTypes 
-        (fn (typename j) 
+      (join (mfmap numTypes 
+        (fn (numname ctype j) 
           (do
-            (fmt ringTemplate (fmt "_%{0}" opname) typename)
+            (fmt ringTemplate (fmt "_operator_%{0}" opname) ctype opsymbol)
           )
         )
       ))
-      (join ts)
     )
   )
 ))
 
-(define casters (lfmap numTypes 
-  (fn (e i) 
+(define logic (mfmap logicops 
+  (fn (opname opsymbol i) 
     (do
-      (define ts (lfmap numTypes 
-        (fn (f j) 
+      (join (mfmap numTypes 
+        (fn (numname ctype j) 
           (do
-            (fmt castTemplate (fmt "_cast_%{0}" e) e f)
+            (fmt logicTemplate (fmt "_operator_%{0}" opname) ctype opsymbol)
           )
         )
       ))
-      (join ts)
     )
   )
 ))
 
-(define epilogue 
-  (lfmap numTypes 
-    (fn (ntype i) 
-      (fmt "		ret->define_eval(%{0}, %{1});" ntype (fmt "_cast_%{0}" ntype))
+(define defineCast 
+  (mfmap numTypes 
+    (fn (key ntype i) 
+      (fmt """		ret->define_eval("%{0}", %{1});""" key (fmt "_operator_%{0}" key))
     )
   )
 )
 
+(define defineRings 
+  (mfmap ringops 
+    (fn (opname opsymbol i) 
+      (fmt """		ret->define_eval("%{0}", %{1});""" opsymbol (fmt "_operator_%{0}" opname))
+    )
+  )
+)
 
-; (print "void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns) {")
-(print (join prelude))
+(define defineLogic 
+  (mfmap logicops 
+    (fn (opname opsymbol i) 
+      (fmt """		ret->define_eval("%{0}", %{1});""" opsymbol (fmt "_operator_%{0}" opname))
+    )
+  )
+)
+
+(print "void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns) {")
+(print "		auto env = ns->environment();")
+(print (join castMulti))
+(print (join ringMulti))
+(print (join logicMulti))
+(print "")
 (print (join casters))
-(print (join epilogue))
-
-;(print (join rings))
-; (print "}")
-
-
+(print "")
+(print (join rings))
+(print "")
+(print (join logic))
+(print "")
+(print (join defineCast))
+(print (join defineRings))
+(print (join defineLogic))
+(print "}")
