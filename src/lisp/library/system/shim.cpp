@@ -42,13 +42,16 @@ void system::make_shim_globals(instance<Module>& ret, instance<Namespace>& ns)
 	}));
 
 	_parse->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, double>(),
+		SubroutineSignature::makeFromArgs<uint64_t, std::string>(),
 		[](auto frame, auto args)
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-
+		instance<uint64_t> a(expect<uint64_t>(args[0]));
+		instance<std::string> b(expect<std::string>(args[1]));
 		auto parsers = types::system().getManager<PParse>();
-		return ((PParse*)parsers->getProvider(types::type<double>::typeId()))->parse(*a);
+
+		TypeId t; t.id = *a;
+		
+		return ((PParse*)parsers->getProvider(t))->parse(*b);
 	}));
 
 	ret->define_eval("parse", _parse);
@@ -141,4 +144,21 @@ void system::make_shim_globals(instance<Module>& ret, instance<Namespace>& ns)
 		return instance<>();
 	}));
 	ret->define_eval("kind", kind);
+
+
+	auto _typeid = instance<MultiMethod>::make();
+	_typeid->attach(env, instance<BuiltinFunction>::make(
+	SubroutineSignature::makeFromArgsAndReturn<std::string, uint64_t>(),
+		[](auto frame, auto args)
+	{
+		instance<std::string> a = args[0].asType<std::string>();
+		auto ids = types::system().getManager<PIdentifier>();
+		for (auto tid : ids->supportedTypes())
+		{
+			auto p = ((PIdentifier*)ids->getProvider(tid))->identifier();
+			if(p == *a) return instance<uint64_t>::make(tid.id);
+		}
+		return instance<uint64_t>::make(0);
+	}));
+	ret->define_eval("typeid", _typeid);
 }
