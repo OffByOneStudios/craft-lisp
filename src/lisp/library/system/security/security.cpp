@@ -86,4 +86,5 @@ void system::make_security_globals(instance<Module>& ret, instance<Namespace>& n
 		return instance<std::string>::make(res);
 	}));
 	ret->define_eval("sboxdecrypt", boxdecrypt);
+
 }

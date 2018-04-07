@@ -140,8 +140,7 @@ platform-dependencies:
   debian_x64_gcc: []
 
 platform-flags:
-  x86_64-pc-windows-msvccoff:
-    - "/bigobj"
+  x86_64-pc-windows-msvccoff: []
   osx_x64_clang:
     - "-std=c++1z"
     - "-stdlib=libc++"

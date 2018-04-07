@@ -57,7 +57,9 @@ namespace lisp {
 		{
 			void make_string_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_shim_globals(instance<Module>& m, instance<Namespace>& ns);
-			void make_math_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_arithmatic_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_cast_globals(instance<Module>& m, instance<Namespace>& ns);
+			void make_logic_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_fs_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_llvm_globals(instance<Module>& m, instance<Namespace>& ns);
 			void make_zmq_globals(instance<Module>& m, instance<Namespace>& ns);

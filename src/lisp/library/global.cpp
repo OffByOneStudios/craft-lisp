@@ -464,7 +464,9 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	ret->define_eval("#t", _true);
 	ret->define_eval("#f", _false);
 
-	library::system::make_math_globals(ret, ns); // Quick Maths
+	library::system::make_logic_globals(ret, ns); // Quick Maths
+	library::system::make_cast_globals(ret, ns); 
+	library::system::make_arithmatic_globals(ret, ns);
 	library::system::make_string_globals(ret, ns);
 	library::system::make_shim_globals(ret, ns);
 	library::system::make_fs_globals(ret, ns);
