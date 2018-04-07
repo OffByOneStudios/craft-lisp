@@ -120,7 +120,16 @@ instance<> CultSemanticsProvider::transform(instance<> semantics, instance<lisp:
 
 }
 
-instance<> CultSemanticsProvider::lookup(instance<> semantics, std::string const&) const
+instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string const& s) const
 {
+	instance<CultSemantics> semantics = semantics_;
 
+	if (s == "$init")
+	{
+
+	}
+	else
+	{
+		// Symbol table lookup
+	}
 }

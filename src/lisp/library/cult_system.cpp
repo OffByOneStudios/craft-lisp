@@ -36,7 +36,15 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	//
 	// Special forms
 	//
-	auto sf_define = sem->builtin_addSpecialForm("define",
+	auto sf_define = sem->builtin_addSpecialForm("define");
+
+	//
+	// Special forms - Reader
+	//
+	// TODO, make this a multimethod
+
+	sem->builtin_implementMultiMethod("read",
+		"define",
 		[](instance<CultSemantics> semantics, instance<SScope> scope, instance<Sexpr> sexpr)
 		{
 			if (sexpr->cells.size() != 3)

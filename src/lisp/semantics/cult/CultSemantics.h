@@ -57,8 +57,9 @@ namespace lisp
 		// Builtin helpers
 	public:
 		CRAFT_LISP_EXPORTED void builtin_addMultiMethod(std::string const& symbol_name);
+		CRAFT_LISP_EXPORTED void builtin_implementMultiMethod(std::string const& symbol_name);
 
-		CRAFT_LISP_EXPORTED instance<Symbol> builtin_addSpecialForm(std::string const& symbol_name, f_specialFormReader reader);
+		CRAFT_LISP_EXPORTED void builtin_addSpecialForm(std::string const& symbol_name, TypeId nodeType);
 
 		CRAFT_LISP_EXPORTED void builtin_eval(std::string const& contents);
 
