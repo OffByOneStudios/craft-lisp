@@ -1,6 +1,11 @@
 #pragma once
+#include "lisp/common.h"
+
+#include "lisp/lisp.h"
 #define SODIUM_STATIC
 #include "sodium/sodium.h"
+
+#include "nonce.h"
 
 namespace craft {
 namespace lisp {
@@ -15,17 +20,6 @@ namespace library {
 		CRAFT_LISP_EXPORTED SecretBoxKey();
 	};
 
-	class SecretBoxNonce
-		: public virtual types::Object
-	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::SecretBoxNonce);
-
-	public:
-		unsigned char nonce[crypto_secretbox_NONCEBYTES];
-
-		CRAFT_LISP_EXPORTED SecretBoxNonce();
-	};
-
 	class SecretBoxCipher
 		: public virtual types::Object
 	{
@@ -35,6 +29,10 @@ namespace library {
 		std::vector<uint8_t> cipher;
 
 		SecretBoxCipher() = default;
-		SecretBoxCipher(instance<SecretBoxKey> key, instance<SecretBoxNonce> nonce, instance<std::string> message);
+		SecretBoxCipher(instance<SecretBoxKey> key, instance<Nonce> nonce, instance<std::string> message);
 	};
+
+	namespace system {
+		void make_secretkey_globals(instance<Module>& ret, instance<Namespace>& ns);
+	}
 }}}
