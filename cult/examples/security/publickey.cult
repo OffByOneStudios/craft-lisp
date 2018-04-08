@@ -1,0 +1,7 @@
+(define alice (curve/keypair))
+(define bob (curve/keypair))
+
+(define nonce (security/nonce))
+
+(define msg (curve/encrypt "Fish tacos" (curve/pubkey alice) (curve/privkey bob) nonce))
+(print (define msg (curve/decrypt msg (curve/pubkey bob) (curve/privkey alice) nonce)))
