@@ -14,6 +14,6 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::PExecutor, "lisp.executor", types::SingletonProviderManager);
 
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<> exec(instance<> backend, instance<lisp::Module> module, std::string const& entry, GenericCall const&) const = 0;
+		CRAFT_LISP_EXPORTED virtual instance<> exec(instance<> backend, instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const&) const = 0;
 	};
 }}

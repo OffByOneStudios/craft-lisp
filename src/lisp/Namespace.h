@@ -50,7 +50,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> read(std::string contents, types::TypeId type, PSyntax::ParseOptions const* popts = nullptr, PSemantics::ReadOptions const* ropts = nullptr);
 		CRAFT_LISP_EXPORTED instance<> read(instance<> source, types::TypeId type, PSemantics::ReadOptions const* opts = nullptr);
 
-		CRAFT_LISP_EXPORTED instance<> exec(instance<Module> module, std::string method, lisp::GenericCall const& call = {});
+		CRAFT_LISP_EXPORTED instance<> exec(instance<Module> module, std::string method, types::GenericInvoke const& call = {});
 
 		CRAFT_LISP_EXPORTED void compile(std::string path, instance<> compiler_options);
 		CRAFT_LISP_EXPORTED void compile(instance<Module> module, std::string path, instance<> compiler_options);

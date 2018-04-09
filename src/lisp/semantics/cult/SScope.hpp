@@ -15,8 +15,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SScope, "lisp.scope", types::FactoryAspectManager);
 
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const = 0;
-
+		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const;
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParent() const = 0;
 
 		// E.g. may enclose over other higher scopes

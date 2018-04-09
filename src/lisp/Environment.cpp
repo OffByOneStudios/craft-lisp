@@ -13,10 +13,6 @@ CRAFT_DEFINE(Environment)
 Environment::Environment(std::shared_ptr<spdlog::logger> logger)
 {
 	_logger = logger;
-
-	auto any = instance<types::Special>::make();
-	any->kind = types::Special::Any;
-	_any = any;
 }
 
 void Environment::craft_setupInstance()
@@ -24,14 +20,6 @@ void Environment::craft_setupInstance()
 	Object::craft_setupInstance();
 
 	ns_user = instance<Namespace>::make(craft_instance());
-
-	ns_user->interpreter_provider = bootstrap_backend_provider();
-	ns_user->interpreter = ns_user->interpreter_provider->init(ns_user);
-
-	ns_user->backend_provider = llvm_backend_provider();
-	ns_user->backend = ns_user->backend_provider->init(ns_user);
-
-	ns_user->requireModule("builtin:cult.system");
 }
 
 std::shared_ptr<spdlog::logger> Environment::log()
