@@ -17,17 +17,33 @@ namespace lisp
 
 		instance<Execution> _execution;
 		instance<> _backend;
-		instance<> _entryModule;
 
-		instance<SScope> _scope;
-		std::map<instance<SBinding>, instance<>> _values;
+		struct _Entry
+		{
+			instance<Function> _function;
+			std::vector<instance<>> _state;
+			instance<SScope> _scope; // if any
+			std::map<instance<SBinding>, instance<>> _values; // values bound to the scope
+		};
+
+		std::vector<_Entry> _entries;
+
+		_Entry const& _getEntry(size_t) const;
 
 	public:
-		CRAFT_LISP_EXPORTED InterpreterFrame(instance<Execution> exec, instance<> backend, instance<Module> semanticsOwner, instance<SSubroutine>);
+		CRAFT_LISP_EXPORTED InterpreterFrame(instance<> backend);
 
-		CRAFT_LISP_EXPORTED virtual instance<Execution> getExecution() const;
-		CRAFT_LISP_EXPORTED virtual instance<> backend() const;
-		CRAFT_LISP_EXPORTED virtual instance<Module> entryModule() const;
+		CRAFT_LISP_EXPORTED virtual void setExecution(instance<Execution>) override;
+		CRAFT_LISP_EXPORTED virtual instance<Execution> getExecution() const override;
+		CRAFT_LISP_EXPORTED virtual instance<> getBackend() const override;
+
+		CRAFT_LISP_EXPORTED virtual size_t entries() const override;
+		CRAFT_LISP_EXPORTED virtual std::string getEntryName(size_t index) const override;
+		CRAFT_LISP_EXPORTED virtual instance<> getEntryRepresentative(size_t index) const override;
+		CRAFT_LISP_EXPORTED virtual instance<Module> getEntryModule(size_t index) const override;
+
+		CRAFT_LISP_EXPORTED void pushEntry(instance<Function> function, types::GenericInvoke const& args);
+		CRAFT_LISP_EXPORTED instance<>& topState();
 	};
 
 	class BootstrapInterpreter
@@ -44,9 +60,9 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED BootstrapInterpreter(instance<Namespace> lisp);
 
-		CRAFT_LISP_EXPORTED instance<> exec_cult(instance<SSubroutine>, GenericCall const&);
+		CRAFT_LISP_EXPORTED instance<> exec_cult(instance<SSubroutine>, types::GenericInvoke const&);
 
-		CRAFT_LISP_EXPORTED instance<> exec(instance<lisp::Module> module, std::string const& entry, GenericCall const&);
+		CRAFT_LISP_EXPORTED instance<> exec(instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const&);
 
 	public:
 
@@ -65,7 +81,9 @@ namespace lisp
 	public:
 		virtual instance<> init(instance<Namespace> env) const override;
 
-		virtual instance<> exec(instance<> backend, instance<lisp::Module> module, std::string const& entry, GenericCall const&) const override;
+		virtual instance<> exec(instance<> backend, instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const&) const override;
+
+		virtual void resume(instance<> backend) const override;
 	};
 }}
 

@@ -163,7 +163,7 @@ Casting is a complete subset of coercian. Below are the places where these trans
 
 `(as value type)`
 
-System macro performs coercian/casting of a value to a specific type. Will automatically fall back to casting (and can optimize *to* casting if neccessary). Perfer this function.
+System macro performs coercion/casting of a value to a specific type. Will automatically fall back to casting (and can optimize *to* casting if necessary). Prefer this function.
 
 #### `cast`
 
@@ -175,7 +175,7 @@ System function performs casting of a value to a specific type.
 
 `(coerce value type)`
 
-System method performs coercian of a value to a specific type, will automatically perform casting if neccessary).
+System method performs coercion of a value to a specific type, will automatically perform casting if necessary).
 
 ## Implementation
 
@@ -183,4 +183,4 @@ Here we describe the semantic tree of objects.
 
 ### CultSemantics
 
-The root object of a semantic tree. Provides a module of semantics. Can **append** (for live modules evaluating new forms in sequence) or **merge** (for live editors re-evaluating code) another module of semantics.
+The root object of a semantic tree. Provides a module of semantics. Can **append** (for live modules evaluating new forms in sequence) or **merge** (for live editors re-evaluating code) another module of semantics. Is a scope.

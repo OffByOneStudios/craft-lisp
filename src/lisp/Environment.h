@@ -26,7 +26,6 @@ namespace lisp
 		// Global Logger
 		CRAFT_LISP_EXPORTED std::shared_ptr<spdlog::logger> log();
 
-		// Type System
 	};
 
 }}

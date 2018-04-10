@@ -34,5 +34,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED void push_frame(instance<SFrame> _push);
 		CRAFT_LISP_EXPORTED void pop();
 
+		// Helpers
+	public:
 	};
 }}

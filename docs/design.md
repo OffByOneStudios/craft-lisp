@@ -172,7 +172,7 @@ instance<> semantics = ns->read(source, cpptype<CultSemantics>::typeDesc(), &rea
 //   features meant for internal use only.
 
 // `eval` Evaluates arbitrary code in a one-off module using the current state
-Execution::current()->eval(s);
+Execution::getCurrent()->eval(s);
 ```
 
 Other requests can use internal helper methods (since they will need full knowledge anyway):
