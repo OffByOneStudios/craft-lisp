@@ -10,10 +10,12 @@ using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
 
-void system::make_meta_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_meta_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
+	//TODO Macro implementation on cult semantics
+	/*semantics->builtin_addSpecialForm
 	auto getmeta = instance<Macro>::make(
 		[](instance<SScope> scope, std::vector<instance<>> const& code)
 	{
@@ -55,5 +57,5 @@ void system::make_meta_globals(instance<Module>& ret, instance<Namespace>& ns)
 		}
 		return res;
 	}));
-	ret->define_eval("multimethod/signatures", signatures);
+	ret->define_eval("multimethod/signatures", signatures);*/
 }

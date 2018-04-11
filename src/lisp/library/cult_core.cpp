@@ -22,7 +22,7 @@ instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns)
 
 	auto ret = instance<Module>::make(ns, "builtin:cult.core");
 
-	library::core::make_logic_globals(ret); // Quick Maths
+	library::core::make_logic_globals(ret);
 	library::core::make_cast_globals(ret);
 	library::core::make_arithmatic_globals(ret);
 	library::core::make_string_globals(ret);

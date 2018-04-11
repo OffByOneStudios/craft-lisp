@@ -13,6 +13,8 @@ namespace lisp
 	class Execution;
 	class Environment;
 
+	class Function;
+	class MultiMethod;
 }}
 
 #include "exceptions.hpp"

@@ -90,10 +90,12 @@ void core::make_env_globals(instance<Module> ret)
 		[](instance<std::string> a, instance<std::string> b) -> instance<std::string>
 	{
 		return _impl::setEnv(a, b);
-	
+
+	});
+
 	semantics->builtin_implementMultiMethod("listenv",
-		[]() -> Map
+		[]() -> instance<Map>
 	{
 		return _impl::listEnv();
-	}));
+	});
 }

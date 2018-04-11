@@ -15,33 +15,24 @@ namespace _impl {
 #endif
 }
 
-void system::make_platform_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_platform_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto triplecross = instance<MultiMethod>::make();
-	triplecross->attach(env, instance<BuiltinFunction>::make(
-		[](instance<SFrame> frame, auto args)
-	{	
-		return instance<std::string>::make(CRAFT_TRIPLE_CROSS);
-	}));
-
-	ret->define_eval("triplecross", triplecross);
-
-
-	auto _dllload = instance<MultiMethod>::make();
-	_dllload->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, int64_t>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("platform/triplecross",
+		[]() -> instance<std::string>
 	{
-		instance<std::string> a = expect<std::string>(args[0]);
+		return instance<std::string>::make(CRAFT_TRIPLE_CROSS);
+	});
+
+	semantics->builtin_implementMultiMethod("platform/loaddll",
+		[](instance<std::string> a) -> instance<int64_t>
+	{
 		auto target = path::normalize(*a);
 #ifdef _WIN32
 		auto handle = LoadLibraryA(target.c_str());
 		if (handle == nullptr) throw stdext::exception(_impl::GetLastErrorAsString());
 		return instance<int64_t>::make(int64_t(handle));
 #endif
-	}));
-
-	ret->define_eval("dllload", _dllload);
+	});
 }

@@ -7,7 +7,7 @@ namespace library {
 	class PHashable abstract
 		: public types::Provider
 	{
-		CRAFT_LISP_EXPORTED CRAFT_PROVIDER_DECLARE(PHashable, "lisp.hashable", types::SingletonProviderManager);
+		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::library::PHashable, "lisp.library.hash", types::SingletonProviderManager);
 
 	public:
 		virtual Hash asHash(instance<> inst) const = 0;

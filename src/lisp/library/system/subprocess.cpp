@@ -39,7 +39,7 @@ namespace library
 	class SSubprocess
 		: public craft::types::Aspect
 	{
-		CRAFT_LISP_EXPORTED CRAFT_ASPECT_DECLARE(craft::lisp::library::SSubprocess, "lisp.library.subprocess", types::FactoryAspectManager);
+		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::library::SSubprocess, "lisp.library.subprocess", types::FactoryAspectManager);
 
 
 		virtual void exec(instance<std::string> s) = 0;
@@ -229,86 +229,52 @@ namespace library
 
 
 
-CRAFT_ASPECT_DEFINE(SSubprocess);
+CRAFT_DEFINE(SSubprocess) { _.defaults(); }
 
 
-CRAFT_OBJECT_DEFINE(Subprocess)
+CRAFT_DEFINE(Subprocess) { _.defaults(); }
+
+void core::make_subprocess_globals(instance<Module> ret)
 {
-	_.defaults();
-}
-
-void system::make_subprocess_globals(instance<Module>& ret, instance<Namespace>& ns)
-{
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
 	auto exec = instance<MultiMethod>::make();
-	exec->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, Subprocess>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("subprocess/exec",
+		[](instance<std::string> a) -> instance<Subprocess>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-
 		auto res = instance<Subprocess>::make();
 
 		res->exec(instance<std::string>::make(path::normalize(*a)));
 		return res;
-	}));
-	ret->define_eval("subexec", exec);
+	});
 
-	auto running = instance<MultiMethod>::make();
-	running->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<Subprocess, bool>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("subprocess/running",
+		[](instance<Subprocess> a) -> instance<bool>
 	{
-		instance<Subprocess> a(expect<Subprocess>(args[0]));
-
 		return a->running();
-	}));
-	ret->define_eval("subrunning", running);
+	});
 
-	auto block = instance<MultiMethod>::make();
-	running->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Subprocess, int64_t>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("subprocess/block",
+		[](instance<Subprocess> a, instance<int64_t> b)
 	{
-		instance<Subprocess> a(expect<Subprocess>(args[0]));
-		instance<int64_t> b(expect<int64_t>(args[1]));
 		a->block(b);
-		return instance<>();
-	}));
-	ret->define_eval("subblock", running);
+	});
 
-	auto kill = instance<MultiMethod>::make();
-	kill->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Subprocess, int64_t>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("subprocess/kill",
+		[](instance<Subprocess> a)
 	{
-		instance<Subprocess> a(expect<Subprocess>(args[0]));
-
 		a->kill();
-		return instance<>();
-	}));
-	ret->define_eval("subkill", kill);
+	});
 
-	auto read = instance<MultiMethod>::make();
-	read->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<Subprocess, int64_t, std::string>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("subprocess/read",
+		[](instance<Subprocess> a, instance<int64_t> b) -> instance<std::string>
 	{
-		instance<Subprocess> a(expect<Subprocess>(args[0]));
-		instance<int64_t> b(expect<int64_t>(args[1]));
 		return a->read(b);
-	}));
-	ret->define_eval("subread", read);
+	});
 
-	auto write = instance<MultiMethod>::make();
-	write->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<Subprocess, std::string, int64_t>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("subprocess/write",
+		[](instance<Subprocess> a, instance<std::string> b) -> instance<int64_t>
 	{
-		instance<Subprocess> a(expect<Subprocess>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
 		return a->write(b);
-	}));
-	ret->define_eval("subwrite", write);
+	});
 }

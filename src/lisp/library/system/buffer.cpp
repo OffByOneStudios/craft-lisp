@@ -9,7 +9,7 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
-CRAFT_OBJECT_DEFINE(Buffer)
+CRAFT_DEFINE(Buffer)
 {
 	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("size", &Buffer::size)
@@ -84,9 +84,9 @@ instance<Buffer> Buffer::join(instance<Buffer> other)
 }
 
 
-void system::make_buffer_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_buffer_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 }
 
 

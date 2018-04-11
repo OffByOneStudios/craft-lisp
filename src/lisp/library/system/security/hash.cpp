@@ -12,7 +12,7 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
-CRAFT_OBJECT_DEFINE(Hash)
+CRAFT_DEFINE(Hash)
 {
 	_.use<PParse>().singleton<FunctionalParse>([](std::string s) {
 		size_t bin_len;
@@ -47,106 +47,36 @@ CRAFT_OBJECT_DEFINE(Hash)
 	_.defaults();
 }
 
-CRAFT_ASPECT_DEFINE(PHashable);
+CRAFT_DEFINE(PHashable) { _.defaults(); };
 
-void system::make_hash_globals(instance<Module>& ret, instance<Namespace>& ns)
+#define hsh(type)  (crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(type), NULL, 0))
+
+void core::make_hash_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
 	auto hash = instance<MultiMethod>::make();
 
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<int8_t, Hash>(), [](auto frame, auto args) {
-		instance<int8_t> a(expect<int8_t>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(int8_t), NULL, 0);
+	semantics->builtin_implementMultiMethod("hash", [](instance<mpf_class> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(mpf_class); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<int32_t> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(int32_t); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<uint8_t> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(uint8_t); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<int8_t> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(int8_t); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<uint64_t> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(uint64_t); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<uint16_t> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(uint16_t); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<float> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(float); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<uint32_t> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(uint32_t); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<bool> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(bool); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<double> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(double); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<int64_t> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(int64_t); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<mpq_class> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(mpq_class); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<mpz_class> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(mpz_class); return res; });
+	semantics->builtin_implementMultiMethod("hash", [](instance<int16_t> a) -> instance<Hash> { auto res = instance<Hash>::make(); hsh(int16_t); return res; });
+	
 
-		return res;
-	}));
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<int16_t, Hash>(), [](auto frame, auto args) {
-		instance<int16_t> a(expect<int16_t>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(int16_t), NULL, 0);
-
-		return res;
-	}));
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<int32_t, Hash>(), [](auto frame, auto args) {
-		instance<int32_t> a(expect<int32_t>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(int32_t), NULL, 0);
-
-		return res;
-	}));
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<int64_t, Hash>(), [](auto frame, auto args) {
-		instance<int64_t> a(expect<int64_t>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(int64_t), NULL, 0);
-
-		return res;
-	}));
-
-
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<uint8_t, Hash>(), [](auto frame, auto args) {
-		instance<uint8_t> a(expect<uint8_t>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(uint8_t), NULL, 0);
-
-		return res;
-	}));
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<uint16_t, Hash>(), [](auto frame, auto args) {
-		instance<uint16_t> a(expect<uint16_t>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(uint16_t), NULL, 0);
-
-		return res;
-	}));
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<uint32_t, Hash>(), [](auto frame, auto args) {
-		instance<uint32_t> a(expect<uint32_t>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(uint32_t), NULL, 0);
-
-		return res;
-	}));
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<uint64_t, Hash>(), [](auto frame, auto args) {
-		instance<uint64_t> a(expect<uint64_t>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(uint64_t), NULL, 0);
-
-		return res;
-	}));
-
-
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<float, Hash>(), [](auto frame, auto args) {
-		instance<float> a(expect<float>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(float), NULL, 0);
-
-		return res;
-	}));
-	hash->attach(env, instance<BuiltinFunction>::make(SubroutineSignature::makeFromArgsAndReturn<double, Hash>(), [](auto frame, auto args) {
-		instance<double> a(expect<double>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (uint8_t*)a.get(), sizeof(double), NULL, 0);
-
-		return res;
-	}));
-
-	hash->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, Hash>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("hash",
+		[](instance<PHashable> a) -> instance<Hash>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		auto res = instance<Hash>::make();
-		crypto_generichash(res->hash, crypto_generichash_BYTES, (const uint8_t*)a->c_str(), a->size(), NULL, 0);
+		return instance<Hash>::make(a.asFeature<PHashable>()->asHash(a));
+	});
 
-		return res;
-	}));
-
-	hash->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<PHashable, Hash>(),
-		[](auto frame, std::vector<instance<>> args)
-	{
-		return instance<Hash>::make(args[0].asFeature<PHashable>()->asHash(args[0]));
-	}));
-
-	ret->define_eval("hash", hash);
 }

@@ -612,18 +612,14 @@ namespace json
 
 }
 
-void system::make_json_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_json_globals(instance<Module> ret)
 {
 	
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto _json = instance<MultiMethod>::make();
-	
-	
-	_json->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("json",
+		[](instance<std::string> a) -> instance<>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
 		json::result_state result;
 		json::string_input<> s(*a, "");
 
@@ -650,7 +646,5 @@ void system::make_json_globals(instance<Module>& ret, instance<Namespace>& ns)
 		{
 			return instance<>();
 		}
-	}));
-
-	ret->define_eval("json", _json);
+	});
 }

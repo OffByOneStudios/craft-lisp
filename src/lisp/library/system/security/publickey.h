@@ -52,7 +52,7 @@ namespace library {
 		KeypairCipher(instance<PublicKey> pub, instance<PrivateKey> priv, instance<Nonce> nonce, instance<std::string> message);
 	};
 
-	namespace system {
-		void make_publickey_globals(instance<Module>& ret, instance<Namespace>& ns);
+	namespace core {
+		void make_publickey_globals(instance<Module> ret);
 	}
 }}}

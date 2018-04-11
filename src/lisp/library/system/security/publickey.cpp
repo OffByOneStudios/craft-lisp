@@ -10,7 +10,7 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
-CRAFT_OBJECT_DEFINE(PrivateKey)
+CRAFT_DEFINE(PrivateKey)
 {
 	_.use<PParse>().singleton<FunctionalParse>([](std::string s) {
 		size_t bin_len;
@@ -45,7 +45,7 @@ CRAFT_OBJECT_DEFINE(PrivateKey)
 	_.defaults();
 }
 
-CRAFT_OBJECT_DEFINE(PublicKey)
+CRAFT_DEFINE(PublicKey)
 {
 	_.use<PParse>().singleton<FunctionalParse>([](std::string s) {
 		size_t bin_len;
@@ -80,7 +80,7 @@ CRAFT_OBJECT_DEFINE(PublicKey)
 	_.defaults();
 }
 
-CRAFT_OBJECT_DEFINE(Keypair)
+CRAFT_DEFINE(Keypair)
 {
 	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Keypair> l) -> std::string {
 		std::ostringstream  res;
@@ -106,7 +106,7 @@ Keypair::Keypair()
 	crypto_box_keypair(public_->key, private_->key);
 }
 
-CRAFT_OBJECT_DEFINE(KeypairCipher)
+CRAFT_DEFINE(KeypairCipher)
 {
 	_.use<PParse>().singleton<FunctionalParse>([](std::string s) {
 		auto res = instance<KeypairCipher>::make();
@@ -146,78 +146,44 @@ KeypairCipher::KeypairCipher(instance<PublicKey> pub, instance<PrivateKey> priv,
 }
 
 
-void system::make_publickey_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_publickey_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto curvepair = instance<MultiMethod>::make();
-
-	curvepair->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<Keypair>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("crypto/curve",
+		[]() -> instance<Keypair>
 	{
 		return instance<Keypair>::make();
-	}));
+	});
 
-	ret->define_eval("curve/keypair", curvepair);
-
-	auto privkey = instance<MultiMethod>::make();
-
-	privkey->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<Keypair, PrivateKey>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("crypto/curve/private",
+		[](instance<Keypair> a) -> instance<PrivateKey>
 	{
-		instance<Keypair> a = args[0].asType<Keypair>();
 		return a->private_;
-	}));
-
-	ret->define_eval("curve/privkey", privkey);
-
-	auto pubkey = instance<MultiMethod>::make();
-	pubkey->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<Keypair, PublicKey>(),
-		[](auto frame, auto args)
+	});
+	
+	semantics->builtin_implementMultiMethod("crypto/curve/public",
+		[](instance<Keypair> a) -> instance<PublicKey>
 	{
-		instance<Keypair> a = args[0].asType<Keypair>();
 		return a->public_;
-	}));
+	});
 
-	ret->define_eval("curve/pubkey", pubkey);
-
-
-	auto curveencrypt = instance<MultiMethod>::make();
-	curveencrypt->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, PublicKey, PrivateKey, Nonce, KeypairCipher>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("crypto/curve/encrypt",
+		[](instance<std::string> msg, instance<PublicKey> pub, instance<PrivateKey> priv, instance<Nonce> nonce) -> instance<KeypairCipher>
 	{
-		instance<std::string> msg = args[0].asType<std::string>();
-		instance<PublicKey> a = args[1].asType<PublicKey>();
-		instance<PrivateKey> b = args[2].asType<PrivateKey>();
-		instance<Nonce> c = args[3].asType<Nonce>();
-		
-		return instance<KeypairCipher>::make(a, b, c, msg);
-	}));
+		return instance<KeypairCipher>::make(pub, priv, nonce, msg);
+	});
 
-	ret->define_eval("curve/encrypt", curveencrypt);
 
-	auto curvedecrypt = instance<MultiMethod>::make();
-	curveencrypt->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<KeypairCipher, PublicKey, PrivateKey, Nonce, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("crypto/curve/decrypt",
+		[](instance<KeypairCipher> msg, instance<PublicKey> pub, instance<PrivateKey> priv, instance<Nonce> nonce) -> instance<std::string>
 	{
-		instance<KeypairCipher> a = args[0].asType<KeypairCipher>();
-		instance<PublicKey> b = args[1].asType<PublicKey>();
-		instance<PrivateKey> c = args[2].asType<PrivateKey>();
-		instance<Nonce> d = args[3].asType<Nonce>();
-		
-		size_t outsize = a->cipher.size() - crypto_secretbox_MACBYTES;
+		size_t outsize = msg->cipher.size() - crypto_secretbox_MACBYTES;
 		std::string res;
 		res.resize(outsize);
-		if (crypto_box_open_easy((uint8_t*)res.c_str(), a->cipher.data(), a->cipher.size(), d->nonce, b->key, c->key) != 0) {
+		if (crypto_box_open_easy((uint8_t*)res.c_str(), msg->cipher.data(), msg->cipher.size(), nonce->nonce, pub->key, priv->key) != 0) {
 			throw stdext::exception("Message Forgary");
 		}
 		return instance<std::string>::make(res);
-	}));
-
-	ret->define_eval("curve/decrypt", curveencrypt);
+	});
 }

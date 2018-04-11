@@ -31,6 +31,7 @@ namespace library
 		std::vector<instance<>> _data;
 
 	public:
+		CRAFT_LISP_EXPORTED List() = default;
 		CRAFT_LISP_EXPORTED List(std::vector<instance<>> && data);
 
 		CRAFT_LISP_EXPORTED instance<int64_t> size();
@@ -48,7 +49,7 @@ namespace library
 		: public virtual types::Object
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::Map);
-	private:
+	public:
 		struct cmpByInstanceSemantics {
 			inline bool operator()(const instance<>& a, const instance<>& b) const {
 				if (a.typeId() != b.typeId()) return a.typeId() < b.typeId();
@@ -64,6 +65,9 @@ namespace library
 		std::map<instance<>, instance<>, cmpByInstanceSemantics> _data;
 
 	public:
+		CRAFT_LISP_EXPORTED Map() = default;
+		CRAFT_LISP_EXPORTED Map(std::map<instance<>, instance<>, cmpByInstanceSemantics> && data);
+
 
 		CRAFT_LISP_EXPORTED instance<int64_t> size();
 
@@ -71,6 +75,7 @@ namespace library
 
 		CRAFT_LISP_EXPORTED void insert(instance<> i, instance<> v);
 		CRAFT_LISP_EXPORTED void erase(instance<> i);
+		CRAFT_LISP_EXPORTED void clear();
 		CRAFT_LISP_EXPORTED std::map<instance<>, instance<>, cmpByInstanceSemantics>& data();
 		CRAFT_LISP_EXPORTED std::vector<instance<>> keys();
 		CRAFT_LISP_EXPORTED std::vector<instance<>> values();

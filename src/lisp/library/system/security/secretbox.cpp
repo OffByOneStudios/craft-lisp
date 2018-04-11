@@ -10,7 +10,7 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
-CRAFT_OBJECT_DEFINE(SecretBoxKey)
+CRAFT_DEFINE(SecretBoxKey)
 {
 	_.use<PParse>().singleton<FunctionalParse>([](std::string s) {
 		size_t bin_len;
@@ -47,7 +47,7 @@ CRAFT_OBJECT_DEFINE(SecretBoxKey)
 
 
 
-CRAFT_OBJECT_DEFINE(SecretBoxCipher)
+CRAFT_DEFINE(SecretBoxCipher)
 {
 	_.use<PParse>().singleton<FunctionalParse>([](std::string s) {
 		auto res = instance<SecretBoxCipher>::make();
@@ -82,10 +82,7 @@ SecretBoxKey::SecretBoxKey()
 	crypto_secretbox_keygen(key);
 }
 
-Nonce::Nonce()
-{
-	randombytes_buf(nonce, crypto_secretbox_NONCEBYTES);
-}
+
 
 SecretBoxCipher::SecretBoxCipher(instance<SecretBoxKey> key, instance<Nonce> nonce, instance<std::string> message)
 {
@@ -94,50 +91,31 @@ SecretBoxCipher::SecretBoxCipher(instance<SecretBoxKey> key, instance<Nonce> non
 }
 
 
-void system::make_secretkey_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_secretkey_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();;
 
-	auto boxkeygen = instance<MultiMethod>::make();
-	boxkeygen->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<SecretBoxKey>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("crypto/salsa",
+		[]() -> instance<SecretBoxKey>
 	{
 		return instance<SecretBoxKey>::make();
-	}));
-	ret->define_eval("salsa/keygen", boxkeygen);
+	});
 
-	auto boxencrypt = instance<MultiMethod>::make();
-	boxencrypt->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, SecretBoxKey, Nonce, SecretBoxCipher>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("crypto/salsa/encrypt",
+		[](instance<std::string> msg, instance<SecretBoxKey> secret, instance<Nonce> nonce) -> instance<SecretBoxCipher>
 	{
-		auto a = args[0].asType<std::string>();
-		auto b = args[1].asType<SecretBoxKey>();
-		auto c = args[2].asType<Nonce>();
-		
-		return instance<SecretBoxCipher>::make(b, c, a);
-	}));
-	ret->define_eval("salsa/encrypt", boxencrypt);
+		return instance<SecretBoxCipher>::make(msg, secret, nonce);
+	});
 
-	auto boxdecrypt = instance<MultiMethod>::make();
-	boxdecrypt->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<SecretBoxCipher, SecretBoxKey, Nonce, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("crypto/salsa/decrypt",
+		[](instance<SecretBoxCipher> msg, instance<SecretBoxKey> key, instance<Nonce> nonce) -> instance<std::string>
 	{
-		auto cipher = args[0].asType<SecretBoxCipher>();
-		auto key = args[1].asType<SecretBoxKey>();
-		auto nonce = args[2].asType<Nonce>();
-
-		size_t outsize = cipher->cipher.size() - crypto_secretbox_MACBYTES;
+		size_t outsize = msg->cipher.size() - crypto_secretbox_MACBYTES;
 		std::string res;
 		res.resize(outsize);
-		if (crypto_secretbox_open_easy((uint8_t*)res.c_str(), cipher->cipher.data(), cipher->cipher.size(), nonce->nonce, key->key) != 0) {
+		if (crypto_secretbox_open_easy((uint8_t*)res.c_str(), msg->cipher.data(), msg->cipher.size(), nonce->nonce, key->key) != 0) {
 			throw stdext::exception("Message Forgary");
 		}
 		return instance<std::string>::make(res);
-	}));
-	ret->define_eval("salsa/decrypt", boxdecrypt);
-
-
+	});
 }

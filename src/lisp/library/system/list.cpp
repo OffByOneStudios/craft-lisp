@@ -20,7 +20,7 @@ instance<int64_t> List::size()
 
 instance<> List::at(instance<int64_t> i)
 {
-	if ((*i) < _data.size()) return _data[*i];
+	if (size_t(*i) < _data.size()) return _data[size_t(*i)];
 	throw stdext::exception("List Index Out Of Bounds");
 }
 
@@ -61,7 +61,7 @@ instance<List> List::slice(instance<int64_t> i, instance<int64_t> j)
 	auto ti = *i; auto tj = std::min(int64_t(_data.size()), *j);
 	auto s = _data.size();
 
-	if (ti > tj || ti < 0 || ti >= s || tj < 0) return res;
+	if (ti > tj || ti < int64_t(0) || ti >= int64_t(s) || tj < int64_t(0)) return res;
 
 	for (auto it = ti; it < tj; it++)
 	{
@@ -120,18 +120,12 @@ void core::make_list_globals(instance<Module> ret)
 {
 	auto semantics = ret->require<CultSemantics>();
 
-	auto list = instance<MultiMethod>::make();
-	list->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+	//TODO Take list of args n stuff
+	semantics->builtin_implementMultiMethod("list",
+		[]() -> instance<List>
 	{
-		auto res = instance<List>::make();
-		for (auto i : args)
-		{
-			res->push(i);
-		}
-		return res;
-	}));
-	ret->define_eval("list", list);
+		return instance<List>::make();
+	});
 
 	semantics->builtin_implementMultiMethod("list/get",
 		[](instance<List> a, instance<int64_t> b) -> instance<>
@@ -139,163 +133,84 @@ void core::make_list_globals(instance<Module> ret)
 		return a->at(b);
 	});
 
-	auto insert = instance<MultiMethod>::make();
-	insert->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("list/insert", 
+		[](instance<List> a, instance<int64_t> b, instance<> c)
 	{
-		instance<List> a(expect<List>(args[0]));
-		instance<int64_t> b(expect<int64_t>(args[1]));
-		a->insert(b, args[2]);
-		return instance<>();
-	}));
-	ret->define_eval("list/insert", insert);
-
-
-	auto erase = instance<MultiMethod>::make();
-	erase->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List, int64_t>(),
-		[](auto frame, auto args)
+		a->insert(b, c);
+	});
+	
+	semantics->builtin_implementMultiMethod("list/erase",
+		[](instance<List> a, instance<int64_t> b)
 	{
-		instance<List> a(expect<List>(args[0]));
-		instance<int64_t> b(expect<int64_t>(args[1]));
-
 		a->erase(b);
-		return instance<>();
-	}));
-	ret->define_eval("list/erase", erase);
+	});
 
-	auto pop = instance<MultiMethod>::make();
-	pop->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("list/pop",
+		[](instance<List> a)
 	{
-		instance<List> a(expect<List>(args[0]));
-		return a->pop();
-	}));
-	ret->define_eval("list/pop", pop);
+		a->pop();
+	});
 
-	auto push = instance<MultiMethod>::make();
-	push->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("list/push",
+		[](instance<List> a, instance<> b)
 	{
-		instance<List> a(expect<List>(args[0]));
-		a->push(args[1]);
-		return instance<>();
-	}));
-	ret->define_eval("list/push", push);
+		a->push(b);
+	});
 
-	auto slice = instance<MultiMethod>::make();
-	slice->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List, int64_t, int64_t>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("list/slice",
+		[](instance<List> a, instance<int64_t> b, instance<int64_t> c) -> instance<List>
 	{
-		instance<List> a(expect<List>(args[0]));
-		instance<int64_t> b(expect<int64_t>(args[1]));
-		instance<int64_t> c(expect<int64_t>(args[2]));
 		return a->slice(b, c);
-	}));
-	ret->define_eval("list/slice", slice);
+	});
 
-	auto reverse = instance<MultiMethod>::make();
-	reverse->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("list/reverse",
+		[](instance<List> a)
 	{
-		instance<List> a(expect<List>(args[0]));
 		a->reverse();
-		return instance<>();
-	}));
-	ret->define_eval("list/reverse", reverse);
+	});
 
-
-	auto fmap = instance<MultiMethod>::make();
-	fmap->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List, Function>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("list/fmap",
+		[](instance<List> a, instance<Function> b) -> instance<List>
 	{
-		instance<List> a(expect<List>(args[0]));
-		instance<Function> b(expect<Function>(args[1]));
-
 		auto res = instance<List>::make();
 
 		auto count = instance<int64_t>::make(0);
 
 		for (auto& i : a->data())
 		{
-			auto call = instance<Sexpr>::make();
-			call->cells = { b, i, count };
-			res->push(frame->getNamespace()->environment()->eval(frame, call));
+			Execution::exec(b, { i, count });
 			(*count)++;
 		}
 
 		return res;
-	}));
-	fmap->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List, Closure>(),
-		[](instance<SFrame> frame, auto args)
-	{
-		instance<List> a(expect<List>(args[0]));
-		instance<Closure> b(expect<Closure>(args[1]));
+	});
 
+	semantics->builtin_implementMultiMethod("list/fmap",
+		[](instance<List> a, instance<Function> b) -> instance<List>
+	{
 		auto res = instance<List>::make();
 
 		auto count = instance<int64_t>::make(0);
 
 		for (auto& i : a->data())
 		{
-			auto call = instance<Sexpr>::make();
-			call->cells = { b, i, count };
-			res->push(frame->getNamespace()->environment()->eval(frame, call));
-			(*count)++;
-		}
-		return res;
-	}));
-	ret->define_eval("list/fmap", fmap);
-
-	auto filter = instance<MultiMethod>::make();
-	filter->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List, Function>(),
-		[](instance<SFrame> frame, auto args)
-	{
-		instance<List> a(expect<List>(args[0]));
-		instance<Function> b(expect<Function>(args[1]));
-
-		auto res = instance<List>::make();
-
-		auto count = instance<int64_t>::make(0);
-
-		for (auto& i : a->data())
-		{
-			auto call = instance<Sexpr>::make();
-			call->cells = { b, i, count };
-			auto isIn = frame->getNamespace()->environment()->eval(frame, call);
-			if (isIn.typeId().isType<bool>())
-			{
-				bool f = *isIn.asType<bool>();
-				if (f) res->push(i);
-			} 
-			else if (isIn)  res->push(i);
+			Execution::exec(b, { i, count });
 			(*count)++;
 		}
 
 		return res;
-	}));
-	filter->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List, Closure>(),
-		[](instance<SFrame> frame, auto args)
-	{
-		instance<List> a(expect<List>(args[0]));
-		instance<Closure> b(expect<Closure>(args[1]));
+	});
 
+	semantics->builtin_implementMultiMethod("list/fmap",
+		[](instance<List> a, instance<Function> b) -> instance<List>
+	{
 		auto res = instance<List>::make();
 
 		auto count = instance<int64_t>::make(0);
 
 		for (auto& i : a->data())
 		{
-			auto call = instance<Sexpr>::make();
-			call->cells = { b, i, count };
-			auto isIn = frame->getNamespace()->environment()->eval(frame, call);
+			auto isIn = Execution::exec(b, { i, count });
 			if (isIn.typeId().isType<bool>())
 			{
 				bool f = *isIn.asType<bool>();
@@ -306,6 +221,5 @@ void core::make_list_globals(instance<Module> ret)
 		}
 
 		return res;
-	}));
-	ret->define_eval("list/filter", filter);
+	});
 }

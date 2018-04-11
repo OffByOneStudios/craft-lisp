@@ -9,12 +9,13 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
-CRAFT_OBJECT_DEFINE(Map)
+CRAFT_DEFINE(Map)
 {
 	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("size", &Map::size)
 		->withMethod("at", &Map::at)
 		->withMethod("erase", &Map::erase)
+		->withMethod("clear", &Map::clear)
 		->withMethod("insert", &Map::insert);
 
 	_.use<PStringer>().singleton<FunctionalStringer>(
@@ -55,6 +56,13 @@ CRAFT_OBJECT_DEFINE(Map)
 	_.defaults();
 }
 
+
+Map::Map(std::map<instance<>, instance<>, cmpByInstanceSemantics> && data)
+	: _data(data)
+{
+	
+}
+
 instance<int64_t> Map::size()
 {
 	return instance<int64_t>::make(_data.size());
@@ -73,6 +81,11 @@ void Map::insert(instance<> i, instance<> v) {
 
 void Map::erase(instance<> i) {
 	_data.erase(i);
+}
+
+void Map::clear()
+{
+	_data.clear();
 }
 
 std::map<instance<>, instance<>, Map::cmpByInstanceSemantics>& Map::data()
@@ -101,125 +114,71 @@ std::vector<instance<>> Map::values()
 	return res;
 }
 
-void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_map_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto map = instance<MultiMethod>::make();
-	map->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("map",
+		[]() -> instance<Map>
 	{
-		if (args.size() % 2 != 0) throw stdext::exception("Arguments must be in key value order");
+		//if (args.size() % 2 != 0) throw stdext::exception("Arguments must be in key value order");
 		auto res = instance<Map>::make();
-		for (auto it = 0; it < args.size(); it += 2)
+		/*for (auto it = 0; it < args.size(); it += 2)
 		{
 			res->insert(args[it], args[it + 1]);
-		}
+		}*/
 		return res;
-	}));
-	ret->define_eval("map", map);
+	});
 
-	auto get = instance<MultiMethod>::make();
-	get->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("map/get",
+		[](instance<Map> a, instance<> b) -> instance<>
 	{
-		if (args.size() != 2) throw stdext::exception("Dispatch Failure");
-		instance<Map> a(expect<Map>(args[0]));
-		return a->at(args[1]);
-	}));
-	ret->define_eval("map/get", get);
-
-	auto insert = instance<MultiMethod>::make();
-	insert->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+		return a->at(b);
+	});
+	
+	semantics->builtin_implementMultiMethod("map/set",
+		[](instance<Map> a, instance<> b, instance<> c)
 	{
-		if ((args.size() - 1) % 2 != 0) throw stdext::exception("Arguments must be in key value order");
-
-		instance<Map> a(expect<Map>(args[0]));
-		for (auto it = 1; it < args.size(); it += 2)
-		{
-			a->insert(args[it], args[it + 1]);
-		}
-		return instance<>();
-	}));
-	ret->define_eval("map/set", insert);
-
-
-	auto erase = instance<MultiMethod>::make();
-	erase->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+		a->insert(b, c);
+	});
+	
+	semantics->builtin_implementMultiMethod("map/erase",
+		[](instance<Map> a, instance<> b)
 	{
-		if (args.size() != 2) throw stdext::exception("Dispatch Failure");
-		instance<Map> a(expect<Map>(args[0]));
+		a->erase(b);
+	});
 
-		a->erase(args[1]);
-		return instance<>();
-	}));
-	ret->define_eval("map/clear", erase);
-
-	auto keys = instance<MultiMethod>::make();
-	keys->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Map>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("map/clear",
+		[](instance<Map> a)
 	{
-		instance<Map> a(expect<Map>(args[0]));
+		a->clear();
+	});
 
-		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, a->keys());
-	}));
-	ret->define_eval("map/keys", keys);
-
-	auto values = instance<MultiMethod>::make();
-	values->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Map>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("map/keys",
+		[](instance<Map> a) -> instance<List>
 	{
-		instance<Map> a(expect<Map>(args[0]));
+		return instance<List>::make(a->keys());
+	});
 
-		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, a->values());
-	}));
-	ret->define_eval("map/values", values);
-
-
-	auto fmap = instance<MultiMethod>::make();
-	fmap->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Map, Function>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("map/values",
+		[](instance<Map> a) -> instance<List>
 	{
-		instance<Map> a(expect<Map>(args[0]));
-		instance<Function> b(expect<Function>(args[1]));
+		return instance<List>::make(a->values());
+	});
 
+	semantics->builtin_implementMultiMethod("map/fmap",
+		[](instance<Map> a, instance<Function> b) -> instance<List>
+	{
 		auto res = instance<List>::make();
 
 		auto count = instance<int64_t>::make(0);
 
 		for (auto& i : a->data())
 		{
-			auto call = instance<Sexpr>::make();
-			call->cells = { b, i.first, i.second, count };
-			res->push(frame->getNamespace()->environment()->eval(frame, call));
+			Execution::exec(b, { i.first, i.second, count });
 			(*count)++;
 		}
+
 		return res;
-	}));
-	fmap->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Map, Closure>(),
-		[](instance<SFrame> frame, auto args)
-	{
-		instance<Map> a(expect<Map>(args[0]));
-		instance<Closure> b(expect<Closure>(args[1]));
-
-		auto res = instance<List>::make();
-
-		auto count = instance<int64_t>::make(0);
-
-		for (auto& i : a->data())
-		{
-			auto call = instance<Sexpr>::make();
-			call->cells = { b, i.first, i.second, count };
-			res->push(frame->getNamespace()->environment()->eval(frame, call));
-			(*count)++;
-		}
-		return res;
-	}));
-	ret->define_eval("map/fmap", fmap);
+	});
 }

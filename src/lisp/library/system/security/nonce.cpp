@@ -6,7 +6,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 using namespace craft::lisp::library;
 
-CRAFT_OBJECT_DEFINE(Nonce)
+CRAFT_DEFINE(Nonce)
 {
 	_.use<PParse>().singleton<FunctionalParse>([](std::string s) {
 		size_t bin_len;
@@ -39,4 +39,9 @@ CRAFT_OBJECT_DEFINE(Nonce)
 		return l.getFeature<PRepr>()->toRepr(l);
 	});
 	_.defaults();
+}
+
+Nonce::Nonce()
+{
+	randombytes_buf(nonce, crypto_secretbox_NONCEBYTES);
 }

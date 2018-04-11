@@ -11,7 +11,7 @@ using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
 
-CRAFT_OBJECT_DEFINE(craft::lisp::library::HttpServer)
+CRAFT_DEFINE(craft::lisp::library::HttpServer)
 {
 	_.defaults();
 }
@@ -50,15 +50,11 @@ namespace library {
 		instance<Environment> _env;
 		instance<Function> _handler;
 	public:
-		HttpLispServer(instance<Environment> env, instance<Function> handler) { _env = env; _handler = handler; }
+		HttpLispServer(instance<Function> handler) {_handler = handler; }
 	public:
 		virtual bool handle(net::HTTPRequest& req, net::HttpResponse& rep) {
 			rep.code = 200;
 			rep.content_type = "text/html";
-
-			
-			auto frame = instance<Frame>::make(_env->ns_user);
-			Execution::execute(frame);
 
 			// Gather Request
 			auto mreq = instance<Map>::make();
@@ -84,7 +80,7 @@ namespace library {
 			// Invoke
 			try
 			{
-				auto res = _handler->call(frame, { mreq, mrep });
+				auto res = Execution::exec(_handler, { mreq, mrep });
 				// Gather Response
 				rep.content_type = *mrep->at(instance<std::string>::make("content-type")).asType<std::string>();
 				rep.code = int16_t(*mrep->at(instance<std::string>::make("code")).asType<int64_t>());
@@ -105,16 +101,13 @@ namespace library {
 	};
 }}}
 
-void system::make_http_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_http_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto fetch = instance<MultiMethod>::make();
-	fetch->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("http/fetch",
+		[](instance<std::string> a) -> instance<std::string>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
 		std::function<std::string(void*, size_t)> f = [](void* d, size_t s) {
 			return std::string((char*)d, s);
 		};
@@ -133,41 +126,24 @@ void system::make_http_globals(instance<Module>& ret, instance<Namespace>& ns)
 		std::string s = fut.get();
 
 		return instance<std::string>::make(s);
-	}));
+	});
 
-	ret->define_eval("fetch", fetch);
-
-	
-	
-
-	auto httpserver = instance<MultiMethod>::make();
-	httpserver->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<int64_t, Function, HttpServer>(),
-		[env](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("http/server",
+		[](instance<int64_t> a, instance<Function> b) -> instance<HttpServer>
 	{
-		instance<int64_t> a(expect<int64_t>(args[0]));
-		instance<Function> b(expect<Function>(args[1]));
-
 		auto server = instance<HttpServer>::make(spdlog::stdout_color_mt("http"), int32_t(*a));
-		auto hands = new HttpLispServer(env, b);
+		auto hands = new HttpLispServer(b);
 		server->handlers.push_back(hands);
 		server->init();
 
 		return server;
-	}));
+	});
 
-	ret->define_eval("httpserver", httpserver);
-
-	auto forever= instance<MultiMethod>::make();
-	forever->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<HttpServer>(),
-		[env](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("http/server/forever",
+		[](instance<HttpServer> a)
 	{
-		instance<HttpServer> a(expect<HttpServer>(args[0]));
 		a->serve_forever();
+	});
 
-		return instance<>();
-	}));
-
-	ret->define_eval("httpforever", forever);
+	
 }

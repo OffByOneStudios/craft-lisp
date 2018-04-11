@@ -10,28 +10,98 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
-void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_string_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto concat = instance<MultiMethod>::make();
-	concat->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("string",
+		[](instance<std::string> a) -> instance<std::string>
 	{
-		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
+		return instance<std::string>::make(*a);
+	});
+	semantics->builtin_implementMultiMethod("string",
+		[](instance<PStringer> a) -> instance<std::string>
+	{
+		return instance<std::string>::make(a.getFeature<PStringer>()->toString(a));
+	});
+	semantics->builtin_implementMultiMethod("string",
+		[](instance<PRepr> a) -> instance<std::string>
+	{
+		return instance<std::string>::make(a.getFeature<PRepr>()->toRepr(a));
+	});
+	semantics->builtin_implementMultiMethod("string",
+		[](instance<PIdentifier> a) -> instance<std::string>
+	{
+		return instance<std::string>::make(a.getFeature<PIdentifier>()->identifier());
+	});
+
+	semantics->builtin_implementMultiMethod("print",
+		[](instance<> a)
+	{
+		std::cout << *Execution::exec("string", { a }).asType<std::string>();
+	});
+
+	/*semantics->builtin_implementMultiMethod("fmt",
+	[](instance<> a)
+	{
+	std::regex re("%\\{[^\\}]+\\}");
+	std::ostringstream s;
+	instance<std::string> a(expect<std::string>(args[0]));
+
+	auto& tmp = *a;
+	std::sregex_token_iterator
+	begin(tmp.begin(), tmp.end(), re, { -1,0 }),
+	end;
+
+	std::for_each(begin, end, [&](std::string const& m) {
+
+	if (std::regex_match(m, re))
+	{
+	std::string match = m.substr(2, m.size() - 3);
+	instance<> target;
+
+
+	ssize_t i = -1;
+	try
+	{
+	i = std::stoi(match) + 1;
+	}
+	catch (...)
+	{
+
+	}
+	if (i != -1)
+	{
+	if (size_t(i) >= args.size())
+	{
+	throw stdext::exception("Argument Reference {0} Out of Bounds", i - 1);
+	}
+	target = args[i];
+	}
+	else
+	{
+	target = env->eval(match);
+	}
+
+	instance<std::string> c = str->call(frame, { target });
+	s << *c;
+	}
+	else
+	{
+	s << m;
+	}
+	});*/
+
+	semantics->builtin_implementMultiMethod("string/concat",
+		[](instance<std::string> a, instance<std::string> b) -> instance<std::string>
+	{
 		std::string res = fmt::format("{0}{1}", *a, *b);
 		return instance<std::string>::make(res);
-	}));
-	ret->define_eval("cat", concat);
+	});
 
-	auto split = instance<MultiMethod>::make();
-	split->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<std::string, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("string/split",
+		[](instance<std::string> a, instance<std::string> b) -> instance<List>
 	{
-		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
-
 		std::vector<std::string> sm;
 		stdext::split(*a, *b, std::back_inserter(sm));
 
@@ -41,214 +111,62 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 			res.push_back(instance<std::string>::make(i));
 		}
 
-    return frame->getNamespace()->lookup("list")->getValue(frame).template asType<MultiMethod>()->call(frame, res);
-	}));
-	ret->define_eval("split", split);
+		return instance<List>::make(res);
+	});
 
-
-	auto str = instance<MultiMethod>::make();
-	str->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("string/join",
+		[](instance<List> a, instance<std::string> b) -> instance<std::string>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		return a;
-	}));
-	str->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<PStringer, std::string>(),
-		[](auto frame, auto args)
-	{
-		instance<> a(args[0]);
-		return instance<std::string>::make(a.getFeature<PStringer>()->toString(a));
-	}));
-	str->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<PIdentifier, std::string>(),
-		[](auto frame, auto args)
-	{
-		instance<> a(args[0]);
-		return instance<std::string>::make(a.getFeature<PIdentifier>()->identifier());
-	}));
-	ret->define_eval("str", str);
-
-	auto _print = instance<MultiMethod>::make();
-	_print->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeCollectArgs(),
-		[str](instance<SFrame> frame, std::vector<instance<>> args) mutable
-	{
-		for (auto i : args) {
-			std::cout << str->call(frame, { i }) << " ";
-		}
-
-		std::cout << "\n";
-
-		return instance<>();
-	}));
-	ret->define_eval("print", _print);
-
-	auto fmt = instance<MultiMethod>::make();
-	fmt->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeCollectArgs(),
-		[str, env](instance<SFrame> frame, std::vector<instance<>> args) mutable
-	{
-		std::regex re("%\\{[^\\}]+\\}");
-		std::ostringstream s;
-		instance<std::string> a(expect<std::string>(args[0]));
-
-		auto& tmp = *a;
-		std::sregex_token_iterator
-			begin(tmp.begin(), tmp.end(), re, { -1,0 }),
-			end;
-
-		std::for_each(begin, end, [&](std::string const& m) {
-
-			if (std::regex_match(m, re))
-			{
-				std::string match = m.substr(2, m.size() - 3);
-				instance<> target;
-
-
-				ssize_t i = -1;
-				try
-				{
-					i = std::stoi(match) + 1;
-				}
-				catch (...)
-				{
-
-				}
-				if(i != -1)
-				{
-					if (size_t(i) >= args.size())
-					{
-						throw stdext::exception("Argument Reference {0} Out of Bounds", i - 1);
-					}
-					target = args[i];
-				}
-				else
-				{
-					target = env->eval(match);
-				}
-
-				instance<std::string> c = str->call(frame, { target });
-				s << *c;
-			}
-			else
-			{
-				s << m;
-			}
-		});
-		return instance<std::string>::make(s.str());
-	}));
-	ret->define_eval("fmt", fmt);
-
-	auto join = instance<MultiMethod>::make();
-	join->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List, std::string>(),
-		[](instance<SFrame> frame, auto args)
-	{
-		instance<List> a(expect<List>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
+		std::cout << *Execution::exec("string", { a }).asType<std::string>();
 
 		std::ostringstream res;
 
 		auto count = 0;
 		for (auto& i : a->data())
 		{
-			if (i.typeId() == type<std::string>().typeId())
-			{
-				res << *i.asType<std::string>();
-			}
-			else if (i.hasFeature<PStringer>())
-			{
-				res << i.asFeature<PStringer>()->toString(i);
-			}
-			else
-			{
-				res << i.asFeature<PIdentifier>()->identifier() << fmt::format("{0}", (uint64_t)i.get());
-			}
+			std::cout << *Execution::exec("string", { i }).asType<std::string>();
 			if (count != (*a->size()) - 1) res << *b;
 			count++;
 		}
 
 		return instance<std::string>::make(res.str());
-	}));
+	});
 
-	join->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List>(),
-		[join](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("string/join",
+		[](instance<List> a) -> instance<std::string>
 	{
-		instance<List> a(expect<List>(args[0]));
-		auto b = instance<std::string>::make("\n"); 
-		auto call = instance<Sexpr>::make();
-		call->cells = { join, a, b};
-		return frame->getNamespace()->environment()->eval(frame, call);
-	}));
+		return Execution::exec("string/join", { a, instance<std::string>::make("\n") }).asType<std::string>();
+	});
 	
-	ret->define_eval("join", join);
 
-
-	auto slice = instance<MultiMethod>::make();
-	slice->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, int64_t, int64_t, std::string>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("string/slice",
+		[](instance<std::string> a, instance<int64_t> b, instance<int64_t> c) -> instance<std::string>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		instance<int64_t> b(expect<int64_t>(args[1]));
-		instance<int64_t> c(expect<int64_t>(args[2]));
-
 		return instance<std::string>::make(a->substr(*b, *c));
-	}));
+	});
 
-	ret->define_eval("slice", slice);
-
-
-	auto reverse = instance<MultiMethod>::make();
-	reverse->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("string/reverse",
+		[](instance<std::string> a) -> instance<std::string>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-
 		auto res = instance<std::string>::make(*a);
 		std::reverse(res->begin(), res->end());
-		
-		return res;
-	}));
+	});
 
-	ret->define_eval("reverse", reverse);
-
-
-	auto includes = instance<MultiMethod>::make();
-	includes->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, bool>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("string/includes",
+		[](instance<std::string> a, instance<std::string> b) -> instance<bool>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
 		return instance<bool>::make(a->find(*b) != a->npos);
-	}));
+	});
 
-	ret->define_eval("includes", includes);
-
-	auto strcmp = instance<MultiMethod>::make();
-	strcmp->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, int64_t>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("string/compare",
+		[](instance<std::string> a, instance<std::string> b) -> instance<int64_t>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
 		return instance<int64_t>::make(std::strcmp(a->c_str(), b->c_str()));
-	}));
+	});
 
-	ret->define_eval("strcmp", strcmp);
-
-	auto isprefix = instance<MultiMethod>::make();
-	isprefix->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, int64_t>(),
-		[](instance<SFrame> frame, auto args)
+	semantics->builtin_implementMultiMethod("string/isprefix",
+		[](instance<std::string> a, instance<std::string> b) -> instance<bool>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
 		bool res;
 		if (a->size() > b->size()) res = false;
 		else
@@ -257,7 +175,6 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 		}
 
 		return instance<bool>::make(res);
-	}));
+	});
 
-	ret->define_eval("str/isprefix", isprefix);
 }

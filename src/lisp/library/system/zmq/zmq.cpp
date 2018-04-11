@@ -18,7 +18,7 @@ using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
 
-CRAFT_OBJECT_DEFINE(ZMessage)
+CRAFT_DEFINE(ZMessage)
 {
 	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("get", &ZMessage::get)
@@ -26,7 +26,7 @@ CRAFT_OBJECT_DEFINE(ZMessage)
 	_.defaults();
 }
 
-CRAFT_OBJECT_DEFINE(ZSocket)
+CRAFT_DEFINE(ZSocket)
 {
 	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("send", &ZSocket::send)
@@ -34,7 +34,7 @@ CRAFT_OBJECT_DEFINE(ZSocket)
 	_.defaults();
 }
 
-CRAFT_OBJECT_DEFINE(ZContext)
+CRAFT_DEFINE(ZContext)
 {
 	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("bind", &ZContext::bind)
@@ -194,104 +194,65 @@ instance<ZSocket> ZContext::connect(instance<std::string> kind, instance<std::st
 	return res;
 }
 
-void lisp::library::system::make_zmq_globals(instance<Module>& ret, instance<Namespace>& ns)
+void lisp::library::core::make_zmq_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto zcontext = instance<MultiMethod>::make();
-	zcontext->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("zmq",
+		[]() -> instance<ZContext>
 	{
 		return instance<ZContext>::make();
-	}));
-	ret->define_eval("zcontext", zcontext);
+	});
 
-
-	auto zbind = instance<MultiMethod>::make();
-	zbind->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<ZContext, std::string, int64_t, ZSocket>(),
-		[](auto frame, auto args)
+	
+	semantics->builtin_implementMultiMethod("zmq/bind",
+		[](instance<ZContext> ctx, instance<std::string> kind, instance<int64_t> port) -> instance<ZSocket>
 	{
-		instance<ZContext> a(expect<ZContext>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
-		instance<int64_t> c(expect<int64_t>(args[2]));
+		return ctx->bind(kind, port);
+	});
 
-		return a->bind(b, c);
-	}));
-	ret->define_eval("zbind", zbind);
-
-	auto zconnect = instance<MultiMethod>::make();
-	zconnect->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<ZContext, std::string, std::string, ZSocket>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("zmq/connect",
+		[](instance<ZContext> ctx, instance<std::string> kind, instance<std::string> address) -> instance<ZSocket>
 	{
-		instance<ZContext> a(expect<ZContext>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
-		instance<std::string> c(expect<std::string>(args[2]));
+		return ctx->connect(kind, address);
+	});
 
-		return a->connect(b, c);
-	}));
-	ret->define_eval("zconnect", zconnect);
-
-	auto zmsg = instance<MultiMethod>::make();
-	zmsg->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, ZMessage>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("zmq/msg",
+		[](instance<std::string> msg) -> instance<ZMessage>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-
 		auto res = instance<ZMessage>::make();
-		res->fill(a);
+		res->fill(msg);
 		return res;
-	}));
-	zmsg->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<ZMessage, std::string>(),
-		[](auto frame, auto args)
-	{
-		instance<ZMessage> a(expect<ZMessage>(args[0]));
-		return a->get();
-	}));
-	ret->define_eval("zmsg", zmsg);
+	});
 
-	auto zsend = instance<MultiMethod>::make();
-	zsend->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<ZSocket, ZMessage>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("zmq/msg",
+		[](instance<ZMessage> msg) -> instance<std::string>
 	{
-		instance<ZSocket> a(expect<ZSocket>(args[0]));
-		instance<ZMessage> b(expect<ZMessage>(args[1]));
-		a->send(b, instance<bool>::make(false));
-		return instance<>();
-	}));
-	zsend->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<ZSocket, ZMessage, bool>(),
-		[](auto frame, auto args)
-	{
-		instance<ZSocket> a(expect<ZSocket>(args[0]));
-		instance<ZMessage> b(expect<ZMessage>(args[1]));
-		instance<bool> c(expect<bool>(args[2]));
-		a->send(b, c);
-		return instance<>();
-	}));
-	ret->define_eval("zsend", zsend);
+		return msg->get();
+	});
 
-	auto zrecv = instance<MultiMethod>::make();
-	zrecv->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<ZSocket, ZMessage>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("zmq/send",
+		[](instance<ZSocket> socket, instance<ZMessage> msg)
 	{
-		instance<ZSocket> a(expect<ZSocket>(args[0]));
-		return a->recv();
-	}));
-	ret->define_eval("zrecv", zrecv);
+		socket->send(msg, instance<bool>::make(false));
+	});
 
-	auto zmore = instance<MultiMethod>::make();
-	zmore->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<ZSocket>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("zmq/send",
+		[](instance<ZSocket> socket, instance<ZMessage> msg, instance<bool> more)
 	{
-		instance<ZSocket> a(expect<ZSocket>(args[0]));
-		return a->recv_more();
-	}));
-	ret->define_eval("zmore", zmore);
+		socket->send(msg, more);
+	});
+
+
+	semantics->builtin_implementMultiMethod("zmq/recv",
+		[](instance<ZSocket> socket) -> instance<ZMessage>
+	{
+		return socket->recv();
+	});
+	
+	semantics->builtin_implementMultiMethod("zmq/more",
+		[](instance<ZSocket> socket) -> instance<bool>
+	{
+		return socket->recv_more();
+	});
 }

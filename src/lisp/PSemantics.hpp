@@ -11,7 +11,7 @@ namespace lisp
 	class PSemantics
 		: public craft::types::Provider
 	{
-		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::PSemantics, "lisp.semantics", types::SingletonProviderManager);
+		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::PSemantics, "lisp.semantics.semantics", types::SingletonProviderManager);
 
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<lisp::Module> getModule(instance<> semantics) const = 0;

@@ -32,7 +32,7 @@ namespace library {
 		SecretBoxCipher(instance<SecretBoxKey> key, instance<Nonce> nonce, instance<std::string> message);
 	};
 
-	namespace system {
-		void make_secretkey_globals(instance<Module>& ret, instance<Namespace>& ns);
+	namespace core {
+		void make_secretkey_globals(instance<Module> ret);
 	}
 }}}

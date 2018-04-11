@@ -55,3 +55,21 @@ void Execution::pop()
 
 	_stack.pop_back();
 }
+
+instance<> Execution::exec(std::string const& a, types::GenericInvoke const& b)
+{
+	throw stdext::exception("Not Implemented");
+	return instance<>();
+}
+
+instance<> Execution::exec(instance<Function> a, types::GenericInvoke const & b)
+{
+	throw stdext::exception("Not Implemented");
+	return instance<>();
+}
+
+instance<> Execution::exec(instance<MultiMethod> a, types::GenericInvoke const & b)
+{
+	throw stdext::exception("Not Implemented");
+	return instance<>();
+}

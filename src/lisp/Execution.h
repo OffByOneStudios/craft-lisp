@@ -36,5 +36,8 @@ namespace lisp
 
 		// Helpers
 	public:
+		CRAFT_LISP_EXPORTED static instance<> exec(std::string const& a, types::GenericInvoke const& b);
+		CRAFT_LISP_EXPORTED static instance<> exec(instance<lisp::Function> a, types::GenericInvoke const& b);
+		CRAFT_LISP_EXPORTED static instance<> exec(instance<lisp::MultiMethod> a, types::GenericInvoke const& b);
 	};
 }}

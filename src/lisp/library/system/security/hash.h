@@ -17,7 +17,7 @@ namespace library {
 		uint8_t hash[crypto_generichash_BYTES];
 	};
 
-	namespace system {
-		void make_hash_globals(instance<Module>& ret, instance<Namespace>& ns);
+	namespace core {
+		void make_hash_globals(instance<Module> ret);
 	}
 }}}
