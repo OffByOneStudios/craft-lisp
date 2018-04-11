@@ -127,7 +127,7 @@ void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 		instance<Map> a(expect<Map>(args[0]));
 		return a->at(args[1]);
 	}));
-	ret->define_eval("mget", get);
+	ret->define_eval("map/get", get);
 
 	auto insert = instance<MultiMethod>::make();
 	insert->attach(env, instance<BuiltinFunction>::make(
@@ -142,7 +142,7 @@ void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 		}
 		return instance<>();
 	}));
-	ret->define_eval("mset", insert);
+	ret->define_eval("map/set", insert);
 
 
 	auto erase = instance<MultiMethod>::make();
@@ -155,7 +155,7 @@ void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 		a->erase(args[1]);
 		return instance<>();
 	}));
-	ret->define_eval("mclear", erase);
+	ret->define_eval("map/clear", erase);
 
 	auto keys = instance<MultiMethod>::make();
 	keys->attach(env, instance<BuiltinFunction>::make(
@@ -166,7 +166,7 @@ void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, a->keys());
 	}));
-	ret->define_eval("keys", keys);
+	ret->define_eval("map/keys", keys);
 
 	auto values = instance<MultiMethod>::make();
 	values->attach(env, instance<BuiltinFunction>::make(
@@ -177,7 +177,7 @@ void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 		return frame->getNamespace()->lookup("list")->getValue(frame).asType<MultiMethod>()->call(frame, a->values());
 	}));
-	ret->define_eval("values", values);
+	ret->define_eval("map/values", values);
 
 
 	auto fmap = instance<MultiMethod>::make();
@@ -221,5 +221,5 @@ void system::make_map_globals(instance<Module>& ret, instance<Namespace>& ns)
 		}
 		return res;
 	}));
-	ret->define_eval("mfmap", fmap);
+	ret->define_eval("map/fmap", fmap);
 }
