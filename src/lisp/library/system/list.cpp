@@ -139,7 +139,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		instance<int64_t> b(expect<int64_t>(args[1]));
 		return a->at(b);
 	}));
-	ret->define_eval("lget", get);
+	ret->define_eval("list/get", get);
 
 	auto insert = instance<MultiMethod>::make();
 	insert->attach(env, instance<BuiltinFunction>::make(
@@ -150,7 +150,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		a->insert(b, args[2]);
 		return instance<>();
 	}));
-	ret->define_eval("linsert", insert);
+	ret->define_eval("list/insert", insert);
 
 
 	auto erase = instance<MultiMethod>::make();
@@ -164,7 +164,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		a->erase(b);
 		return instance<>();
 	}));
-	ret->define_eval("lerase", erase);
+	ret->define_eval("list/erase", erase);
 
 	auto pop = instance<MultiMethod>::make();
 	pop->attach(env, instance<BuiltinFunction>::make(
@@ -174,7 +174,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		instance<List> a(expect<List>(args[0]));
 		return a->pop();
 	}));
-	ret->define_eval("lpop", pop);
+	ret->define_eval("list/pop", pop);
 
 	auto push = instance<MultiMethod>::make();
 	push->attach(env, instance<BuiltinFunction>::make(
@@ -184,7 +184,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		a->push(args[1]);
 		return instance<>();
 	}));
-	ret->define_eval("lpush", push);
+	ret->define_eval("list/push", push);
 
 	auto slice = instance<MultiMethod>::make();
 	slice->attach(env, instance<BuiltinFunction>::make(
@@ -196,7 +196,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		instance<int64_t> c(expect<int64_t>(args[2]));
 		return a->slice(b, c);
 	}));
-	ret->define_eval("lslice", slice);
+	ret->define_eval("list/slice", slice);
 
 	auto reverse = instance<MultiMethod>::make();
 	reverse->attach(env, instance<BuiltinFunction>::make(
@@ -207,7 +207,7 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		a->reverse();
 		return instance<>();
 	}));
-	ret->define_eval("lreverse", reverse);
+	ret->define_eval("list/reverse", reverse);
 
 
 	auto fmap = instance<MultiMethod>::make();
@@ -252,5 +252,62 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 		}
 		return res;
 	}));
-	ret->define_eval("lfmap", fmap);
+	ret->define_eval("list/fmap", fmap);
+
+	auto filter = instance<MultiMethod>::make();
+	filter->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<List, Function>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<List> a(expect<List>(args[0]));
+		instance<Function> b(expect<Function>(args[1]));
+
+		auto res = instance<List>::make();
+
+		auto count = instance<int64_t>::make(0);
+
+		for (auto& i : a->data())
+		{
+			auto call = instance<Sexpr>::make();
+			call->cells = { b, i, count };
+			auto isIn = frame->getNamespace()->environment()->eval(frame, call);
+			if (isIn.typeId().isType<bool>())
+			{
+				bool f = *isIn.asType<bool>();
+				if (f) res->push(i);
+			} 
+			else if (isIn)  res->push(i);
+			(*count)++;
+		}
+
+		return res;
+	}));
+	filter->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgs<List, Closure>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<List> a(expect<List>(args[0]));
+		instance<Closure> b(expect<Closure>(args[1]));
+
+		auto res = instance<List>::make();
+
+		auto count = instance<int64_t>::make(0);
+
+		for (auto& i : a->data())
+		{
+			auto call = instance<Sexpr>::make();
+			call->cells = { b, i, count };
+			auto isIn = frame->getNamespace()->environment()->eval(frame, call);
+			if (isIn.typeId().isType<bool>())
+			{
+				bool f = *isIn.asType<bool>();
+				if (f) res->push(i);
+			}
+			else if (isIn)  res->push(i);
+			(*count)++;
+		}
+
+		return res;
+	}));
+	ret->define_eval("list/filter", filter);
 }
