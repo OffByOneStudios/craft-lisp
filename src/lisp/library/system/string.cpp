@@ -216,4 +216,48 @@ void system::make_string_globals(instance<Module>& ret, instance<Namespace>& ns)
 	}));
 
 	ret->define_eval("reverse", reverse);
+
+
+	auto includes = instance<MultiMethod>::make();
+	includes->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, bool>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+		instance<std::string> b(expect<std::string>(args[1]));
+		return instance<bool>::make(a->find(*b) != a->npos);
+	}));
+
+	ret->define_eval("includes", includes);
+
+	auto strcmp = instance<MultiMethod>::make();
+	strcmp->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, int64_t>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+		instance<std::string> b(expect<std::string>(args[1]));
+		return instance<int64_t>::make(std::strcmp(a->c_str(), b->c_str()));
+	}));
+
+	ret->define_eval("strcmp", strcmp);
+
+	auto isprefix = instance<MultiMethod>::make();
+	isprefix->attach(env, instance<BuiltinFunction>::make(
+		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, int64_t>(),
+		[](instance<SFrame> frame, auto args)
+	{
+		instance<std::string> a(expect<std::string>(args[0]));
+		instance<std::string> b(expect<std::string>(args[1]));
+		bool res;
+		if (a->size() > b->size()) res = false;
+		else
+		{
+			res = *a == b->substr(0, a->size());
+		}
+
+		return instance<bool>::make(res);
+	}));
+
+	ret->define_eval("str/isprefix", isprefix);
 }
