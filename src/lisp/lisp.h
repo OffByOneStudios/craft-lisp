@@ -20,7 +20,9 @@ namespace lisp
 #include "exceptions.hpp"
 
 #include "SymbolStore.hpp"
-#include "GenericCall.hpp"
+
+#include "semantics/subroutine.h"
+#include "semantics/slots.h"
 
 #include "PSyntax.hpp"
 #include "PSemantics.hpp"

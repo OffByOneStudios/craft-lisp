@@ -30,6 +30,7 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED CallSite();
 
+        CRAFT_LISP_EXPORTED bool isDynamicCall() const;
 		CRAFT_LISP_EXPORTED instance<> calleeAst() const;
 
 		CRAFT_LISP_EXPORTED size_t argCount() const;
@@ -106,13 +107,21 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::MultiMethod);
 	private:
 		instance<SCultSemanticNode> _parent;
-
 		instance<Binding> _binding;
 
-
+        struct _Entry
+        {
+            instance<PSubroutine> subroutine;
+        };
+        
+        plf::colony<_Entry> _entries;
+        ExpressionDispatcher _dispatcher;
+        
 	public:
 		CRAFT_LISP_EXPORTED MultiMethod();
 
+        CRAFT_LISP_EXPORTED void attach(instance<PSubroutine>);
+        
 		// SCultSemanticNode
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
