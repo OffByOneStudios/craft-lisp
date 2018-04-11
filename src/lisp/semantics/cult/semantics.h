@@ -17,21 +17,36 @@ namespace lisp
 	*/
 	class CultSemantics
 		: public virtual craft::types::Object
+		, public craft::types::Implements<SCultSemanticNode>
 		, public craft::types::Implements<SScope>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::CultSemantics)
 	public:
-		struct ReadState
+		struct ReadState final
 		{
-			instance<CultSemantics> _semantics;
-			instance<SScope> _scope;
-			instance<Sexpr> _sexpr;
+			instance<CultSemantics> semantics;
+			instance<SScope> scope;
+			instance<Sexpr> sexpr;
 
-			inline instance<> read(size_t index);
+			inline instance<SCultSemanticNode> read(size_t index);
+
+			struct RestoreScope final
+			{
+				ReadState* rs;
+				instance<SScope> oldScope;
+
+				inline ~RestoreScope() { rs->scope = oldScope; }
+			};
+			inline RestoreScope pushScope(instance<SScope> newScope)
+			{
+				auto oldScope = scope;
+				scope = newScope;
+				return RestoreScope{ this, oldScope };
+			}
 		};
 
 		// TODO: Make this a multiMethod
-		typedef instance<> (*f_specialFormReader)(ReadState*);
+		typedef instance<SCultSemanticNode> (*f_specialFormReader)(ReadState*);
 
 	private:
 		instance<lisp::Module> _module;
@@ -83,6 +98,11 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED void builtin_eval(std::string const& contents);
 
+		// SCultSemanticNode
+	public:
+		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
+		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
+
 		// SScope
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const override;
@@ -91,8 +111,10 @@ namespace lisp
 		// E.g. may enclose over other higher scopes
 		CRAFT_LISP_EXPORTED virtual bool isLexicalScope() const override;
 
-		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) override;
-		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<> ast) override;
+		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;
+		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;
+
+		CRAFT_LISP_EXPORTED std::vector<instance<Binding>> search(std::string const& search) const;
 	};
 
 
@@ -126,8 +148,11 @@ namespace lisp
 	*/
 	class SpecialForm
 		: public virtual craft::types::Object
+		, public craft::types::Implements<SCultSemanticNode>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::SpecialForm);
+	private:
+		instance<SCultSemanticNode> _parent;
 
 	protected:
 		CRAFT_LISP_EXPORTED SpecialForm();
@@ -136,8 +161,10 @@ namespace lisp
 
 		CultSemantics::f_specialFormReader _read;
 
-		CRAFT_LISP_EXPORTED instance<> read(instance<CultSemantics>, instance<SScope>, instance<Sexpr>);
+		// SCultSemanticNode
 	public:
+		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
+		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
 	};
     
 }}

@@ -72,6 +72,13 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const = 0;
 		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) = 0;
+
+	protected:
+		inline static instance<SCultSemanticNode> _ast(instance<SCultSemanticNode> parent, instance<SCultSemanticNode> child)
+		{
+			child->setParent(parent);
+			return child;
+		}
 	};
 
 	/******************************************************************************
@@ -89,11 +96,11 @@ namespace lisp
 	private:
 		instance<SCultSemanticNode> _parent;
 
-	public:
+	private:
 		instance<> _value;
 
 	public:
-		CRAFT_LISP_EXPORTED Constant();
+		CRAFT_LISP_EXPORTED Constant(instance<> value);
 
 		CRAFT_LISP_EXPORTED instance<> getValue() const;
 

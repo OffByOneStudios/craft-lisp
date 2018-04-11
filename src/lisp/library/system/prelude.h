@@ -15,6 +15,7 @@ namespace library
 
 	public:
 		CRAFT_LISP_EXPORTED Buffer(instance<int64_t> size);
+
 		CRAFT_LISP_EXPORTED instance<int64_t> size();
 		CRAFT_LISP_EXPORTED instance<int64_t> at(instance<int64_t> i);
 		CRAFT_LISP_EXPORTED void set(instance<int64_t> i, instance<int64_t> d);
@@ -30,6 +31,7 @@ namespace library
 		std::vector<instance<>> _data;
 
 	public:
+		CRAFT_LISP_EXPORTED List(std::vector<instance<>> && data);
 
 		CRAFT_LISP_EXPORTED instance<int64_t> size();
 		CRAFT_LISP_EXPORTED instance<> at(instance<int64_t> i);

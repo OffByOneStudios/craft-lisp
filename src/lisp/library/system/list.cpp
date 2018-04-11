@@ -9,6 +9,9 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
+List::List(std::vector<instance<>> && data)
+	: _data(data)
+{ }
 
 instance<int64_t> List::size()
 {
@@ -69,7 +72,7 @@ instance<List> List::slice(instance<int64_t> i, instance<int64_t> j)
 }
 
 
-CRAFT_OBJECT_DEFINE(List)
+CRAFT_DEFINE(List)
 {
 	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("size", &List::size)

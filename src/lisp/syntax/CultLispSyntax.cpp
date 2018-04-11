@@ -26,7 +26,7 @@ CultLispSyntax::CultLispSyntax(instance<lisp::Module> forModule)
 
 
 
-void CultLispSyntax::parse(std::string const& s, PSyntax::ParseOptions const* opts = nullptr)
+void CultLispSyntax::parse(std::string const& s, PSyntax::ParseOptions const* opts)
 {
 	static PSyntax::ParseOptions defaultOpts = {
 		true, // keep_source;

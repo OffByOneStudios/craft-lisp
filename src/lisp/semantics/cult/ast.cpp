@@ -20,13 +20,14 @@ void SCultSemanticNode::validate(ValidationState* vs) const
 
 CRAFT_DEFINE(Constant)
 {
+	_.use<SCultSemanticNode>().byCasting();
+
 	_.defaults();
 }
 
-
-Constant::Constant()
+Constant::Constant(instance<> value)
 {
-
+	_value = value;
 }
 
 instance<> Constant::getValue() const
@@ -40,6 +41,6 @@ instance<SCultSemanticNode> Constant::getParent() const
 }
 void Constant::setParent(instance<SCultSemanticNode> parent)
 {
-	if (_parent) throw parent_already_set_error(parent);
+	if (_parent) throw parent_already_set_error(craft_instance());
 	_parent = parent;
 }

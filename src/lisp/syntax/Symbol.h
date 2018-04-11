@@ -6,6 +6,7 @@
 namespace craft {
 namespace lisp
 {
+	class Keyword;
 
 	class Symbol
 		: public virtual craft::types::Object
@@ -24,6 +25,7 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED std::string const& getValue() const;
 
+		static CRAFT_LISP_EXPORTED instance<Symbol> makeSymbol(instance<Keyword> keyword);
 		static CRAFT_LISP_EXPORTED instance<Symbol> makeSymbol(std::string const&);
 	};
 

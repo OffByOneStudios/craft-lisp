@@ -16,13 +16,25 @@ CRAFT_DEFINE(craft::lisp::SScope) { _.defaults(); }
 
 CRAFT_DEFINE(BindSite)
 {
+	_.use<SCultSemanticNode>().byCasting();
+
 	_.defaults();
 }
 
-
-BindSite::BindSite()
+BindSite::BindSite(instance<SCultSemanticNode> symbol, instance<SCultSemanticNode> value)
 {
+	_bindSymbol = _ast(craft_instance(), symbol);
+	_bindValue = _ast(craft_instance(), value);
+}
 
+BindSite::BindSite(instance<Symbol> symbol, instance<SCultSemanticNode> value)
+	: BindSite(instance<Constant>::make(symbol), value)
+{
+}
+
+bool BindSite::isDynamicBind() const
+{
+	return _bindSymbol.isType<Constant>();
 }
 
 instance<> BindSite::symbolAst() const
@@ -40,7 +52,7 @@ instance<SCultSemanticNode> BindSite::getParent() const
 }
 void BindSite::setParent(instance<SCultSemanticNode> parent)
 {
-	if (_parent) throw parent_already_set_error(parent);
+	if (_parent) throw parent_already_set_error(craft_instance());
 	_parent = parent;
 }
 

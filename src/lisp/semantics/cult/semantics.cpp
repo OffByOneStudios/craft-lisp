@@ -82,6 +82,16 @@ void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOption
 	}
 }
 
+instance<SCultSemanticNode> CultSemantics::getParent() const
+{
+	return instance<>();
+}
+void CultSemantics::setParent(instance<SCultSemanticNode> parent)
+{
+	throw parent_already_set_error(craft_instance());
+}
+
+
 
 instance<CultSemantics> CultSemantics::getSemantics() const
 {
@@ -98,20 +108,42 @@ bool CultSemantics::isLexicalScope() const
 	return false;
 }
 
-instance<SBinding> CultSemantics::lookup(instance<Symbol> symbol)
+instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
 {
 	auto it = _symbolTable.find(symbol->symbolStoreId);
 	if (it == _symbolTable.end())
 		return instance<>();
 	return it->second;
 }
-instance<SBinding> CultSemantics::define(instance<Symbol> symbol, instance<> ast)
+instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
-	auto it = _symbolTable.find(symbol->symbolStoreId);
-	if (it == _symbolTable.end())
-		return instance<>();
-	return it->second;
+	auto key = symbol->symbolStoreId;
+	auto lb = _symbolTable.lower_bound(key);
+
+	if (lb != _symbolTable.end() && !(_symbolTable.key_comp()(key, lb->first)))
+		throw stdext::exception("Symbol already defined.");
+
+	auto res = instance<Binding>::make(craft_instance(), symbol, ast);
+	_symbolTable.insert(lb, { key, res });
+	return res;
 }
+
+std::vector<instance<Binding>> CultSemantics::search(std::string const & search) const
+{
+	auto const size = search.size();
+	auto const& symbols = _module->getNamespace()->symbolStore;
+
+	std::vector<instance<Binding>> res;
+	for (auto& it : _symbolTable)
+	{
+		auto const& sym = symbols.getValue(it.first);
+
+		if (size <= sym.size() && search == sym.substr(0, size))
+			res.push_back(it.second);
+	}
+	return res;
+}
+
 
 /******************************************************************************
 ** CultSemanticsProvider
@@ -171,11 +203,15 @@ instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string cons
 
 void CultSemantics::builtin_addSpecialForm(std::string const& symbol_name)
 {
-	define(Symbol::makeSymbol(symbol_name), instance<SpecialForm>::make());
+	auto symbol = Symbol::makeSymbol(symbol_name);
+	auto bindsite = instance<BindSite>::make(symbol, instance<SpecialForm>::make());
+	_ast.push_back(bindsite);
+	define(symbol, bindsite);
 }
 void CultSemantics::builtin_specialFormReader(std::string const& symbol_name, CultSemantics::f_specialFormReader reader)
 {
-	lookup(Symbol::makeSymbol(symbol_name));
+	auto binding = lookup(Symbol::makeSymbol(symbol_name));
+	auto value = binding->getSite()->valueAst().asType<SpecialForm>()->_read = reader;
 }
 
 void CultSemantics::builtin_addMultiMethod(std::string const& symbol_name)
@@ -199,6 +235,8 @@ void CultSemantics::builtin_eval(std::string const& contents)
 
 CRAFT_DEFINE(SpecialForm)
 {
+	_.use<SCultSemanticNode>().byCasting();
+
 	_.defaults();
 }
 
@@ -207,7 +245,12 @@ SpecialForm::SpecialForm()
 
 }
 
-instance<> SpecialForm::read(instance<CultSemantics> semantics, instance<SScope> scope, instance<Sexpr> form)
+instance<SCultSemanticNode> SpecialForm::getParent() const
 {
-	return _read(semantics, scope, form);
+	return _parent;
+}
+void SpecialForm::setParent(instance<SCultSemanticNode> parent)
+{
+	if (_parent) throw parent_already_set_error(craft_instance());
+	_parent = parent;
 }

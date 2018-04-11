@@ -18,8 +18,19 @@ namespace lisp {
 		{
 			/* Try to get a string from a symbol like object (e.g. strings, symbols, keywords).
 			
+				TODO: Multimethod
 			*/
-			CRAFT_LISP_EXPORTED std::string symbol(instance<>);
+			inline instance<Symbol> symbol(instance<> s)
+			{
+				if (s.typeId().isType<Symbol>())
+					return s;
+				else if (s.typeId().isType<Keyword>())
+					return Symbol::makeSymbol(s.asType<Keyword>());
+				else if (s.typeId().isType<std::string>())
+					return Symbol::makeSymbol(*s.asType<std::string>());
+				else
+					throw stdext::exception("The given {0} cannot be used as a symbol", s.typeId().toString());
+			}
 
 			/* Throw an exception if a given argument is not of the expected type
 

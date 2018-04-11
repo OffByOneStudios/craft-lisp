@@ -13,6 +13,8 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(Condition)
 {
+	_.use<SCultSemanticNode>().byCasting();
+
 	_.defaults();
 }
 
@@ -45,7 +47,7 @@ instance<SCultSemanticNode> Condition::getParent() const
 }
 void Condition::setParent(instance<SCultSemanticNode> parent)
 {
-	if (_parent) throw parent_already_set_error(parent);
+	if (_parent) throw parent_already_set_error(craft_instance());
 	_parent = parent;
 }
 
@@ -55,6 +57,8 @@ void Condition::setParent(instance<SCultSemanticNode> parent)
 
 CRAFT_DEFINE(Loop)
 {
+	_.use<SCultSemanticNode>().byCasting();
+
 	_.defaults();
 }
 
@@ -79,6 +83,6 @@ instance<SCultSemanticNode> Loop::getParent() const
 }
 void Condition::setParent(instance<SCultSemanticNode> parent)
 {
-	if (_parent) throw parent_already_set_error(parent);
+	if (_parent) throw parent_already_set_error(craft_instance());
 	_parent = parent;
 }

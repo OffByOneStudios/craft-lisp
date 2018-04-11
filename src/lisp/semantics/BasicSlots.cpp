@@ -17,9 +17,6 @@ BasicSlots::BasicSlots(instance<> representing, size_t size)
 	this->size = size;
 	this->slots.reserve(size);
 }
-BasicSlots::~BasicSlots()
-{
-}
 
 size_t BasicSlots::getSize(instance<>* inst)
 {

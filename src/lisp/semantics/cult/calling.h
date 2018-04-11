@@ -87,7 +87,40 @@ namespace lisp
 		// E.g. may enclose over other higher scopes
 		CRAFT_LISP_EXPORTED virtual bool isLexicalScope() const override;
 
-		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) override;
-		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<> ast) override;
+		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;
+		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;
+	};
+
+	/******************************************************************************
+	** MultiMethod
+	******************************************************************************/
+
+	/*
+		Multimethod Definition
+	*/
+	class MultiMethod
+		: public virtual craft::types::Object
+		, public craft::types::Implements<SCultSemanticNode>
+		, public craft::types::Implements<SBindable>
+	{
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::MultiMethod);
+	private:
+		instance<SCultSemanticNode> _parent;
+
+		instance<Binding> _binding;
+
+
+	public:
+		CRAFT_LISP_EXPORTED MultiMethod();
+
+		// SCultSemanticNode
+	public:
+		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
+		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
+
+		// SBindable
+	public:
+		CRAFT_LISP_EXPORTED virtual instance<Binding> getBinding() const override;
+		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) const override;
 	};
 }}

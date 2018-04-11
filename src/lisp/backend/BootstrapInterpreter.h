@@ -86,8 +86,3 @@ namespace lisp
 		virtual void resume(instance<> backend) const override;
 	};
 }}
-
-inline craft::types::TypeId craft::types::type<craft::lisp::BootstrapInterpreter>::typeId()
-{
-  return craft::lisp::BootstrapInterpreter::craft_s_typeId();
-};

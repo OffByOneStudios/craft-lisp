@@ -39,10 +39,8 @@ namespace lisp
 			auto mlb = _map.lower_bound(key);
 
 			if (mlb != _map.end() && !(_map.key_comp()(key, mlb->first)))
-			{
 				// key already exists
 				return mlb->second;
-			}
 
 			auto vit = _strings.insert(s);
 			size_t index = std::distance(_strings.begin(), vit);

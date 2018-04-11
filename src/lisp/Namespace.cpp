@@ -82,7 +82,7 @@ instance<> Namespace::read(std::string contents, TypeId type, PSyntax::ParseOpti
 	return read(parse(contents, type.getFeature<PSemantics>()->readsFrom()[0], popts), type, ropts);
 }
 
-instance<> Namespace::exec(instance<Module> module, std::string method, lisp::GenericCall const& call)
+instance<> Namespace::exec(instance<Module> module, std::string method, types::GenericInvoke const& call)
 {
 	auto backend = preferedBackend();
 
@@ -174,21 +174,4 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 	on_moduleInit.emit(ret);
 
 	return ret;
-}
-
-std::vector<instance<SBinding>> Namespace::search(std::string const & search)
-{
-	std::vector<instance<SBinding>> res;
-	for (auto& it : _lookup)
-	{
-
-		if (search.size() <= it.first.size())
-		{
-			if (search == it.first.substr(0, search.size()))
-			{
-				res.push_back(it.second);
-			}
-		}
-	}
-	return res;
 }

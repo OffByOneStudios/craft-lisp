@@ -34,6 +34,9 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED Condition();
 
+		CRAFT_LISP_EXPORTED void preSize(size_t);
+		CRAFT_LISP_EXPORTED void push(instance<SCultSemanticNode> cond, instance<SCultSemanticNode> branch);
+
 		CRAFT_LISP_EXPORTED size_t branchCount() const;
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> branchConditionAst(size_t index) const;
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> branchAst(size_t index) const;
@@ -66,7 +69,7 @@ namespace lisp
 		instance<SCultSemanticNode> _body;
 
 	public:
-		CRAFT_LISP_EXPORTED Loop();
+		CRAFT_LISP_EXPORTED Loop(instance<SCultSemanticNode> cond, instance<SCultSemanticNode> body);
 
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> conditionAst() const;
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> bodyAst() const;

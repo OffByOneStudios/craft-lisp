@@ -24,12 +24,15 @@ namespace lisp
 	private:
 		instance<SCultSemanticNode> _parent;
 
-	public:
+	private:
 		instance<SCultSemanticNode> _bindSymbol;
 		instance<SCultSemanticNode> _bindValue;
 
 	public:
-		CRAFT_LISP_EXPORTED BindSite();
+		CRAFT_LISP_EXPORTED BindSite(instance<SCultSemanticNode> symbol, instance<SCultSemanticNode> value);
+		CRAFT_LISP_EXPORTED BindSite(instance<Symbol> symbol, instance<SCultSemanticNode> value);
+
+		CRAFT_LISP_EXPORTED bool isDynamicBind() const;
 
 		CRAFT_LISP_EXPORTED instance<> symbolAst() const;
 		CRAFT_LISP_EXPORTED instance<> valueAst() const;
@@ -105,7 +108,7 @@ namespace lisp
 		// E.g. may enclose over other higher scopes
 		CRAFT_LISP_EXPORTED virtual bool isLexicalScope() const = 0;
 
-		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) = 0;
-		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<> ast) = 0;
+		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const = 0;
+		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) = 0;
 	};
 }}

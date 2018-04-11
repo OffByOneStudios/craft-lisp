@@ -15,14 +15,12 @@ namespace _impl {
 #endif
 }
 
-void system::make_fs_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_fs_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto ls = instance<MultiMethod>::make();
-	ls->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<List>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("ls",
+		[]() -> instance<List>
 	{
 		auto files = path::list_files(path::absolute());
 		auto dirs = path::list_dirs(path::absolute());
@@ -38,17 +36,12 @@ void system::make_fs_globals(instance<Module>& ret, instance<Namespace>& ns)
 			res.push_back(instance<std::string>::make(f));
 		}
 
-    return frame->getNamespace()->lookup("list")->getValue(frame).template asType<MultiMethod>()->call(frame, res);
-		
-	}));
-	ret->define_eval("ls", ls);
+		return instance<List>::make(res);
+	});
 
-	ls->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, List>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("ls",
+		[](instance<std::string> a) -> instance<List>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-
 		auto files = path::list_files(*a);
 		auto dirs = path::list_dirs(*a);
 
@@ -63,106 +56,67 @@ void system::make_fs_globals(instance<Module>& ret, instance<Namespace>& ns)
 			res.push_back(instance<std::string>::make(f));
 		}
 
-    return frame->getNamespace()->lookup("list")->getValue(frame).template asType<MultiMethod>()->call(frame, res);
-	}));
-	ret->define_eval("ls", ls);
+		return instance<List>::make(res);
+	});
 
-	auto cwd = instance<MultiMethod>::make();
-	cwd->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("cwd",
+		[]() -> instance<std::string>
 	{
 		return instance<std::string>::make(path::absolute());
-	}));
-	ret->define_eval("cwd", cwd);
+	});
 
-	auto cd = instance<MultiMethod>::make();
-	cd->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("cd",
+		[](instance<std::string> a)
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-
 		path::set_cwd(*a);
+	});
 
-		return instance<>();
-	}));
-	ret->define_eval("cd", cd);
 
-	auto read = instance<MultiMethod>::make();
-	read->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("read",
+		[](instance<std::string> _0) -> instance<std::string>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		auto text = craft::fs::read<std::string>(*a, &craft::fs::string_read).get();
+		auto text = craft::fs::read<std::string>(*_0, &craft::fs::string_read).get();
 
 		return instance<std::string>::make(text);
-	}));
-	ret->define_eval("read", read);
+	});
 
-	auto write = instance<MultiMethod>::make();
-	write->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<std::string, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("write",
+		[](instance<std::string> _0, instance<std::string> _1)
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
+		std::ofstream outfile;
+		outfile.open(*_0);
+		outfile.write(_1->c_str(), _1->size());
+		outfile.close();
+	});
+	semantics->builtin_implementMultiMethod("write",
+		[](instance<std::string> _0, instance<std::string> _1, instance<std::string> _2)
+	{
+		std::ofstream::openmode op;
+		if (*_2 == "b") op = std::ofstream::binary;
+		else if (*_2 == "a") op = std::ofstream::app;
+		else if (*_2 == "ba" || *_2 == "ba") op = std::ofstream::app | std::ofstream::binary;
+		else throw stdext::exception("Unknown File Open Mode: {0}", *_2);
 		
 		std::ofstream outfile;
-		outfile.open(*a);
-		outfile.write(b->c_str(), b->size());
+		outfile.open(*_0, op);
+		outfile.write(_1->c_str(), _1->size());
 		outfile.close();
+	});
 
-		return instance<>();
-	}));
-	write->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<std::string, std::string, std::string>(),
-		[](auto frame, auto args)
+
+	semantics->builtin_implementMultiMethod("mv",
+		[](instance<std::string> a, instance<std::string> b)
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		instance<std::string> c(expect<std::string>(args[1]));
-		instance<std::string> b(expect<std::string>(args[2]));
-
-		std::ofstream::openmode op;
-		if (*c == "b") op = std::ofstream::binary;
-		else if (*c == "a") op = std::ofstream::app;
-		else if (*c == "ba" || *c == "ba") op = std::ofstream::app | std::ofstream::binary;
-		else throw stdext::exception("Unknown File Open Mode: {0}", *c);
-		std::ofstream outfile;
-		outfile.open(*a, op);
-		outfile.write(b->c_str(), b->size());
-		outfile.close();
-
-		return instance<>();
-	}));
-
-	ret->define_eval("write", write);
-
-
-	auto move = instance<MultiMethod>::make();
-	move->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<std::string, std::string>(),
-		[](auto frame, auto args)
-	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
-
-
 		auto f = path::normalize(*a);
 		auto t = path::normalize(*b);
 		if (rename(f.c_str(), t.c_str())) throw stdext::exception("{0}", "TODO Rename Failure");
 		return instance<>();
-	}));
-	ret->define_eval("mv", move);
+	});
 
 
-	auto glob = instance<MultiMethod>::make();
-	glob->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, List>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("glob",
+		[](instance<std::string> a, instance<std::string> b) -> instance<List>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
-		instance<std::string> b(expect<std::string>(args[1]));
 		auto res = std::vector<instance<>>();
 
 		auto location = *a;
@@ -198,8 +152,6 @@ void system::make_fs_globals(instance<Module>& ret, instance<Namespace>& ns)
 			}
 		}
 
-    return frame->getNamespace()->lookup("list")->getValue(frame).template asType<MultiMethod>()->call(frame, res);
-	}));
-	ret->define_eval("glob", glob);
-
+		return instance<List>::make(res);
+	});
 }

@@ -1,7 +1,7 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
 #include "lisp/backend/backend.h"
-#include "lisp/semantics/cult/cult_semantics.h"
+#include "lisp/semantics/cult/cult.h"
 #include "lisp/backend/BootstrapInterpreter.h"
 
 using namespace craft;
@@ -61,10 +61,10 @@ instance<> InterpreterFrame::getEntryRepresentative(size_t index) const
 }
 instance<Module> InterpreterFrame::getEntryModule(size_t index) const
 {
-	return _getEntry(index)._function->;
+	return _getEntry(index)._function;
 }
 
-void InterpreterFrame::pushEntry(instance<Function> function, types::GenericInvoke const& args)
+void InterpreterFrame::pushEntry(instance<lisp::Function> function, types::GenericInvoke const& args)
 {
 
 }

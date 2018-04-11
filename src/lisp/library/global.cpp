@@ -19,18 +19,6 @@ bool special::helper::truth(instance<SFrame> frame, instance<PSubroutine> truth,
 	return *value.asType<bool>();
 }
 
-std::string library::helper::symbol(instance<> s)
-{
-	if (s.typeId().isType<Symbol>())
-		return s.asType<Symbol>()->value;
-	else if (s.typeId().isType<Keyword>())
-		return s.asType<Keyword>()->value;
-	else if (s.typeId().isType<std::string>())
-		return *s.asType<std::string>();
-	else
-		throw stdext::exception("The given {0} cannot be used as a symbol", s.typeId().toString());
-}
-
 instance<SubroutineSignature> library::helper::binding_expr_to_signature(instance<SScope> scope, instance<Sexpr> expr)
 {
 	// (foo bar baz)
@@ -219,59 +207,6 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 
 	// -- Special Forms --
-	auto do_ = instance<SpecialForm>::make(
-		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
-	{
-		return scope->environment()->read_rest(scope, head, sexpr);
-	},
-		[](instance<SFrame> frame, instance<Sexpr> sexpr) -> instance<>
-	{
-		// Setup special form
-		size_t size = sexpr->cells.size();
-
-		instance<> last_ret;
-		for (int i = 0; i < size; i += 1)
-		{
-			last_ret = frame->getNamespace()->environment()->eval(frame, sexpr->cells[i]);
-		}
-
-		return last_ret;
-	});
-	ret->define_eval("do", do_);
-
-	auto define = instance<SpecialForm>::make(
-		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
-	{
-		if (sexpr->cells.size() != 3)
-			throw stdext::exception("malformed: (define <symbol> <expr>)");
-
-		auto name = sexpr->cells[1];
-		auto object = sexpr->cells[2];
-
-		std::string name_value = symbol(name);
-
-		object = scope->environment()->read(scope, object);
-
-		auto binding = scope->define(name_value, object);
-
-		auto ret = instance<Sexpr>::make();
-		ret->cells.push_back(head);
-		ret->cells.push_back(binding);
-		return ret;
-	},
-		[](instance<SFrame> frame, instance<Sexpr> sexpr) -> instance<>
-	{
-		if (sexpr->cells.size() != 2 || !sexpr->cells[1].typeId().hasFeature<SBinding>())
-			throw stdext::exception("Malformed define evaluated.");
-
-		instance<SBinding> binding = sexpr->cells[1];
-
-		binding->eval(frame);
-
-		return binding->getValue(frame);
-	});
-	ret->define_eval("define", define);
-
 
 	auto quote = instance<SpecialForm>::make(
 		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
