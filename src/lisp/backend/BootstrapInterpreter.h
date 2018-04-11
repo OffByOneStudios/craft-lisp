@@ -21,7 +21,6 @@ namespace lisp
 		struct _Entry
 		{
 			instance<Function> _function;
-			std::vector<instance<>> _state;
 			instance<SScope> _scope; // if any
 			std::map<instance<Binding>, instance<>> _values; // values bound to the scope
 		};
@@ -59,8 +58,6 @@ namespace lisp
 	public:
 
 		CRAFT_LISP_EXPORTED BootstrapInterpreter(instance<Namespace> lisp);
-
-		CRAFT_LISP_EXPORTED instance<> exec_cult(instance<>, types::GenericInvoke const&);
 
 		CRAFT_LISP_EXPORTED instance<> exec(instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const&);
 

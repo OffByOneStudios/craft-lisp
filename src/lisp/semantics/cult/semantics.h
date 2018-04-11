@@ -82,6 +82,8 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED void read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts);
 
+		CRAFT_LISP_EXPORTED std::vector<instance<Binding>> search(std::string const& search) const;
+
 		// Builtin helpers
 	public:
 		CRAFT_LISP_EXPORTED void builtin_addSpecialForm(std::string const& symbol_name);
@@ -113,8 +115,6 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;
-
-		CRAFT_LISP_EXPORTED std::vector<instance<Binding>> search(std::string const& search) const;
 	};
 
 

@@ -1,0 +1,44 @@
+#include "lisp/common.h"
+#include "lisp/lisp.h"
+#include "lisp/library/libraries.h"
+
+#include "lisp/semantics/cult/cult.h"
+#include "lisp/backend/BootstrapInterpreter.h"
+#include "lisp/backend/llvm/llvm_internal.h"
+
+using namespace craft;
+using namespace craft::types;
+using namespace craft::lisp;
+using namespace craft::lisp::library::helper;
+
+
+instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns)
+{
+	//
+	// Aquire objects, set up returns
+	//
+	auto backend_interp = ns->get<BootstrapInterpreter>();
+	auto backend_llvm = ns->get<LlvmBackend>();
+
+	auto ret = instance<Module>::make(ns, "builtin:cult.core");
+
+	library::core::make_logic_globals(ret); // Quick Maths
+	library::core::make_cast_globals(ret);
+	library::core::make_arithmatic_globals(ret);
+	library::core::make_string_globals(ret);
+	library::core::make_shim_globals(ret);
+	library::core::make_fs_globals(ret);
+	library::core::make_env_globals(ret);
+	library::core::make_llvm_globals(ret);
+	library::core::make_zmq_globals(ret);
+	library::core::make_regex_globals(ret);
+	library::core::make_meta_globals(ret);
+	library::core::make_http_globals(ret);
+	library::core::make_subprocess_globals(ret);
+	library::core::make_list_globals(ret);
+	library::core::make_map_globals(ret);
+	library::core::make_platform_globals(ret);
+	library::core::make_security_globals(ret);
+	library::core::make_repl_globals(ret);
+	library::core::make_json_globals(ret);
+}

@@ -9,8 +9,8 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
-void system::make_logic_globals(instance<Module>& ret, instance<Namespace>& ns) {
-	auto env = ns->environment();
+void core::make_logic_globals(instance<Module> ret)
+{
 	auto _operator_eq = instance<MultiMethod>::make();
 	auto _operator_gt = instance<MultiMethod>::make();
 	auto _operator_gte = instance<MultiMethod>::make();

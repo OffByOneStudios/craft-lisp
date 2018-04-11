@@ -10,17 +10,13 @@ using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
 
-void system::make_regex_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_regex_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto _rmatch = instance<MultiMethod>::make();
-	_rmatch->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, bool>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("rmatch",
+		[](instance<std::string> a, instance<std::string> b) -> instance<bool>
 	{
-		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
-
 		std::regex r(*a);
 
 		std::smatch sm;    // same as std::match_results<string::const_iterator> sm;
@@ -28,16 +24,11 @@ void system::make_regex_globals(instance<Module>& ret, instance<Namespace>& ns)
 
 		return instance<bool>::make(sm.size() != 0);
 
-	}));
-	ret->define_eval("rmatch", _rmatch);
+	});
 
-	auto _rfind = instance<MultiMethod>::make();
-	_rfind->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<std::string, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("rfind",
+		[](instance<std::string> a, instance<std::string> b) -> instance<List>
 	{
-		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
-
 		std::regex r(*a);
 
 		std::smatch sm;    // same as std::match_results<string::const_iterator> sm;
@@ -49,7 +40,6 @@ void system::make_regex_globals(instance<Module>& ret, instance<Namespace>& ns)
 			res.push_back(instance<std::string>::make(i.str()));
 		}
 
-    return frame->getNamespace()->lookup("list")->getValue(frame).template asType<MultiMethod>()->call(frame, res);
-	}));
-	ret->define_eval("rfind", _rfind);
+		return instance<List>::make(res);
+	});
 }

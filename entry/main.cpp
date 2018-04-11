@@ -42,7 +42,7 @@ namespace _impl {
 
 int main(int argc, char** argv)
 {
-	craft::types::boot_with_cpp();
+	craft::types::boot();
 
 	instance<Environment> global_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"));
 	

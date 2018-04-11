@@ -9,7 +9,7 @@ using namespace craft::lisp;
 using namespace craft::lisp::library::helper;
 
 
-bool special::helper::truth(instance<SFrame> frame, instance<PSubroutine> truth, instance<> code)
+bool helper::truth(instance<SFrame> frame, instance<PSubroutine> truth, instance<> code)
 {
 	auto result = frame->getNamespace()->environment()->eval(frame, code);
 	auto value = truth->call(truth, frame, { result });
@@ -19,7 +19,7 @@ bool special::helper::truth(instance<SFrame> frame, instance<PSubroutine> truth,
 	return *value.asType<bool>();
 }
 
-instance<SubroutineSignature> library::helper::binding_expr_to_signature(instance<SScope> scope, instance<Sexpr> expr)
+ExpressionStore library::helper::binding_expr_to_signature(instance<SScope> scope, instance<Sexpr> expr)
 {
 	// (foo bar baz)
 	// ((foo Int) bar (baz (Union String Int)))
@@ -230,59 +230,6 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	});
 	ret->define_eval("quote", quote);
 
-	auto cond = instance<SpecialForm>::make(
-		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
-	{
-		return scope->environment()->read_rest(scope, head, sexpr);
-	},
-		[truth](instance<SFrame> frame, instance<Sexpr> sexpr) -> instance<>
-	{
-		// Setup special form
-		size_t size = sexpr->cells.size();
-		assert(size > 0);
-		size -= 1;
-
-		// Do loop of conditions:
-		size_t index;
-		for (index = 1; index < size; index += 2)
-		{
-			if (special::helper::truth(frame, truth, sexpr->cells[index]))
-				return frame->getNamespace()->environment()->eval(frame, sexpr->cells[index + 1]);
-		}
-
-		// Check for last branch
-		if (index - 1 < size)
-			return frame->getNamespace()->environment()->eval(frame, sexpr->cells[index]);
-		else
-			return instance<>();
-	});
-	ret->define_eval("cond", cond);
-
-	auto _while = instance<SpecialForm>::make(
-		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
-	{
-		return scope->environment()->read_rest(scope, head, sexpr);
-	},
-		[truth](instance<SFrame> frame, instance<Sexpr> sexpr) -> instance<>
-	{
-		// Setup special form
-		size_t size = sexpr->cells.size();
-		assert(size == 3);
-		size -= 1;
-
-		auto condition = sexpr->cells[1];
-		auto body = sexpr->cells[2];
-
-		instance<> last_ret;
-		while (special::helper::truth(frame, truth, condition))
-		{
-			last_ret = frame->getNamespace()->environment()->eval(frame, body);
-		}
-
-		return last_ret;
-	});
-	ret->define_eval("while", _while);
-
 	auto fn = instance<SpecialForm>::make(
 		[](instance<SScope> scope, instance<> head, instance<Sexpr> sexpr) -> instance<>
 	{
@@ -399,25 +346,6 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	ret->define_eval("#t", _true);
 	ret->define_eval("#f", _false);
 
-	library::system::make_logic_globals(ret, ns); // Quick Maths
-	library::system::make_cast_globals(ret, ns); 
-	library::system::make_arithmatic_globals(ret, ns);
-	library::system::make_string_globals(ret, ns);
-	library::system::make_shim_globals(ret, ns);
-	library::system::make_fs_globals(ret, ns);
-	library::system::make_env_globals(ret, ns);
-	library::system::make_llvm_globals(ret, ns);
-	library::system::make_zmq_globals(ret, ns);
-	library::system::make_regex_globals(ret, ns);
-	library::system::make_meta_globals(ret, ns);
-	library::system::make_http_globals(ret, ns);
-	library::system::make_subprocess_globals(ret, ns);
-	library::system::make_list_globals(ret, ns);
-	library::system::make_map_globals(ret, ns);
-	library::system::make_platform_globals(ret, ns);
-	library::system::make_security_globals(ret, ns);
-	library::system::make_repl_globals(ret, ns);
-	library::system::make_json_globals(ret, ns);
 
 	auto file_text = instance<MultiMethod>::make();
 	file_text->attach(env, instance<BuiltinFunction>::make(

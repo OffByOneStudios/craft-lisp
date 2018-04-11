@@ -137,10 +137,14 @@ instance<> BootstrapInterpreter::exec_cult(instance<SSubroutine> s, types::Gener
 instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const& call)
 {
 	auto semantics = module->require<CultSemantics>();
+	auto binding = semantics->lookup(Symbol::makeSymbol(entry));
+
+	auto potFunc = binding->getSite()->symbolAst();
 
 	auto frame = instance<InterpreterFrame>::make(craft_instance());
-
 	Execution::getCurrent()->push_frame(frame);
+
+	frame->pushEntry(, call)
 }
 
 /******************************************************************************

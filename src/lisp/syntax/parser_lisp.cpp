@@ -84,9 +84,9 @@ namespace lisp_grammar
 		static void apply(Input const& in, ParseStack& ps)
 		{
 			auto new_expr = instance<Sexpr>::make();
-			new_expr->cell_locs.push_back(in.posisition().byte);
+			new_expr->cell_locs.push_back(in.position().byte);
 
-			ps.push();
+			ps.push(new_expr);
 		}
 	};
 
@@ -98,7 +98,7 @@ namespace lisp_grammar
 		{
 			auto finished = ps.top();
 			ps.pop();
-			finished->cell_locs.push_back(in.posisition().byte);
+			finished->cell_locs.push_back(in.position().byte);
 
 			ps.top()->cells.push_back(finished);
 		}
@@ -110,7 +110,7 @@ namespace lisp_grammar
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)
 		{
-			ps.top()->cells.push_back(instance<Keyword>::make(in.string()));
+			ps.top()->cells.push_back(Keyword::makeKeyword(in.string()));
 		}
 	};
 
@@ -120,8 +120,8 @@ namespace lisp_grammar
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)
 		{
-			ps.top()->cell_locs.push_back(in.posisition().byte);
-			ps.top()->cells.push_back(instance<Symbol>::make(in.string()));
+			ps.top()->cell_locs.push_back(in.position().byte);
+			ps.top()->cells.push_back(Symbol::makeSymbol(in.string()));
 		}
 	};
 
@@ -131,7 +131,7 @@ namespace lisp_grammar
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)
 		{
-			ps.top()->cell_locs.push_back(in.posisition().byte);
+			ps.top()->cell_locs.push_back(in.position().byte);
 			std::string s = in.string();
 			// TODO specialized parse function returning arbitrary percision number
 			// and/or deciding on the prefered type/size of the number
@@ -192,7 +192,7 @@ namespace lisp_grammar
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)
 		{
-			ps.top()->cell_locs.push_back(in.posisition().byte);
+			ps.top()->cell_locs.push_back(in.position().byte);
 			std::string pstr = in.string();
 			ps.top()->cells.push_back(instance<std::string>::make(pstr.substr(1, pstr.size() - 2)));
 		}

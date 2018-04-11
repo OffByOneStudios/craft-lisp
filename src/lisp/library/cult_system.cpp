@@ -20,14 +20,13 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	auto backend_interp = ns->get<BootstrapInterpreter>();
 	auto backend_llvm = ns->get<LlvmBackend>();
 
-	auto ret = instance<Module>::make(ns);
-	auto sem = instance<CultSemantics>::make(ret);
+	auto ret = instance<Module>::make(ns, "builtin:cult.system");
+	auto sem = ret->require<CultSemantics>();
 
 	//
 	// Multimethods
 	//
 	sem->builtin_addMultiMethod("truth");
-	sem->builtin_addMultiMethod("read"); // read multi-method rather than using special form read
 
 	//
 	// Multimethod Implementations
@@ -104,7 +103,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
 	{
 		if (rs->sexpr->cells.size() != 3)
-			throw stdext::exception("malformed: (loop <cond> <body>)");
+			throw stdext::exception("malformed: (while <cond> <body>)");
 
 		auto ret = instance<Loop>::make(rs->read(1), rs->read(2));
 
@@ -114,7 +113,12 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	//
 	// Semantics - Interpreter
 	//
-	// TODO, make this a multimethod
+	sem->builtin_addMultiMethod("eval");
+	sem->builtin_implementMultiMethod("eval",
+		[](instance<BootstrapInterpreter> interp, instance<Constant> ast) -> instance<>
+	{
+		return ast->getValue();
+	});
 
 
 	//

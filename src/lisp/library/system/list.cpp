@@ -116,9 +116,9 @@ CRAFT_DEFINE(List)
 }
 
 
-void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_list_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
 	auto list = instance<MultiMethod>::make();
 	list->attach(env, instance<BuiltinFunction>::make(
@@ -133,16 +133,11 @@ void system::make_list_globals(instance<Module>& ret, instance<Namespace>& ns)
 	}));
 	ret->define_eval("list", list);
 
-	auto get = instance<MultiMethod>::make();
-	get->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<List, int64_t>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("list/get",
+		[](instance<List> a, instance<int64_t> b) -> instance<>
 	{
-		instance<List> a(expect<List>(args[0]));
-		instance<int64_t> b(expect<int64_t>(args[1]));
 		return a->at(b);
-	}));
-	ret->define_eval("list/get", get);
+	});
 
 	auto insert = instance<MultiMethod>::make();
 	insert->attach(env, instance<BuiltinFunction>::make(
