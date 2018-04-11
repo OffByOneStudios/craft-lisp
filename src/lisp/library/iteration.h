@@ -6,6 +6,6 @@
 namespace craft {
 namespace lisp {
 
-	instance<Scope> make_library_iteration(instance<Environment> env);
+	void make_library_iteration(instance<Module> m);
 
 }}

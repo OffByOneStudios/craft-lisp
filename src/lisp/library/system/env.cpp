@@ -76,36 +76,24 @@ namespace _impl {
 }
 
 
-void system::make_env_globals(instance<Module>& ret, instance<Namespace>& ns)
+void core::make_env_globals(instance<Module> ret)
 {
-	auto env = ns->environment();
+	auto semantics = ret->require<CultSemantics>();
 
-	auto _getenv = instance<MultiMethod>::make();
-	_getenv->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("getenv",
+		[](instance<std::string> a) -> instance<std::string>
 	{
-		instance<std::string> a(expect<std::string>(args[0]));
 		return _impl::getEnv(a);
-	}));
-	ret->define_eval("getenv", _getenv);
+	});
 
-	auto _setenv = instance<MultiMethod>::make();
-	_setenv->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<std::string, std::string, std::string>(),
-		[](auto frame, auto args)
+	semantics->builtin_implementMultiMethod("setenv",
+		[](instance<std::string> a, instance<std::string> b) -> instance<std::string>
 	{
-		instance<std::string> a(expect<std::string>(args[0])), b(expect<std::string>(args[1]));
 		return _impl::setEnv(a, b);
-	}));
-	ret->define_eval("setenv", _setenv);
-
-	auto _listenv = instance<MultiMethod>::make();
-	_listenv->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgsAndReturn<Map>(),
-		[](auto frame, auto args)
+	
+	semantics->builtin_implementMultiMethod("listenv",
+		[]() -> Map
 	{
 		return _impl::listEnv();
 	}));
-	ret->define_eval("listenv", _listenv);
 }

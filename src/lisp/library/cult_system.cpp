@@ -2,7 +2,7 @@
 #include "lisp/lisp.h"
 #include "lisp/library/libraries.h"
 
-#include "lisp/semantics/cult/cult_semantics.h"
+#include "lisp/semantics/cult/cult.h"
 #include "lisp/backend/BootstrapInterpreter.h"
 #include "lisp/backend/llvm/llvm_internal.h"
 
@@ -36,16 +36,15 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	//
 	// Special forms
 	//
-	auto sf_define = sem->builtin_addSpecialForm("define");
+	sem->builtin_addSpecialForm("define");
 
 	//
 	// Special forms - Reader
 	//
 	// TODO, make this a multimethod
 
-	sem->builtin_implementMultiMethod("read",
-		"define",
-		[](instance<CultSemantics> semantics, instance<SScope> scope, instance<Sexpr> sexpr)
+	sem->builtin_specialFormReader("read",
+		[](CultSemantics::ReadState* rs) -> instance<>
 		{
 			if (sexpr->cells.size() != 3)
 				throw stdext::exception("malformed: (define <symbol> <expr>)");
