@@ -1,8 +1,8 @@
 #pragma once
 #include "lisp/common.h"
 #include "lisp/lisp.h"
-#include "lisp/semantics/cult/cult_semantics.h"
-#include "CultSemantics.h"
+#include "lisp/semantics/cult/cult.h"
+#include "lisp/semantics/cult/semantics.h"
 
 using namespace craft;
 using namespace craft::types;
@@ -82,6 +82,37 @@ void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOption
 	}
 }
 
+
+instance<CultSemantics> CultSemantics::getSemantics() const
+{
+	return craft_instance();
+}
+instance<SScope> CultSemantics::getParentScope() const
+{
+	return instance<>();
+}
+
+// E.g. may enclose over other higher scopes
+bool CultSemantics::isLexicalScope() const
+{
+	return false;
+}
+
+instance<SBinding> CultSemantics::lookup(instance<Symbol> symbol)
+{
+	auto it = _symbolTable.find(symbol->symbolStoreId);
+	if (it == _symbolTable.end())
+		return instance<>();
+	return it->second;
+}
+instance<SBinding> CultSemantics::define(instance<Symbol> symbol, instance<> ast)
+{
+	auto it = _symbolTable.find(symbol->symbolStoreId);
+	if (it == _symbolTable.end())
+		return instance<>();
+	return it->second;
+}
+
 /******************************************************************************
 ** CultSemanticsProvider
 ******************************************************************************/
@@ -105,7 +136,7 @@ instance<> CultSemanticsProvider::read(instance<> syntax_, instance<lisp::Module
 	}
 	else
 	{
-		assert(false, "Unknown syntax.");
+		assert(false && "Unknown syntax.");
 	}
 
 	return building;
@@ -132,4 +163,51 @@ instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string cons
 	{
 		// Symbol table lookup
 	}
+}
+
+/******************************************************************************
+** CultSemantics Helpers
+******************************************************************************/
+
+void CultSemantics::builtin_addSpecialForm(std::string const& symbol_name)
+{
+	define(Symbol::makeSymbol(symbol_name), instance<SpecialForm>::make());
+}
+void CultSemantics::builtin_specialFormReader(std::string const& symbol_name, CultSemantics::f_specialFormReader reader)
+{
+	lookup(Symbol::makeSymbol(symbol_name));
+}
+
+void CultSemantics::builtin_addMultiMethod(std::string const& symbol_name)
+{
+
+}
+void CultSemantics::builtin_attachMultiMethod(std::string const& symbol_name, std::tuple<types::ExpressionStore, types::Function> impl)
+{
+
+}
+
+void CultSemantics::builtin_eval(std::string const& contents)
+{
+
+}
+
+/******************************************************************************
+** SpecialForm
+******************************************************************************/
+
+
+CRAFT_DEFINE(SpecialForm)
+{
+	_.defaults();
+}
+
+SpecialForm::SpecialForm()
+{
+
+}
+
+instance<> SpecialForm::read(instance<CultSemantics> semantics, instance<SScope> scope, instance<Sexpr> form)
+{
+	return _read(semantics, scope, form);
 }

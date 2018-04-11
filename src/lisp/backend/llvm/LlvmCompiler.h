@@ -30,7 +30,7 @@ namespace lisp
 		static CRAFT_LISP_EXPORTED void compile_while(CompilerState&, instance<>);
 
 	public:
-		CRAFT_LISP_EXPORTED llvm::FunctionType* getLlvmType(instance<SubroutineSignature> signature);
+		CRAFT_LISP_EXPORTED llvm::FunctionType* getLlvmType(ExpressionStore signature);
 
 	public:
 		CRAFT_LISP_EXPORTED LlvmCompiler();

@@ -33,6 +33,7 @@
 
 // Vendor
 #include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
 
 // Deps
 #include "util/all.h"

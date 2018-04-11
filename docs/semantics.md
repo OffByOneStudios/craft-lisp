@@ -14,7 +14,8 @@ This primitive binds a value to a name in the current scope. The default require
 
 #### Notes
 
-With simple analysis the compiler can improve the performance of things around define by exploiting the mechanics of the interactions of scopes and the things being bound. For example, in a `do` scope a `define` creates a name for a value that will be accessible within that `do` block; if that value is analyzed to be a `Variable` then a compiler might push it along with all the other variables in a single stack frame.
+* `SBindable`: With simple analysis the compiler can improve the performance of things around define by exploiting the mechanics of the interactions of scopes and the things being bound. For example, in a `do` scope a `define` creates a name for a value that will be accessible within that `do` block; if that value is analyzed to be a `Variable` then a compiler might push it along with all the other variables in a single stack frame.
+* The name of a special form must be known at read time (e.g. can only be computed by macros) for the time being.
 
 ### `proclaim`
 

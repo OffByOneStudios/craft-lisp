@@ -34,25 +34,6 @@ void Execution::clearFromCurrent()
 	_tl_current = instance<>();
 }
 
-instance<Execution> Execution::execute(instance<SFrame> frame)
-{
-	auto exc = getCurrent();
-	if (!exc)
-	{
-		if (frame.typeId().isType<Frame>())
-		{
-			auto scope = frame.asType<Frame>()->getScope();
-			exc = instance<Execution>::make(scope->namespace_());
-			exc->makeCurrent();
-		}
-	}
-
-	exc->_stack.push_back(frame);
-	frame->beginExecution(exc);
-
-	return exc;
-}
-
 instance<Namespace> Execution::getNamespace() const
 {
 	return _namespace;
@@ -64,6 +45,7 @@ std::vector<instance<SFrame>> const& Execution::stack() const
 }
 void Execution::push_frame(instance<SFrame> _push)
 {
+	_push->setExecution(craft_instance());
 	_stack.push_back(_push);
 }
 void Execution::pop()

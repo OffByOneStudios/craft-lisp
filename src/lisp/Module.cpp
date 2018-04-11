@@ -33,7 +33,7 @@ std::string Module::uri() const
 	return _uri;
 }
 
-instance<> Module::getNamespace() const
+instance<Namespace> Module::getNamespace() const
 {
 	return _ns;
 }
@@ -105,7 +105,7 @@ instance<> Module::get(types::TypeId type)
 
 	throw bad_projection_error("Cannot get a projection to `{1}` from {0}", craft_instance(), type.toString(false));
 }
-instance<> Module::require(types::TypeId type, bool force_read = true)
+instance<> Module::require(types::TypeId type, bool force_read)
 {
 	auto ret = get(type);
 
@@ -170,7 +170,7 @@ instance<> Module::require(types::TypeId type, bool force_read = true)
 	return ret;
 }
 
-instance<> Module::exec(std::string method, lisp::GenericCall const& call = {})
+instance<> Module::exec(std::string method, types::GenericInvoke const& call)
 {
 	return _ns->exec(craft_instance(), method, call);
 }

@@ -49,7 +49,7 @@
 #include "lisp/backend/backend.h"
 #include "lisp/backend/BootstrapInterpreter.h"
 
-#include "lisp/semantics/cult/cult_semantics.h"
+#include "lisp/semantics/cult/cult.h"
 
 //
 // Lisp Object

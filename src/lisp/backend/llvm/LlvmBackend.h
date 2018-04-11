@@ -61,11 +61,6 @@ namespace lisp
 
 	public:
 		virtual instance<> init(instance<Namespace> env) const override;
-
-		virtual instance<> addModule(instance<> backend_ns, instance<Module>) const override;
-		virtual instance<> addFunction(instance<> backend_module, instance<>) const override;
-
-		virtual instance<> exec(instance<lisp::SFrame> frame, instance<> code) const override;
 	};
 
 }}

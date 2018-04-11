@@ -2,14 +2,14 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
 #include "lisp/backend/backend.h"
-#include "lisp/semantics/cult/cult_semantics.h"
+#include "lisp/semantics/cult/cult.h"
 
 namespace craft {
 namespace lisp
 {
 	class InterpreterFrame
 		: public virtual craft::types::Object
-		, public Implements<SFrame>
+		, public craft::types::Implements<SFrame>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::InterpreterFrame);
 	private:
@@ -23,7 +23,7 @@ namespace lisp
 			instance<Function> _function;
 			std::vector<instance<>> _state;
 			instance<SScope> _scope; // if any
-			std::map<instance<SBinding>, instance<>> _values; // values bound to the scope
+			std::map<instance<Binding>, instance<>> _values; // values bound to the scope
 		};
 
 		std::vector<_Entry> _entries;
@@ -60,7 +60,7 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED BootstrapInterpreter(instance<Namespace> lisp);
 
-		CRAFT_LISP_EXPORTED instance<> exec_cult(instance<SSubroutine>, types::GenericInvoke const&);
+		CRAFT_LISP_EXPORTED instance<> exec_cult(instance<>, types::GenericInvoke const&);
 
 		CRAFT_LISP_EXPORTED instance<> exec(instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const&);
 

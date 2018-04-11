@@ -1,61 +1,78 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
-#include "lisp/Binding.h"
+#include "lisp/semantics/cult/cult.h"
+#include "lisp/semantics/cult/binding.h"
 
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
+CRAFT_DEFINE(craft::lisp::SBindable) { _.defaults(); }
+CRAFT_DEFINE(craft::lisp::SScope) { _.defaults(); }
 
-CRAFT_DEFINE(Binding)
+/******************************************************************************
+** BindSite
+******************************************************************************/
+
+CRAFT_DEFINE(BindSite)
 {
-	_.use<SBinding>().byCasting();
-
 	_.defaults();
 }
 
-Binding::Binding(std::string name, instance<> expression)
+
+BindSite::BindSite()
 {
-	_name = name;
-	_expression = expression;
+
 }
 
-std::string Binding::name() const
+instance<> BindSite::symbolAst() const
 {
-	return _name;
+	return _bindSymbol;
+}
+instance<> BindSite::valueAst() const
+{
+	return _bindValue;
 }
 
-instance<> Binding::expression()
+instance<SCultSemanticNode> BindSite::getParent() const
 {
-	return _expression;
+	return _parent;
+}
+void BindSite::setParent(instance<SCultSemanticNode> parent)
+{
+	if (_parent) throw parent_already_set_error(parent);
+	_parent = parent;
 }
 
-void Binding::setValue(instance<> value)
+/******************************************************************************
+** Binding
+******************************************************************************/
+
+CRAFT_DEFINE(Binding)
 {
-	_value = value;
-}
-instance<> Binding::value()
-{
-	return _value;
+	_.defaults();
 }
 
-/*
-instance<> Binding::eval(instance<SFrame> frame)
+Binding::Binding(instance<SScope> scope, instance<Symbol> symbol, instance<BindSite> site)
 {
-	_value = frame->getNamespace()->environment()->eval(frame, _expression);
-
-	return _value;
+	_scope = scope;
+	_symbol = symbol;
+	_site = site;
 }
-*/
 
 instance<SScope> Binding::getScope() const
 {
 	return _scope;
 }
 
-instance<> Binding::getAst() const
+instance<Symbol> Binding::getSymbol() const
 {
-	return _expression;
+	return _symbol;
+}
+
+instance<BindSite> Binding::getSite() const
+{
+	return _site;
 }
 
 void Binding::addMeta(std::string metaKey, instance<> value)
@@ -63,7 +80,7 @@ void Binding::addMeta(std::string metaKey, instance<> value)
 	_meta[metaKey] = value;
 }
 
-instance<> Binding::getMeta(std::string metaKey, TypeId type)
+instance<> Binding::getMeta(std::string metaKey, TypeId type) const
 {
 	auto it = _meta.find(metaKey);
 
