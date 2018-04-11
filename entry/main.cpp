@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 			instance<> ind = (instance<>)instance<int64_t>::make(index);
 
 			auto env = module->environment();
-			auto repl = env->eval(env->ns_user->lookup("replcomplete"));
+			auto repl = env->eval(env->ns_user->lookup("completion"));
 			
 			if (repl.typeId() == type<craft::lisp::MultiMethod>::typeId())
 			{

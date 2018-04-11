@@ -100,13 +100,16 @@ std::vector<instance<SBinding>> Namespace::search(std::string const & search)
 	std::vector<instance<SBinding>> res;
 	for (auto& it : _lookup)
 	{
-		if (it.first.find(search) != it.first.npos)
+
+		if (search.size() <= it.first.size())
 		{
-			res.push_back(it.second);
+			if (search == it.first.substr(0, search.size()))
+			{
+				res.push_back(it.second);
+			}
 		}
 	}
 	return res;
-
 }
 
 instance<SBinding> Namespace::lookup(std::string const& s)

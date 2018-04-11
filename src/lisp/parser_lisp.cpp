@@ -206,3 +206,27 @@ instance<Sexpr> craft::lisp::parse_lisp(std::string const& text)
 
 	return root;
 }
+
+
+
+std::stack<instance<Sexpr>> craft::lisp::partial_parse(std::string const& text)
+{
+	using namespace lisp_grammar;
+
+	auto root = instance<Sexpr>::make();
+	ParseStack parse_stack;
+	parse_stack.push(root);
+
+	string_input<> in(text, std::string(""));
+
+	try
+	{
+		parse< grammar, lisp_action >(in, parse_stack);
+	}
+	catch (...)
+	{
+
+	}
+	
+	return parse_stack;
+}

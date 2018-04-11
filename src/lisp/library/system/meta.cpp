@@ -41,4 +41,19 @@ void system::make_meta_globals(instance<Module>& ret, instance<Namespace>& ns)
 	});
 	ret->define_eval("setmeta", setmeta);
 	
+	auto signatures = instance<MultiMethod>::make();
+	signatures->attach(env, instance<BuiltinFunction>::make(
+		[](auto frame, auto args)
+	{
+		instance<MultiMethod> a(expect<MultiMethod>(args[0]));
+
+		auto res = instance<List>::make();
+		
+		for (auto it : a->signatures())
+		{
+			res->push(it);
+		}
+		return res;
+	}));
+	ret->define_eval("multimethod/signatures", signatures);
 }

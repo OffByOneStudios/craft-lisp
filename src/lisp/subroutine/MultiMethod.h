@@ -40,6 +40,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> call(instance<SFrame> const& frame, std::vector<instance<>> const&);
 
 		CRAFT_LISP_EXPORTED size_t subroutineCount();
+		CRAFT_LISP_EXPORTED std::vector<instance<SubroutineSignature>> signatures();
 
 		// Provides a configuration and results working memory
 		struct Dispatch

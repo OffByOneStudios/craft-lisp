@@ -25,10 +25,6 @@ MultiMethod::MultiMethod()
 
 }
 
-instance<SubroutineSignature> MultiMethod::signature()
-{
-	return _signature;
-}
 
 instance<SFrame> MultiMethod::call_frame()
 {
@@ -56,6 +52,21 @@ instance<> MultiMethod::call(instance<SFrame> const& frame, std::vector<instance
 size_t MultiMethod::subroutineCount()
 {
 	return _subMethods.size();
+}
+
+instance<SubroutineSignature> MultiMethod::signature()
+{
+	return _signature;
+}
+
+std::vector<instance<SubroutineSignature>> MultiMethod::signatures()
+{
+	std::vector<instance<SubroutineSignature>> res;
+	for (auto& it : _subMethods)
+	{
+		res.push_back(it.asFeature<PSubroutine>()->signature(it));
+	}
+	return res;
 }
 
 void MultiMethod::dispatch(instance<Environment> env, instance<lisp::types::SType> type, MultiMethod::Dispatch* dispatch)

@@ -8,6 +8,12 @@ using namespace craft::lisp;
 
 CRAFT_OBJECT_DEFINE(Argument)
 {
+	_.use<PStringer>().singleton<FunctionalStringer>(
+		[](instance <Argument> arg) -> std::string
+	{
+		auto tname = (arg->type.hasFeature<PStringer>()) ? arg->type.asFeature<PStringer>()->toString(arg->type) : arg->type.asFeature<PIdentifier>()->identifier();
+		return fmt::format("({0} {1})", tname, arg->name);
+	});
 	_.defaults();
 }
 
@@ -19,6 +25,28 @@ Argument::Argument()
 
 CRAFT_OBJECT_DEFINE(SubroutineSignature)
 {
+	_.use<PStringer>().singleton<FunctionalStringer>(
+		[](instance <SubroutineSignature> sig) -> std::string
+	{
+		if (!sig) return "(SubroutineSignature (*args Any) -> Any";
+		std::ostringstream res;
+		res << "(SubroutineSignature (";
+		for (auto i : sig->arguments)
+		{
+			res << i.getFeature<PStringer>()->toString(i);
+		}
+		auto tname = (sig->returnType.hasFeature<PStringer>()) ? sig->returnType.asFeature<PStringer>()->toString(sig->returnType) : sig->returnType.asFeature<PIdentifier>()->identifier();
+		res << "->" << tname << ")";
+
+		return res.str();
+	});
+
+	_.use<PRepr>().singleton<FunctionalRepr>(
+		[](instance<SubroutineSignature> l) -> std::string
+	{
+		return l.getFeature<PStringer>()->toString(l);
+	});
+
 	_.defaults();
 }
 
