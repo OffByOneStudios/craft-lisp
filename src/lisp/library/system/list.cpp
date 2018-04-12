@@ -120,11 +120,10 @@ void core::make_list_globals(instance<Module> ret)
 {
 	auto semantics = ret->require<CultSemantics>();
 
-	//TODO Take list of args n stuff
 	semantics->builtin_implementMultiMethod("list",
-		[]() -> instance<List>
+		[](types::VarArgs<instance<>> args) -> instance<List>
 	{
-		return instance<List>::make();
+		return instance<List>::make(args.args);
 	});
 
 	semantics->builtin_implementMultiMethod("list/get",
