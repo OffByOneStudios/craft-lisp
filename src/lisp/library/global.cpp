@@ -9,6 +9,7 @@ using namespace craft::lisp;
 using namespace craft::lisp::library::helper;
 
 
+/*
 bool helper::truth(instance<SFrame> frame, instance<PSubroutine> truth, instance<> code)
 {
 	auto result = frame->getNamespace()->environment()->eval(frame, code);
@@ -18,7 +19,9 @@ bool helper::truth(instance<SFrame> frame, instance<PSubroutine> truth, instance
 
 	return *value.asType<bool>();
 }
+*/
 
+/*
 ExpressionStore library::helper::binding_expr_to_signature(instance<SScope> scope, instance<Sexpr> expr)
 {
 	// (foo bar baz)
@@ -80,7 +83,9 @@ ExpressionStore library::helper::binding_expr_to_signature(instance<SScope> scop
 	ret->complete();
 	return ret;
 }
+*/
 
+/*
 instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 {
 	auto env = ns->environment();
@@ -443,3 +448,4 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	ret->define_eval("failure", failure);
 	return ret;
 }
+*/
