@@ -4,8 +4,8 @@
 #include <stack>
 #include <queue>
 
-
 #include "replxx/replxx.hxx"
+#include "lisp/semantics/cult/cult.h"
 #include "lisp/library/system/prelude.h"
 
 
@@ -45,6 +45,7 @@ int main(int argc, char** argv)
 	craft::types::boot();
 
 	instance<Environment> global_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"));
+	instance<Namespace> ns = global_env->ns_user;
 	
 	if (argc != 1)
 	{
@@ -59,9 +60,8 @@ int main(int argc, char** argv)
 		}
 		try
 		{
-			auto live_module = global_env->ns_user->requireModule("repl:console");
-			auto top_level = global_env->parse(global_env->ns_user, f);
-			live_module->liveContinueWith(top_level);
+			auto live_module = ns->requireModule(fmt::format("file:{0}", f));
+			live_module->initialize();
 		}
 		catch (stdext::exception e)
 		{
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		auto live_module = global_env->ns_user->requireModule("repl:console");
+		instance<Module> live_module = global_env->ns_user->requireModule("repl:console");
 		using Replxx = replxx::Replxx;
 
 		Replxx rx;
@@ -104,23 +104,13 @@ int main(int argc, char** argv)
 			instance<> query = (instance<>)instance<std::string>::make(context);
 			instance<> ind = (instance<>)instance<int64_t>::make(index);
 
-			auto env = module->environment();
-			auto repl = env->eval(env->ns_user->lookup("completion"));
-			
-			if (repl.typeId() == type<craft::lisp::MultiMethod>::typeId())
+			instance<library::List> res = module->exec("repl/completion", { query, ind });
+
+			for (auto& d : res->data())
 			{
-				auto frame = instance<Frame>::make(env->ns_user);
-				Execution::execute(frame);
-
-				auto results = repl.asType<craft::lisp::MultiMethod>()->call(frame, { query, ind });
-				auto data = results.asType<craft::lisp::library::List>()->data();
-
-				for (auto& d : data)
-				{
-					
-					completions.emplace_back(d.asFeature<std::string>()->c_str());
-				}
+				completions.emplace_back(d.asFeature<std::string>()->c_str());
 			}
+
 			return completions;
 		};
 		rx.set_completion_callback(complete, &live_module);
@@ -149,27 +139,31 @@ int main(int argc, char** argv)
 
 
 
-		for (;;) {
+		for (int i = 0; ; i += 1) {
 			// display the prompt and retrieve input from the user
 			auto cinp = rx.input("CμλΤ>");
 			if (cinp == nullptr) break;
-			auto input = std::string(cinp);
 
-			instance<Sexpr> top_level;
+			auto input = instance<std::string>::make(cinp);
+
+			instance<Module> statement;
 			try
 			{
-				top_level = global_env->parse(global_env->ns_user, input);
-				
+				statement = ns->requireModule(fmt::format("anon:repl-{0}", i), input);
 			}
 			catch (std::exception e)
 			{
 				std::cout << "parser: " << e.what() << '\n';
 			}
+
 			try
 			{
-				if (top_level)
+				if (statement)
 				{
-					std::cout << live_module->liveContinueWith(top_level).toString() << '\n';
+					live_module->appendModule(statement);
+					instance<> res = live_module->lastExecutedResult();
+
+					std::cout << res.toString() << '\n';
 				}
 			}
 			catch (std::exception const& e)
@@ -177,7 +171,7 @@ int main(int argc, char** argv)
 				std::cout << e.what() << '\n';
 			}
 
-			rx.history_add(input);
+			rx.history_add(*input);
 			rx.history_save(history_file);
 		}
 		// the path to the history file
