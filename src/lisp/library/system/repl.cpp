@@ -15,7 +15,7 @@ void core::make_repl_globals(instance<Module> ret)
 	auto semantics = ret->require<CultSemantics>();
 
 	semantics->builtin_implementMultiMethod("repl/completion",
-		[](instance<Binding> a, instance<std::string> b) -> instance<List>
+		[](instance<Module> m, instance<Binding> a, instance<std::string> b) -> instance<List>
 	{
 		auto res = instance<List>::make();
 
@@ -44,18 +44,19 @@ void core::make_repl_globals(instance<Module> ret)
 		//else
 		//{
 		//	
-		//	auto target = a->getSymbol();
+		//	auto target = a->getSite()->valueAst();
+		//	
 		//	auto parse = lisp::partial_parse(*b).top();
 
 		//	auto s = parse->cells.back();
 		//	if (s.typeId().isType<Symbol>())
 		//	{
 		//		auto sym = s.asType<Symbol>();
-		//		auto bindings = fr//frame->getNamespace()->search(sym->value);
+		//		auto bindings = m->require<CultSemantics>()->search(sym->getValue());
 
 		//		if (target.typeId().isType<MultiMethod>())
 		//		{
-		//			auto mm = target.asType<MultiMethod>()->signatures();
+		//			auto mm = target.asType<MultiMethod>()->();
 		//			for (auto b : bindings)
 		//			{
 		//				bool found = false;
@@ -106,7 +107,7 @@ void core::make_repl_globals(instance<Module> ret)
 	});
 
 	semantics->builtin_implementMultiMethod("repl/completion",
-		[](instance<std::string> a, instance<int64_t> b) -> instance<List>
+		[](instance<Module> m, instance<std::string> a, instance<int64_t> b) -> instance<List>
 	{
 		auto res = instance<List>::make();
 
@@ -116,46 +117,45 @@ void core::make_repl_globals(instance<Module> ret)
 		auto parse = lisp::partial_parse(*a);
 		
 
-		//auto last = parse.top();
-		//if (last->cells.size() == 0) return res;
-		//else if (last->cells.size() == 1)
-		//{
-		//	auto s = last->cells[0];
-		//	if (s.typeId().isType<Symbol>())
-		//	{
-		//		auto sym = s.asType<Symbol>();
+		auto last = parse.top();
+		if (last->cells.size() == 0) return res;
+		else if (last->cells.size() == 1)
+		{
+			auto s = last->cells[0];
+			if (s.typeId().isType<Symbol>())
+			{
+				auto sym = s.asType<Symbol>();
+				
+				auto choices = m->require<CultSemantics>()->search(sym->getValue());
+				for (auto s : choices)
+				{
+					
+					res->push(instance<std::string>::make(s->getSymbol()->getValue()));
+				}
+			}
+		}
+		else
+		{
+			auto s = last->cells[0];
+			// We know the first symbol, so dispatch to the symbol lookup
+			if (s.typeId().isType<Symbol>())
+			{
+				auto sym = s.asType<Symbol>();
+				
+				try
+				{
+					auto target = m->require<CultSemantics>()->lookup(sym);
 
-		//		auto choices = frame->getNamespace()->search(sym->value);
-		//		for (auto s : choices)
-		//		{
-		//			res->push(instance<std::string>::make(s->name()));
-		//		}
-		//	}
-		//}
-		//else
-		//{
-		//	auto s = last->cells[0];
-		//	// We know the first symbol, so dispatch to the symbol lookup
-		//	if (s.typeId().isType<Symbol>())
-		//	{
-		//		auto env = frame->getNamespace()->environment();
-		//		auto sym = s.asType<Symbol>();
-		//		
-		//		try
-		//		{
-		//			auto target = frame->getNamespace()->lookup(sym->value);
-
-		//			auto query = instance<std::string>::make(a->substr(a->find(sym->value) + sym->value.size()));
-		//			auto repl = env->eval(env->ns_user->lookup("completion"));
-		//			auto disp = repl.asType<craft::lisp::MultiMethod>()->call(frame, { target, query });
-		//			if (disp.typeId().isType<List>()) return disp.asType<List>();
-		//			else return res;
-		//		}
-		//		catch (...)
-		//		{
-		//		}
-		//	}
-		//}
+					auto query = instance<std::string>::make(a->substr(a->find(sym->getValue()) + sym->getValue().size()));
+					auto disp = Execution::exec_fromCurrentModule("completion", { m, target, query });
+					if (disp.typeId().isType<List>()) return disp.asType<List>();
+					else return res;
+				}
+				catch (...)
+				{
+				}
+			}
+		}
 		return res;
 		
 

@@ -104,7 +104,7 @@ int main(int argc, char** argv)
 			instance<> query = (instance<>)instance<std::string>::make(context);
 			instance<> ind = (instance<>)instance<int64_t>::make(index);
 
-			instance<library::List> res = module->exec("repl/completion", { query, ind });
+			instance<library::List> res = module->exec("repl/completion", { module, query, ind });
 
 			for (auto& d : res->data())
 			{

@@ -41,56 +41,59 @@ void core::make_string_globals(instance<Module> ret)
 		std::cout << *Execution::exec_fromCurrentModule("string", { a }).asType<std::string>();
 	});
 
-	/*semantics->builtin_implementMultiMethod("fmt",
-	[](instance<> a)
+	semantics->builtin_implementMultiMethod("fmt",
+		[](types::VarArgs<instance<>> args) -> instance<std::string>
 	{
-	std::regex re("%\\{[^\\}]+\\}");
-	std::ostringstream s;
-	instance<std::string> a(expect<std::string>(args[0]));
+		std::regex re("%\\{[^\\}]+\\}");
+		std::ostringstream s;
+		instance<std::string> a(expect<std::string>(args.args[0]));
 
-	auto& tmp = *a;
-	std::sregex_token_iterator
-	begin(tmp.begin(), tmp.end(), re, { -1,0 }),
-	end;
+		auto& tmp = *a;
+		std::sregex_token_iterator
+			begin(tmp.begin(), tmp.end(), re, { -1,0 }),
+			end;
 
-	std::for_each(begin, end, [&](std::string const& m) {
+		std::for_each(begin, end, [&](std::string const& m) {
 
-	if (std::regex_match(m, re))
-	{
-	std::string match = m.substr(2, m.size() - 3);
-	instance<> target;
+			if (std::regex_match(m, re))
+			{
+				std::string match = m.substr(2, m.size() - 3);
+				instance<> target;
 
 
-	ssize_t i = -1;
-	try
-	{
-	i = std::stoi(match) + 1;
-	}
-	catch (...)
-	{
+				ssize_t i = -1;
+				try
+				{
+					i = std::stoi(match) + 1;
+				}
+				catch (...)
+				{
 
-	}
-	if (i != -1)
-	{
-	if (size_t(i) >= args.size())
-	{
-	throw stdext::exception("Argument Reference {0} Out of Bounds", i - 1);
-	}
-	target = args[i];
-	}
-	else
-	{
-	target = env->eval(match);
-	}
+				}
+				if (i != -1)
+				{
+					if (size_t(i) >= args.args.size())
+					{
+						throw stdext::exception("Argument Reference {0} Out of Bounds", i - 1);
+					}
+					target = args.args[i];
+				}
+				else
+				{
+					target = Execution::exec_fromCurrentModule(match, {});
+				}
 
-	instance<std::string> c = str->call(frame, { target });
-	s << *c;
-	}
-	else
-	{
-	s << m;
-	}
-	});*/
+				instance<std::string> c = Execution::exec_fromCurrentModule("str", { target });
+				s << *c;
+			}
+			else
+			{
+				s << m;
+			}
+		});
+
+		return instance<std::string>::make(s.str());
+	});
 
 	semantics->builtin_implementMultiMethod("string/concat",
 		[](instance<std::string> a, instance<std::string> b) -> instance<std::string>
@@ -137,7 +140,7 @@ void core::make_string_globals(instance<Module> ret)
 	{
 		return Execution::exec_fromCurrentModule("string/join", { a, instance<std::string>::make("\n") }).asType<std::string>();
 	});
-	
+
 
 	semantics->builtin_implementMultiMethod("string/slice",
 		[](instance<std::string> a, instance<int64_t> b, instance<int64_t> c) -> instance<std::string>
