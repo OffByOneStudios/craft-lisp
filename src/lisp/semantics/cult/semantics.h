@@ -26,9 +26,9 @@ namespace lisp
 		{
 			instance<CultSemantics> semantics;
 			instance<SScope> scope;
-			instance<Sexpr> sexpr;
 
-			inline instance<SCultSemanticNode> read(size_t index);
+			inline instance<SCultSemanticNode> read(instance<Sexpr>, size_t index);
+			inline std::vector<instance<SCultSemanticNode>> readAll(instance<Sexpr>, size_t start_index = 1);
 
 			struct PushScope final
 			{
@@ -51,7 +51,7 @@ namespace lisp
 		};
 
 		// TODO: Make this a multiMethod
-		typedef instance<SCultSemanticNode> (*f_specialFormReader)(ReadState*);
+		typedef instance<SCultSemanticNode> (*f_specialFormReader)(ReadState*, instance<Sexpr>);
 
 	private:
 		instance<lisp::Module> _module;
@@ -61,7 +61,7 @@ namespace lisp
 		instance<> _source;
 
 		// List of AST forms in order evaluated
-		std::vector<instance<>> _ast;
+		std::vector<instance<SCultSemanticNode>> _ast;
 
 		//
 		// Symbol Tables
@@ -77,7 +77,7 @@ namespace lisp
 
 	private:
 
-		CRAFT_LISP_EXPORTED instance<> read_cultLisp(instance<SScope> scope, instance<> syntax);
+		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> read_cultLisp(ReadState* rs, instance<> syntax);
 
 	public:
 		CRAFT_LISP_EXPORTED CultSemantics(instance<lisp::Module> forModule);
@@ -88,6 +88,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED void read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts);
 
 		CRAFT_LISP_EXPORTED std::vector<instance<Binding>> search(std::string const& search) const;
+
+		CRAFT_LISP_EXPORTED void addModule(instance<Module> m);
 
 		// Builtin helpers
 	public:
@@ -119,6 +121,20 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;
 	};
 
+	inline instance<SCultSemanticNode> CultSemantics::ReadState::read(instance<Sexpr> sexpr, size_t index)
+	{
+		return this->semantics->read_cultLisp(this, sexpr->cells[index]);
+	}
+	inline std::vector<instance<SCultSemanticNode>> CultSemantics::ReadState::readAll(instance<Sexpr> sexpr, size_t start_index)
+	{
+		std::vector<instance<SCultSemanticNode>> res;
+		res.reserve(sexpr->cells.size() - start_index);
+		for (auto it = sexpr->cells.begin() + start_index; it != sexpr->cells.end(); ++it)
+		{
+			res.push_back(this->semantics->read_cultLisp(this, *it));
+		}
+		return res;
+	}
 
 	/******************************************************************************
 	** PSemantics for CultSemantics

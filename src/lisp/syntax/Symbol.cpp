@@ -20,21 +20,17 @@ std::string const& Symbol::getValue() const
 
 instance<Symbol> Symbol::makeSymbol(instance<Keyword> keyword)
 {
-	auto nsym = new Symbol();
-	nsym->craft_setupInstance();
-
+	auto nsym = instance<Symbol>::makeFromPointer(new Symbol());
 	nsym->symbolStoreId = keyword->symbolStoreId;
 
-	return instance<Symbol>(nsym);
+	return nsym;
 }
 instance<Symbol> Symbol::makeSymbol(std::string const& s)
 {
 	auto& symbol_store = Execution::getCurrent()->getNamespace()->symbolStore;
 
-	auto nsym = new Symbol();
-	nsym->craft_setupInstance();
-	
+	auto nsym = instance<Symbol>::makeFromPointer(new Symbol());
 	nsym->symbolStoreId = symbol_store.intern(s);
 	
-	return instance<Symbol>(nsym);
+	return nsym;
 }

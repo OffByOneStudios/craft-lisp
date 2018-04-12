@@ -43,8 +43,37 @@ namespace lisp
 		// SBindable
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<Binding> getBinding() const override;
-		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) const override;
+		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) override;
 
+	};
+
+	/******************************************************************************
+	** GetValue
+	******************************************************************************/
+
+	/*
+	Variable define node
+	*/
+	class GetValue
+		: public virtual craft::types::Object
+		, public craft::types::Implements<SCultSemanticNode>
+	{
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::GetValue);
+	private:
+		instance<SCultSemanticNode> _parent;
+
+	private:
+		instance<Binding> _binding;
+
+	public:
+		CRAFT_LISP_EXPORTED GetValue(instance<Binding> binding);
+
+		CRAFT_LISP_EXPORTED instance<Binding> getBinding() const;
+
+		// SCultSemanticNode
+	public:
+		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
+		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
 	};
 
 	/******************************************************************************

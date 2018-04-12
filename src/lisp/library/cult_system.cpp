@@ -39,22 +39,22 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 	sem->builtin_addSpecialForm("define");
 	sem->builtin_specialFormReader("define",
-		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 		{
-			if (rs->sexpr->cells.size() != 3)
+			if (sexpr->cells.size() != 3)
 				throw stdext::exception("malformed: (define <symbol> <expr>)");
 
 			instance<Symbol> symbol;
 			try
 			{
-				symbol = library::helper::symbol(rs->sexpr->cells[1]);
+				symbol = library::helper::symbol(sexpr->cells[1]);
 			}
 			catch (std::exception const& ex)
 			{
 				throw stdext::exception(ex, "Not Implemented: Dynamic Bindings");
 			}
 
-			auto ret = instance<BindSite>::make(symbol, rs->read(2));
+			auto ret = instance<BindSite>::make(symbol, rs->read(sexpr, 2));
 			if (!ret->isDynamicBind())
 				rs->scope->define(ret->symbolAst().asType<Constant>()->getValue().asType<Symbol>(), ret);
 			else
@@ -65,16 +65,16 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 	sem->builtin_addSpecialForm("do");
 	sem->builtin_specialFormReader("do",
-		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
 		auto ret = instance<Block>::make(rs->scope);
 		CultSemantics::ReadState::PushScope _hold(rs, ret);
 
-		auto size = rs->sexpr->cells.size();
+		auto size = sexpr->cells.size();
 		ret->preSize(size - 1);
 		for (auto i = 1; i < size; i++)
 		{
-			ret->push(rs->read(i));
+			ret->push(rs->read(sexpr, i));
 		}
 
 		return ret;
@@ -82,37 +82,37 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 	sem->builtin_addSpecialForm("cond");
 	sem->builtin_specialFormReader("cond",
-		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
 		auto ret = instance<Condition>::make();
 
-		auto size = rs->sexpr->cells.size();
+		auto size = sexpr->cells.size();
 		ret->preSize(size / 2);
 		for (auto i = 1; i < size; i += 2)
 		{
-			ret->push(rs->read(i), rs->read(i + 1));
+			ret->push(rs->read(sexpr, i), rs->read(sexpr, i + 1));
 		}
 		if (size % 2 == 0)
-			ret->push(instance<>(), rs->read(size - 1));
+			ret->push(instance<>(), rs->read(sexpr, size - 1));
 
 		return ret;
 	});
 
 	sem->builtin_addSpecialForm("while");
 	sem->builtin_specialFormReader("while",
-		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
-		if (rs->sexpr->cells.size() != 3)
+		if (sexpr->cells.size() != 3)
 			throw stdext::exception("malformed: (while <cond> <body>)");
 
-		auto ret = instance<Loop>::make(rs->read(1), rs->read(2));
+		auto ret = instance<Loop>::make(rs->read(sexpr, 1), rs->read(sexpr, 2));
 
 		return ret;
 	});
 
 	sem->builtin_addSpecialForm("function");
 	sem->builtin_specialFormReader("function",
-		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
 		auto ret = instance<Function>::make();
 
@@ -121,7 +121,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 	sem->builtin_addSpecialForm("variable");
 	sem->builtin_specialFormReader("variable",
-		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
 		auto ret = instance<Variable>::make();
 

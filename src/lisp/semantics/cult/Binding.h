@@ -86,7 +86,7 @@ namespace lisp
 
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<Binding> getBinding() const = 0;
-		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) const = 0;
+		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) = 0;
 	};
 
 	/******************************************************************************

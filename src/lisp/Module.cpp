@@ -91,7 +91,7 @@ instance<> Module::get(types::TypeId type)
 	if (it != _semantics.end())
 		return it->second.instance;
 
-	throw bad_projection_error("Cannot get a projection to `{1}` from {0}", craft_instance(), type.toString(false));
+	return instance<>();
 }
 instance<> Module::require(types::TypeId type, bool force_read)
 {

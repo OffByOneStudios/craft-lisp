@@ -14,7 +14,7 @@ using namespace craft::lisp;
 CRAFT_DEFINE(Variable)
 {
 	_.use<SCultSemanticNode>().byCasting();
-	_.use<SScope>().byCasting();
+	_.use<SBindable>().byCasting();
 
 	_.defaults();
 }
@@ -45,11 +45,41 @@ void Variable::setParent(instance<SCultSemanticNode> parent)
 
 instance<Binding> Variable::getBinding() const
 {
-
+	return _binding;
 }
-void Variable::setBinding(instance<Binding>) const
+void Variable::setBinding(instance<Binding> binding)
 {
+	_binding = binding;
+}
 
+/******************************************************************************
+** GetValue
+******************************************************************************/
+
+CRAFT_DEFINE(GetValue)
+{
+	_.use<SCultSemanticNode>().byCasting();
+
+	_.defaults();
+}
+
+GetValue::GetValue(instance<Binding> binding)
+{
+	_binding = binding;
+}
+
+instance<Binding> GetValue::getBinding() const
+{
+	return _binding;
+}
+instance<SCultSemanticNode> GetValue::getParent() const
+{
+	return _parent;
+}
+void GetValue::setParent(instance<SCultSemanticNode> parent)
+{
+	if (_parent) throw parent_already_set_error(craft_instance());
+	_parent = parent;
 }
 
 /******************************************************************************
@@ -107,7 +137,20 @@ instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
 {
 	auto it = _symbolTable.find(symbol->symbolStoreId);
 	if (it == _symbolTable.end())
+	{
+		for (auto m : _modules)
+		{
+			auto sem = m->get<CultSemantics>();
+			if (sem)
+			{
+				auto res = sem->lookup(symbol);
+				if (res)
+					return res;
+			}
+		}
+
 		return instance<>();
+	}
 	return it->second;
 }
 instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSite> ast)

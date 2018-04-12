@@ -14,5 +14,10 @@ namespace lisp
         
         CRAFT_LISP_EXPORTED virtual types::Function function(instance<>) const = 0;
 		CRAFT_LISP_EXPORTED virtual types::ExpressionStore expression(instance<>) const = 0;
+
+		//
+		// Performs a full call on the subroutine, including pushing to the current execution
+		//
+		CRAFT_LISP_EXPORTED virtual instance<> execute(instance<>, types::GenericInvoke const& call) const = 0;
 	};
 }}

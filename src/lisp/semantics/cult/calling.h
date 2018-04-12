@@ -23,14 +23,13 @@ namespace lisp
 
 	public:
 
-		instance<> _callee;
+		instance<SCultSemanticNode> _callee;
 
-		std::vector<instance<>> _args;
+		std::vector<instance<SCultSemanticNode>> _args;
 
 	public:
-		CRAFT_LISP_EXPORTED CallSite();
+		CRAFT_LISP_EXPORTED CallSite(instance<SCultSemanticNode> callee, std::vector<instance<SCultSemanticNode>> args);
 
-        CRAFT_LISP_EXPORTED bool isDynamicCall() const;
 		CRAFT_LISP_EXPORTED instance<> calleeAst() const;
 
 		CRAFT_LISP_EXPORTED size_t argCount() const;
@@ -78,7 +77,7 @@ namespace lisp
 		// SBindable
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<Binding> getBinding() const override;
-		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) const override;
+		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) override;
 
 		// SScope
 	public:
@@ -131,6 +130,6 @@ namespace lisp
 		// SBindable
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<Binding> getBinding() const override;
-		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) const override;
+		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) override;
 	};
 }}

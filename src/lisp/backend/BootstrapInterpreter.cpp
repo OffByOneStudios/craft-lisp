@@ -91,17 +91,14 @@ instance<> InterpreterFrame::interp_exec(instance<SCultSemanticNode> node)
 
 instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke const& call)
 {
-	if (fn.isType<Function>())
+	if (fn.hasFeature<PSubroutine>())
 	{
-
-	}
-	else if (fn.isType<MultiMethod>())
-	{
-
+		auto psub = fn.getFeature<PSubroutine>();
+		return psub->execute(fn, call);
 	}
 	else
 	{
-
+		throw stdext::exception("Interpreter asked to call object (`{0}`) with no subroutine hints.", fn.toString());
 	}
 }
 

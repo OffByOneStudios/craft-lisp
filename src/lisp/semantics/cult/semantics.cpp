@@ -25,50 +25,53 @@ CultSemantics::CultSemantics(instance<lisp::Module> forModule)
 	_module = forModule;
 }
 
-instance<> CultSemantics::read_cultLisp(instance<SScope> scope, instance<> syntax)
+instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance<> syntax)
 {
 	if (syntax.typeId().isType<Symbol>())
-		return scope->lookup(syntax.asType<Symbol>()->getValue());
+		return instance<GetValue>::make(rs->scope->lookup(syntax.asType<Symbol>()));
 	else if (syntax.typeId().isType<Sexpr>())
 	{
 		instance<Sexpr> expr = syntax;
+		auto size = expr->cells.size();
 
-		if (expr->cells.size() == 0)
+		if (size == 0)
 			throw stdext::exception("Unquoted empty list.");
 
 		// -- Evaluate Head --
 		instance<> head = expr->cells[0];
 
-		head = read_cultLisp(scope, head);
+		head = read_cultLisp(rs, head);
 
 		instance<> inspect_head = head;
-		if (inspect_head.typeId().isType<Binding>())
+		if (inspect_head.typeId().isType<GetValue>())
 		{
-			auto new_inspect_head = inspect_head.asType<Binding>()->getValue(instance<>());
-			if (!new_inspect_head)
-				new_inspect_head = head.asType<Binding>()->expression();
-			inspect_head = new_inspect_head;
+			auto deep_inspect_head = inspect_head.asType<GetValue>()->getBinding()->getSite()->valueAst();
+			if (!deep_inspect_head)
+			{
+				// -- Evaluate Special Forms --
+				if (deep_inspect_head.typeId().isType<SpecialForm>())
+					return deep_inspect_head.asType<SpecialForm>()->_read(rs, expr);
+
+				// -- Macro Expand --
+				//if (inspect_head.typeId().isType<Macro>())
+				//{
+				//	ast = inspect_head.asType<Macro>()->expand(scope, expr->cells);
+				//	return read(scope, ast);
+				//}
+			}
 		}
 
-		// -- Evaluate Special Forms --
-		if (inspect_head.typeId().isType<SpecialForm>())
-			return inspect_head.asType<SpecialForm>()->read(scope, inspect_head, expr);
-
-		// -- Macro Expand --
-		if (inspect_head.typeId().isType<Macro>())
-		{
-			ast = inspect_head.asType<Macro>()->expand(scope, expr->cells);
-			return read(scope, ast);
-		}
-
-		return read_rest(scope, head, ast);
+		// -- Call Site --
+		return instance<CallSite>::make(inspect_head, rs->readAll(expr));
 	}
-	else
-		return ast;
+	else // Raw Value
+		return instance<Constant>::make(syntax);
 }
 
 void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts)
 {
+	addModule(_module->getNamespace()->requireModule("builtin:cult.system"));
+
 	// TODO, make this executed by the interpreter with some special understanding about accessing
 	//  macros and a different set of special forms
 	// TODO, make this execute on one node at a time (e.g. to prevent blowing the stack) should
@@ -76,7 +79,9 @@ void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOption
 
 	for (auto syntax : syntax->getRootForms())
 	{
-		auto ret = read_cultLisp(craft_instance(), syntax);
+		ReadState rs { craft_instance(), craft_instance() };
+
+		auto ret = read_cultLisp(&rs, syntax);
 
 		_ast.push_back(ret);
 	}
@@ -138,6 +143,10 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 	return res;
 }
 
+void CultSemantics::addModule(instance<Module> m)
+{
+	_modules.insert(_modules.begin(), m);
+}
 
 /******************************************************************************
 ** CultSemanticsProvider
@@ -145,7 +154,7 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 
 instance<lisp::Module> CultSemanticsProvider::getModule(instance<> semantics) const
 {
-	semantics.asType<CultSemantics>()->getModule();
+	return semantics.asType<CultSemantics>()->getModule();
 }
 
 std::vector<TypeId> CultSemanticsProvider::readsFrom() const
@@ -172,9 +181,9 @@ std::vector<TypeId> CultSemanticsProvider::transformsFrom() const
 {
 	return{};
 }
-instance<> CultSemanticsProvider::transform(instance<> semantics, instance<lisp::Module> into, instance<> transformationOptions = instance<>()) const
+instance<> CultSemanticsProvider::transform(instance<> semantics, instance<lisp::Module> into, instance<> transformationOptions) const
 {
-
+	return instance<>();
 }
 
 instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string const& s) const
@@ -185,10 +194,8 @@ instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string cons
 	{
 
 	}
-	else
-	{
-		// Symbol table lookup
-	}
+
+	return semantics->lookup(Symbol::makeSymbol(s))->getSite()->valueAst();
 }
 
 /******************************************************************************
@@ -198,7 +205,7 @@ instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string cons
 void CultSemantics::builtin_addSpecialForm(std::string const& symbol_name)
 {
 	auto symbol = Symbol::makeSymbol(symbol_name);
-	auto bindsite = instance<BindSite>::make(symbol, instance<SpecialForm>::make());
+	auto bindsite = instance<BindSite>::make(symbol, instance<SpecialForm>::makeFromPointer(new SpecialForm()));
 	_ast.push_back(bindsite);
 	define(symbol, bindsite);
 }

@@ -18,13 +18,8 @@ CRAFT_DEFINE(CallSite)
 	_.defaults();
 }
 
-CallSite::CallSite()
+CallSite::CallSite(instance<SCultSemanticNode> callee, std::vector<instance<SCultSemanticNode>> args)
 {
-}
-
-bool CallSite::isDynamicCall() const
-{
-	return _callee.hasFeature<PSubroutine>();
 }
 
 instance<> CallSite::calleeAst() const

@@ -28,11 +28,8 @@ instance<Keyword> Keyword::makeKeyword(std::string const& s)
 
 	auto& symbol_store = Execution::getCurrent()->getNamespace()->symbolStore;
 
-	auto nsym = new Keyword();
-	nsym->craft_setupInstance();
-
+	auto nsym = instance<Keyword>::makeFromPointer(new Keyword());
 	nsym->symbolStoreId = symbol_store.intern(s);
-
-	return instance<Keyword>(nsym);
+	return nsym;
 
 }
