@@ -25,7 +25,9 @@ std::string Sexpr::_toString(instance<> inst)
 }
 instance<> Sexpr::_fromString(std::string s)
 {
-	return parse_lisp(s);
+	auto ret = instance<Sexpr>::make();
+	ret->cells = parse_lisp(s);
+	return ret;
 }
 
 std::string Sexpr::toString() const

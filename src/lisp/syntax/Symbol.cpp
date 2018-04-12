@@ -15,7 +15,7 @@ CRAFT_DEFINE(Symbol)
 
 std::string const& Symbol::getValue() const
 {
-	Execution::getCurrent()->getNamespace()->symbolStore.getValue(symbolStoreId);
+	return Execution::getCurrent()->getNamespace()->symbolStore.getValue(symbolStoreId);
 }
 
 instance<Symbol> Symbol::makeSymbol(instance<Keyword> keyword)

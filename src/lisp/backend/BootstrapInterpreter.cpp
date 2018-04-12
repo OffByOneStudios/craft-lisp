@@ -9,6 +9,20 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 /******************************************************************************
+** InterpreterFrame::SubFrame
+******************************************************************************/
+
+InterpreterFrame::SubFrame::SubFrame(instance<SScope> scope)
+{
+	this->scope = scope;
+}
+InterpreterFrame::SubFrame::SubFrame(instance<SScope> scope, SubFrame* chain)
+{
+	this->scope = scope;
+	this->chain = chain;
+}
+
+/******************************************************************************
 ** InterpreterFrame
 ******************************************************************************/
 
@@ -22,14 +36,6 @@ CRAFT_DEFINE(InterpreterFrame)
 InterpreterFrame::InterpreterFrame(instance<> backend)
 {
 	_backend = backend;
-}
-
-InterpreterFrame::_Entry const& InterpreterFrame::_getEntry(size_t i) const
-{
-	if (i >= _entries.size())
-		throw stdext::exception("Frame entry index out of range.");
-
-	return _entries[i];
 }
 
 void InterpreterFrame::setExecution(instance<Execution> exec)
@@ -53,24 +59,50 @@ size_t InterpreterFrame::entries() const
 }
 std::string InterpreterFrame::getEntryName(size_t index) const
 {
-
+	return "";
 }
 instance<> InterpreterFrame::getEntryRepresentative(size_t index) const
 {
-	return _getEntry(index)._function;
+	return _entries.get_iterator_from_index(index)->scope;
 }
 instance<Module> InterpreterFrame::getEntryModule(size_t index) const
 {
-	return _getEntry(index)._function;
+	return _entries.get_iterator_from_index(index)->scope->getSemantics()->getModule();
 }
 
-void InterpreterFrame::pushEntry(instance<lisp::Function> function, types::GenericInvoke const& args)
+InterpreterFrame::SubFrame* InterpreterFrame::top()
 {
-
+	return &*_entries.rbegin();
 }
-instance<>& InterpreterFrame::topState()
-{
 
+void InterpreterFrame::push(instance<SScope> scope)
+{
+	_entries.insert(SubFrame(scope));
+}
+void InterpreterFrame::pop()
+{
+	_entries.erase(--_entries.end());
+}
+
+instance<> InterpreterFrame::interp_exec(instance<SCultSemanticNode> node)
+{
+	return _backend->_fn_system_exec->call_internal({ craft_instance() , node });
+}
+
+instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke const& call)
+{
+	if (fn.isType<Function>())
+	{
+
+	}
+	else if (fn.isType<MultiMethod>())
+	{
+
+	}
+	else
+	{
+
+	}
 }
 
 /******************************************************************************
@@ -89,51 +121,6 @@ BootstrapInterpreter::BootstrapInterpreter(instance<Namespace> lisp)
 	_lisp = lisp;
 }
 
-instance<> BootstrapInterpreter::exec_cult(instance<SSubroutine> s, types::GenericInvoke const& args)
-{
-	if (code.typeId().hasFeature<SBinding>())
-		return code.asFeature<SBinding>()->getValue(frame);
-	else if (code.typeId().isType<Sexpr>())
-	{
-		instance<Sexpr> expr = code;
-
-		if (expr->cells.size() == 0)
-			throw stdext::exception("Unquoted empty list.");
-
-		// -- Evaluate Head --
-		instance<> head = expr->car();
-
-		head = exec(frame, head);
-
-		// -- Evaluate Special Forms --
-		if (head.typeId().isType<SpecialForm>())
-			return head.asType<SpecialForm>()->eval(frame, expr);
-
-		// -- Evaluate Subroutine --
-		if (!head.hasFeature<PSubroutine>())
-		{
-			throw stdext::exception("Cannot call `{0}`", head.toString());
-		}
-
-		auto subroutine_provider = head.getFeature<PSubroutine>();
-
-		std::vector<instance<>> sub_expr_values;
-		sub_expr_values.reserve(expr->cells.size() - 1);
-
-		for (auto it = expr->cells.begin() + 1, end = expr->cells.end(); it != end; ++it)
-		{
-			sub_expr_values.push_back(exec(frame, *it));
-		}
-
-		// -- Call --
-		frame = subroutine_provider->call_frame(head);
-		Execution::execute(frame);
-		return subroutine_provider->call(head, frame, sub_expr_values);
-	}
-	else
-		return code;
-}
-
 instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const& call)
 {
 	auto semantics = module->require<CultSemantics>();
@@ -144,7 +131,12 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 	auto frame = instance<InterpreterFrame>::make(craft_instance());
 	Execution::getCurrent()->push_frame(frame);
 
-	frame->pushEntry(, call)
+	return frame->interp_call(potFunc, call);
+}
+
+void BootstrapInterpreter::builtin_validateSpecialForms(instance<lisp::Module> module)
+{
+	_fn_system_exec = module->get<CultSemantics>()->lookup(Symbol::makeSymbol("exec"))->getSite()->valueAst();
 }
 
 /******************************************************************************

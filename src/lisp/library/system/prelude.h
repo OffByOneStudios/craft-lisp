@@ -32,7 +32,7 @@ namespace library
 
 	public:
 		CRAFT_LISP_EXPORTED List() = default;
-		CRAFT_LISP_EXPORTED List(std::vector<instance<>> && data);
+		CRAFT_LISP_EXPORTED List(std::vector<instance<>> const& data);
 
 		CRAFT_LISP_EXPORTED instance<int64_t> size();
 		CRAFT_LISP_EXPORTED instance<> at(instance<int64_t> i);

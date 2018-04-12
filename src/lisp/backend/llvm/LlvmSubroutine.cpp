@@ -1,5 +1,6 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
+/*
 #include "lisp/backend/llvm/llvm_internal.h"
 #include "lisp/backend/llvm/LlvmSubroutine.h"
 
@@ -63,3 +64,4 @@ void LlvmSubroutine::generate()
 		backend->lisp->environment()->log()->info(verify_str);
 }
 
+*/

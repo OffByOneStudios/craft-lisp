@@ -22,10 +22,15 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SCultSemanticNode, "lisp.cult.semantic", types::FactoryAspectManager);
 
 	public:
-		struct parent_already_set_error : stdext::exception
+		struct ast_error : stdext::exception
+		{
+			using exception::exception;
+		};
+
+		struct parent_already_set_error : ast_error
 		{
 			parent_already_set_error(instance<SCultSemanticNode> node)
-				: stdext::exception("Node `{0}` has alreayd has parent set.", node.toString())
+				: ast_error("Node `{0}` has alreayd has parent set.", node.toString())
 			{ }
 		};
 

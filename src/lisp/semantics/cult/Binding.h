@@ -105,10 +105,24 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const;
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParentScope() const = 0;
 
-		// E.g. may enclose over other higher scopes
-		CRAFT_LISP_EXPORTED virtual bool isLexicalScope() const = 0;
-
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const = 0;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) = 0;
+
+		inline instance<Binding> lookup_recurse(instance<Symbol> sym)
+		{
+			instance<Binding> bindRet = lookup(sym);
+			if (bindRet) return bindRet;
+
+			instance<SScope> scope = getParentScope();
+			while (!bindRet && scope)
+			{
+				bindRet = lookup(sym);
+				if (bindRet) return bindRet;
+
+				scope = scope->getParentScope();
+			}
+
+			return instance<>();
+		}
 	};
 }}

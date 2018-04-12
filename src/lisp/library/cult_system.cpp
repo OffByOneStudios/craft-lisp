@@ -67,8 +67,8 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_specialFormReader("do",
 		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
 	{
-		auto ret = instance<Block>::make();
-		auto oldScope = rs->pushScope(ret);
+		auto ret = instance<Block>::make(rs->scope);
+		CultSemantics::ReadState::PushScope _hold(rs, ret);
 
 		auto size = rs->sexpr->cells.size();
 		ret->preSize(size - 1);
@@ -110,16 +110,47 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return ret;
 	});
 
+	sem->builtin_addSpecialForm("function");
+	sem->builtin_specialFormReader("function",
+		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
+	{
+		auto ret = instance<Function>::make();
+
+		return ret;
+	});
+
+	sem->builtin_addSpecialForm("variable");
+	sem->builtin_specialFormReader("variable",
+		[](CultSemantics::ReadState* rs) -> instance<SCultSemanticNode>
+	{
+		auto ret = instance<Variable>::make();
+
+		return ret;
+	});
+
 	//
 	// Semantics - Interpreter
 	//
-	sem->builtin_addMultiMethod("eval");
-	sem->builtin_implementMultiMethod("eval",
-		[](instance<BootstrapInterpreter> interp, instance<Constant> ast) -> instance<>
+	sem->builtin_addMultiMethod("exec");
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<Constant> ast) -> instance<>
 	{
 		return ast->getValue();
 	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<Block> ast) -> instance<>
+	{
+		InterpreterFrame::PushSubFrame _hold(interp, ast);
 
+		auto count = ast->statementCount();
+		instance<> last_res;
+		for (auto i = 0; i < count; i++)
+		{
+			last_res = interp->interp_exec(ast->statementAst(i));
+		}
+
+		return last_res;
+	});
 
 	//
 	// Semantics - Llvm

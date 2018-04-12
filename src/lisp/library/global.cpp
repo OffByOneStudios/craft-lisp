@@ -395,39 +395,6 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 	}));
 	ret->define_eval("dispatch", dispatch);
 
-	//
-	// Variable
-	//
-	auto Variable_ = instance<MultiMethod>::make();
-	Variable_->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
-	{
-		if (args.size() > 0)
-			return instance<Variable>::make(args[0]);
-		return instance<Variable>::make();
-	}));
-	ret->define_eval("Variable", Variable_);
-
-	auto get = instance<lisp::MultiMethod>::make();
-	get->attach(env, instance<BuiltinFunction>::make(
-		SubroutineSignature::makeFromArgs<Variable>(),
-		[](auto frame, auto args)
-	{
-		instance<Variable> var(args[0]);
-		return var->get();
-	}));
-	ret->define_eval("get", get);
-
-	auto set = instance<lisp::MultiMethod>::make();
-	set->attach(env, instance<BuiltinFunction>::make(
-		[](auto frame, auto args)
-	{
-		instance<Variable> var(args[0]); instance<> value(args[1]);
-		var->set(value);
-
-		return instance<>();
-	}));
-	ret->define_eval("set", set);
 
 	//
 	// Introspection

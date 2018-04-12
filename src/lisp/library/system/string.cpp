@@ -38,7 +38,7 @@ void core::make_string_globals(instance<Module> ret)
 	semantics->builtin_implementMultiMethod("print",
 		[](instance<> a)
 	{
-		std::cout << *Execution::exec("string", { a }).asType<std::string>();
+		std::cout << *Execution::exec_fromCurrentModule("string", { a }).asType<std::string>();
 	});
 
 	/*semantics->builtin_implementMultiMethod("fmt",
@@ -117,14 +117,14 @@ void core::make_string_globals(instance<Module> ret)
 	semantics->builtin_implementMultiMethod("string/join",
 		[](instance<List> a, instance<std::string> b) -> instance<std::string>
 	{
-		std::cout << *Execution::exec("string", { a }).asType<std::string>();
+		std::cout << *Execution::exec_fromCurrentModule("string", { a }).asType<std::string>();
 
 		std::ostringstream res;
 
 		auto count = 0;
 		for (auto& i : a->data())
 		{
-			std::cout << *Execution::exec("string", { i }).asType<std::string>();
+			std::cout << *Execution::exec_fromCurrentModule("string", { i }).asType<std::string>();
 			if (count != (*a->size()) - 1) res << *b;
 			count++;
 		}
@@ -135,7 +135,7 @@ void core::make_string_globals(instance<Module> ret)
 	semantics->builtin_implementMultiMethod("string/join",
 		[](instance<List> a) -> instance<std::string>
 	{
-		return Execution::exec("string/join", { a, instance<std::string>::make("\n") }).asType<std::string>();
+		return Execution::exec_fromCurrentModule("string/join", { a, instance<std::string>::make("\n") }).asType<std::string>();
 	});
 	
 
@@ -150,6 +150,7 @@ void core::make_string_globals(instance<Module> ret)
 	{
 		auto res = instance<std::string>::make(*a);
 		std::reverse(res->begin(), res->end());
+		return res;
 	});
 
 	semantics->builtin_implementMultiMethod("string/includes",

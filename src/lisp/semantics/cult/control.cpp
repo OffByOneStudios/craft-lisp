@@ -24,6 +24,24 @@ Condition::Condition()
 
 }
 
+void Condition::preSize(size_t cap)
+{
+	_entries.reserve(cap);
+}
+void Condition::push(instance<SCultSemanticNode> cond, instance<SCultSemanticNode> branch)
+{
+	if (!cond)
+	{
+		if (_defaultBranch)
+			throw ast_error("Node `{0}` (Condition) already has a default branch.");
+		_defaultBranch = branch;
+	}
+	else
+	{
+		_entries.push_back({ _ast(craft_instance(), cond) , _ast(craft_instance(), branch) });
+	}
+}
+
 size_t Condition::branchCount() const
 {
 	return _entries.size();
@@ -63,9 +81,10 @@ CRAFT_DEFINE(Loop)
 }
 
 
-Loop::Loop()
+Loop::Loop(instance<SCultSemanticNode> cond, instance<SCultSemanticNode> body)
 {
-
+	_condition = _ast(craft_instance(), cond);
+	_body = _ast(craft_instance(), body);
 }
 
 instance<SCultSemanticNode> Loop::conditionAst() const
@@ -81,7 +100,7 @@ instance<SCultSemanticNode> Loop::getParent() const
 {
 	return _parent;
 }
-void Condition::setParent(instance<SCultSemanticNode> parent)
+void Loop::setParent(instance<SCultSemanticNode> parent)
 {
 	if (_parent) throw parent_already_set_error(craft_instance());
 	_parent = parent;

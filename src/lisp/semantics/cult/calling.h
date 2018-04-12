@@ -85,9 +85,6 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const override;
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParentScope() const override;
 
-		// E.g. may enclose over other higher scopes
-		CRAFT_LISP_EXPORTED virtual bool isLexicalScope() const override;
-
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;
 	};
@@ -114,14 +111,18 @@ namespace lisp
             instance<PSubroutine> subroutine;
         };
         
-        plf::colony<_Entry> _entries;
-        ExpressionDispatcher _dispatcher;
+		plf::colony<_Entry> _entries;
+		types::ExpressionDispatcher _dispatcher;
         
 	public:
 		CRAFT_LISP_EXPORTED MultiMethod();
 
         CRAFT_LISP_EXPORTED void attach(instance<PSubroutine>);
         
+		// A helper to call this multimethod without the normal stackframes...
+		//   could cause some weird stuff if it dispatches to a non-c function
+		CRAFT_LISP_EXPORTED instance<> call_internal(types::GenericInvoke const& invoke) const;
+
 		// SCultSemanticNode
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;

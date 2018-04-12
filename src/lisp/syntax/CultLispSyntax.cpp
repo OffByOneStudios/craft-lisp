@@ -42,14 +42,14 @@ void CultLispSyntax::parse(std::string const& s, PSyntax::ParseOptions const* op
 }
 
 // TODO string_view
-std::string const& CultLispSyntax::getSource(PSyntax::SourceLocation const& sl) const
+std::string CultLispSyntax::getSource(PSyntax::SourceLocation const& sl) const
 {
 	return _source.substr(sl.pos, sl.length);
 }
 
-PSyntax::SourceLocation const& CultLispSyntax::getSourceLocation(size_t const&) const
+PSyntax::SourceLocation CultLispSyntax::getSourceLocation(size_t const& pos) const
 {
-
+	return { (uint32_t)pos, 1, 0, 0, 0, 0 };
 }
 
 /******************************************************************************

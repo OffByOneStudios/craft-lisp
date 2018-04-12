@@ -9,7 +9,7 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
-List::List(std::vector<instance<>> && data)
+List::List(std::vector<instance<>> const& data)
 	: _data(data)
 { }
 

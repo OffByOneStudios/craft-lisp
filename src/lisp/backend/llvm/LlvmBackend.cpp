@@ -1,5 +1,6 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
+/*
 #include "lisp/backend/llvm/llvm_internal.h"
 #include "lisp/backend/llvm/LlvmBackend.h"
 
@@ -140,3 +141,4 @@ instance<> LlvmBackendProvider::exec(instance<lisp::SFrame> frame, instance<> co
 	else
 		return frame->getNamespace()->environment()->eval(frame, code);
 }
+*/

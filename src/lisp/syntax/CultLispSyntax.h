@@ -26,9 +26,9 @@ namespace lisp
 		CRAFT_LISP_EXPORTED void parse(std::string const& s, PSyntax::ParseOptions const* opts = nullptr);
 
 		// TODO string_view
-		CRAFT_LISP_EXPORTED std::string const& getSource(PSyntax::SourceLocation const&) const;
+		CRAFT_LISP_EXPORTED std::string getSource(PSyntax::SourceLocation const&) const;
 
-		CRAFT_LISP_EXPORTED PSyntax::SourceLocation const& getSourceLocation(size_t const&) const;
+		CRAFT_LISP_EXPORTED PSyntax::SourceLocation getSourceLocation(size_t const&) const;
 	};
 
 

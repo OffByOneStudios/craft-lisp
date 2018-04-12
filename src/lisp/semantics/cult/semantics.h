@@ -30,19 +30,24 @@ namespace lisp
 
 			inline instance<SCultSemanticNode> read(size_t index);
 
-			struct RestoreScope final
+			struct PushScope final
 			{
+			private:
 				ReadState* rs;
 				instance<SScope> oldScope;
 
-				inline ~RestoreScope() { rs->scope = oldScope; }
+				PushScope(PushScope const&) = delete;
+				PushScope(PushScope &&) = delete;
+
+			public:
+				inline PushScope(ReadState* rs, instance<SScope> newScope)
+					: rs(rs), oldScope(rs->scope)
+				{
+					rs->scope = newScope;
+				}
+
+				inline ~PushScope() { rs->scope = oldScope; }
 			};
-			inline RestoreScope pushScope(instance<SScope> newScope)
-			{
-				auto oldScope = scope;
-				scope = newScope;
-				return RestoreScope{ this, oldScope };
-			}
 		};
 
 		// TODO: Make this a multiMethod
@@ -109,9 +114,6 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const override;
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParentScope() const override;
-
-		// E.g. may enclose over other higher scopes
-		CRAFT_LISP_EXPORTED virtual bool isLexicalScope() const override;
 
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;

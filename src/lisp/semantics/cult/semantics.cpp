@@ -102,12 +102,6 @@ instance<SScope> CultSemantics::getParentScope() const
 	return instance<>();
 }
 
-// E.g. may enclose over other higher scopes
-bool CultSemantics::isLexicalScope() const
-{
-	return false;
-}
-
 instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
 {
 	auto it = _symbolTable.find(symbol->symbolStoreId);

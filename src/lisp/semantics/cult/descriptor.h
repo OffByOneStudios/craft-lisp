@@ -27,11 +27,13 @@ namespace lisp
 	public:
 
 		instance<SCultSemanticNode> _initalizer;
+		instance<SCultSemanticNode> _type_ast;
 
 	public:
 		CRAFT_LISP_EXPORTED Variable();
 
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> initalizerAst() const;
+		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> typeAst() const;
 
 		// SCultSemanticNode
 	public:
@@ -62,19 +64,19 @@ namespace lisp
 		instance<SCultSemanticNode> _parent;
 
 		// TODO: Symbol equality
+		instance<SScope> _parentSymbols;
 		std::map<size_t, instance<Binding>> _symbolTable; // Internal table
 
-	public:
-
+	private:
 		std::vector<instance<SCultSemanticNode>> _statements;
 
 	public:
-		CRAFT_LISP_EXPORTED Block();
+		CRAFT_LISP_EXPORTED Block(instance<SScope> parent_scope);
 
 		CRAFT_LISP_EXPORTED void preSize(size_t);
 		CRAFT_LISP_EXPORTED void push(instance<SCultSemanticNode>);
 
-		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> statementCount() const;
+		CRAFT_LISP_EXPORTED size_t statementCount() const;
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> statementAst(size_t index) const;
 
 		// SCultSemanticNode
@@ -84,11 +86,7 @@ namespace lisp
 
 		// SScope
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const override;
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParentScope() const override;
-
-		// E.g. may enclose over other higher scopes
-		CRAFT_LISP_EXPORTED virtual bool isLexicalScope() const override;
 
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;

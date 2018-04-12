@@ -41,4 +41,7 @@ instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns)
 	library::core::make_security_globals(ret);
 	library::core::make_repl_globals(ret);
 	library::core::make_json_globals(ret);
+
+	ret->builtin_setSemantics(ret->require<CultSemantics>());
+	return ret;
 }

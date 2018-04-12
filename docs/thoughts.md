@@ -36,3 +36,15 @@ TODO:
 * collections
   ? ((foo Int) (args :args))
   ? ((foo Int) (args :args) (kwargs :keywords))
+
+## Data Structure Library
+
+Powerful library for mixing in various data structure features and choosing the best implementation of those availble.
+
+### Evented
+
+A way to easily hook an object up to a data structure and get events when certain things happen. 
+
+Also, have a way to *replay* the events (removing add/remove pairs so only the adds get replayed) so that an object can be hooked up correctly automatically.
+
+Also, have a way to batch and time updates (e.g. so 200 adds in a row will be batched to a single (or couple) add-collection events... perhaps on a timer or with hints (e.g. to support UI)).

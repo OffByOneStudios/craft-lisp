@@ -1,6 +1,6 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
-#include "BasicSlots.h"
+#include "slots.h"
 
 using namespace craft;
 using namespace craft::types;

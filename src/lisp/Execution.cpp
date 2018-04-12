@@ -56,19 +56,19 @@ void Execution::pop()
 	_stack.pop_back();
 }
 
-instance<> Execution::exec(std::string const& a, types::GenericInvoke const& b)
+instance<> Execution::exec_fromCurrentModule(std::string const& a, types::GenericInvoke const& b)
 {
 	throw stdext::exception("Not Implemented");
 	return instance<>();
 }
 
-instance<> Execution::exec(instance<Function> a, types::GenericInvoke const & b)
+instance<> Execution::exec(instance<PSubroutine> a, types::GenericInvoke const & b)
 {
 	throw stdext::exception("Not Implemented");
 	return instance<>();
 }
 
-instance<> Execution::exec(instance<MultiMethod> a, types::GenericInvoke const & b)
+instance<> Execution::eval(std::string const& a)
 {
 	throw stdext::exception("Not Implemented");
 	return instance<>();

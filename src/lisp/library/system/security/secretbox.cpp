@@ -104,7 +104,7 @@ void core::make_secretkey_globals(instance<Module> ret)
 	semantics->builtin_implementMultiMethod("crypto/salsa/encrypt",
 		[](instance<std::string> msg, instance<SecretBoxKey> secret, instance<Nonce> nonce) -> instance<SecretBoxCipher>
 	{
-		return instance<SecretBoxCipher>::make(msg, secret, nonce);
+		return instance<SecretBoxCipher>::make(secret, nonce, msg);
 	});
 
 	semantics->builtin_implementMultiMethod("crypto/salsa/decrypt",

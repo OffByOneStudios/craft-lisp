@@ -16,7 +16,7 @@ CRAFT_DEFINE(Keyword)
 
 std::string const& Keyword::getValue() const
 {
-	Execution::getCurrent()->getNamespace()->symbolStore.getValue(symbolStoreId);
+	return Execution::getCurrent()->getNamespace()->symbolStore.getValue(symbolStoreId);
 }
 
 instance<Keyword> Keyword::makeKeyword(std::string const& s)

@@ -12,22 +12,25 @@ namespace lisp
 		, public craft::types::Implements<SFrame>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::InterpreterFrame);
+	public:
+		struct SubFrame
+		{
+			instance<SScope> scope; // Scope entry
+			std::map<instance<Binding>, instance<>> values; // values bound to the scope
+
+			SubFrame* chain; // Lexical Chain
+
+			CRAFT_LISP_EXPORTED SubFrame(instance<SScope> scope);
+			CRAFT_LISP_EXPORTED SubFrame(instance<SScope> scope, SubFrame* chain);
+		};
+
 	private:
 		friend class BootstrapInterpreter;
 
 		instance<Execution> _execution;
-		instance<> _backend;
+		instance<BootstrapInterpreter> _backend;
 
-		struct _Entry
-		{
-			instance<Function> _function;
-			instance<SScope> _scope; // if any
-			std::map<instance<Binding>, instance<>> _values; // values bound to the scope
-		};
-
-		std::vector<_Entry> _entries;
-
-		_Entry const& _getEntry(size_t) const;
+		plf::colony<SubFrame> _entries;
 
 	public:
 		CRAFT_LISP_EXPORTED InterpreterFrame(instance<> backend);
@@ -41,8 +44,38 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<> getEntryRepresentative(size_t index) const override;
 		CRAFT_LISP_EXPORTED virtual instance<Module> getEntryModule(size_t index) const override;
 
-		CRAFT_LISP_EXPORTED void pushEntry(instance<Function> function, types::GenericInvoke const& args);
-		CRAFT_LISP_EXPORTED instance<>& topState();
+		CRAFT_LISP_EXPORTED SubFrame* top();
+		CRAFT_LISP_EXPORTED void push(instance<SScope> scope);
+		CRAFT_LISP_EXPORTED void pop();
+
+		// Interpreter helpers
+		/*
+			This class is used to store the state of the executing interpreter, here we provide
+			  helpers for the interpreter code to use
+		*/
+	public:
+		struct PushSubFrame final
+		{
+		private:
+			InterpreterFrame* interp;
+
+			PushSubFrame(PushSubFrame const&) = delete;
+			PushSubFrame(PushSubFrame &&) = delete;
+
+		public:
+			template<typename ... TArgs>
+			inline PushSubFrame(instance<InterpreterFrame>& interp_, TArgs &&... args)
+				: interp(interp_.get())
+			{ interp->push(std::forward<TArgs>(args)...); }
+
+			inline ~PushSubFrame() { interp->pop(); }
+		};
+
+		// Calls the interpreter's exec function
+		CRAFT_LISP_EXPORTED instance<> interp_exec(instance<SCultSemanticNode>);
+
+		// Performs a full call
+		CRAFT_LISP_EXPORTED instance<> interp_call(instance<>, types::GenericInvoke const& call);
 	};
 
 	class BootstrapInterpreter
@@ -53,7 +86,10 @@ namespace lisp
 		typedef void(*f_specialFormHandler)();
 
 	private:
+		friend class InterpreterFrame;
+
 		instance<Namespace> _lisp;
+		instance<MultiMethod> _fn_system_exec;
 
 	public:
 
@@ -63,8 +99,7 @@ namespace lisp
 
 	public:
 
-		CRAFT_LISP_EXPORTED void builtin_addSpecialFormHandler(std::string const&, f_specialFormHandler handler);
-
+		// Ensures the module has everything the interpreter needs
 		CRAFT_LISP_EXPORTED void builtin_validateSpecialForms(instance<lisp::Module> module);
 	};
 

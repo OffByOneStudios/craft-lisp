@@ -12,8 +12,7 @@ namespace lisp
 
 	public:
         
-        CRAFT_LISP_EXPORTED virtual types::Function function(instance<>) const;
-        CRAFT_LISP_EXPORTED virtual ExpressionStore expression(instance<>) const;
-        CRAFT_LISP_EXPORTED virtual instance<> call(instance<>, types::GenericInvoke const&) const;
+        CRAFT_LISP_EXPORTED virtual types::Function function(instance<>) const = 0;
+		CRAFT_LISP_EXPORTED virtual types::ExpressionStore expression(instance<>) const = 0;
 	};
 }}

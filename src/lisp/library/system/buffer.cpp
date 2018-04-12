@@ -53,14 +53,14 @@ instance<int64_t> Buffer::size()
 
 instance<int64_t> Buffer::at(instance<int64_t> i)
 {
-	if (*i > _data.size()) throw stdext::exception("Index Out Of Range");
+	if ((size_t)*i > _data.size()) throw stdext::exception("Index Out Of Range");
 
 	return instance<int64_t>::make(_data[*i]);
 }
 
 void Buffer::set(instance<int64_t> i, instance<int64_t> j)
 {
-	if (*i > _data.size()) throw stdext::exception("Index Out Of Range");
+	if ((size_t)*i > _data.size()) throw stdext::exception("Index Out Of Range");
 
 	_data[*i] = uint8_t(*j);
 

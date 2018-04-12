@@ -10,6 +10,14 @@ using namespace craft::lisp;
 CRAFT_DEFINE(craft::lisp::SBindable) { _.defaults(); }
 CRAFT_DEFINE(craft::lisp::SScope) { _.defaults(); }
 
+instance<CultSemantics> SScope::getSemantics() const
+{
+	instance<SScope> scope = getParentScope();
+	while (scope && !scope.isType<CultSemantics>())
+		scope = scope->getParentScope();
+	return scope;
+}
+
 /******************************************************************************
 ** BindSite
 ******************************************************************************/
