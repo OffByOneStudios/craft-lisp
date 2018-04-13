@@ -15,6 +15,8 @@ using namespace craft::lisp;
 CRAFT_DEFINE(CultSemantics)
 {
 	_.use<PSemantics>().singleton<CultSemanticsProvider>();
+	_.use<SCultSemanticNode>().byCasting();
+	_.use<SScope>().byCasting();
 
 	_.defaults();
 }
@@ -161,6 +163,22 @@ void CultSemantics::addModule(instance<Module> m)
 	_modules.insert(_modules.begin(), m);
 }
 
+instance<> CultSemantics::appendModule(instance<Module> m)
+{
+	auto sem = m->require<CultSemantics>();
+
+	size_t start = _ast.size();
+
+	for (auto appending_ast = sem->_ast)
+	{
+		_ast.push_back(appending_ast);
+	}
+
+	// INVOKE from start onwards
+
+	return instance<>();
+}
+
 /******************************************************************************
 ** CultSemanticsProvider
 ******************************************************************************/
@@ -203,11 +221,6 @@ instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string cons
 {
 	instance<CultSemantics> semantics = semantics_;
 
-	if (s == "$init")
-	{
-
-	}
-
 	return semantics->lookup(Symbol::makeSymbol(s))->getSite()->valueAst();
 }
 
@@ -230,11 +243,29 @@ void CultSemantics::builtin_specialFormReader(std::string const& symbol_name, Cu
 
 void CultSemantics::builtin_addMultiMethod(std::string const& symbol_name)
 {
-
+	auto symbol = Symbol::makeSymbol(symbol_name);
+	auto bindsite = instance<BindSite>::make(symbol, instance<MultiMethod>::make());
+	_ast.push_back(bindsite);
+	define(symbol, bindsite);
 }
 void CultSemantics::builtin_attachMultiMethod(std::string const& symbol_name, std::tuple<types::ExpressionStore, types::Function> impl)
 {
+	auto symbol = Symbol::makeSymbol(symbol_name);
+	auto binding = lookup(symbol);
+	if (!binding)
+		builtin_addMultiMethod(symbol_name);
+	binding = lookup(symbol);
 
+	auto value = binding->getSite()->valueAst();
+	if (!value.isType<MultiMethod>())
+		throw stdext::exception("Can't attach to not a multimethod.");
+
+	auto multi = value.asType<MultiMethod>();
+
+	auto bindsite = instance<BindSite>::make(symbol, instance<Constant>::make(instance<CppFunctionPointer>::make(std::get<0>(impl), std::get<1>(impl))));
+	_ast.push_back(bindsite);
+
+	multi->attach(bindsite); // TODO do this via define
 }
 
 void CultSemantics::builtin_eval(std::string const& contents)

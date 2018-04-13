@@ -78,10 +78,10 @@ CRAFT_DEFINE(List)
 		->withMethod("size", &List::size)
 		->withMethod("slice", &List::slice)
 		//->withMethod("at", &List::at)
-		->withMethod("insert", &List::insert)
+		//->withMethod("insert", &List::insert)
 		->withMethod("erase", &List::erase)
 		->withMethod("reverse", &List::reverse)
-		->withMethod("push", &List::push)
+		//->withMethod("push", &List::push)
 		//->withMethod("pop", &List::pop)
 		;
 

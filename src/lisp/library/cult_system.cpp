@@ -20,7 +20,8 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	auto backend_interp = ns->get<BootstrapInterpreter>();
 
 	auto ret = instance<Module>::make(ns, "builtin:cult.system");
-	auto sem = ret->require<CultSemantics>();
+	auto sem = instance<CultSemantics>::make(ret);
+	ret->builtin_setSemantics(sem);
 
 	//
 	// Multimethods

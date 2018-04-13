@@ -20,6 +20,8 @@ instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns)
 	auto backend_interp = ns->get<BootstrapInterpreter>();
 
 	auto ret = instance<Module>::make(ns, "builtin:cult.core");
+	auto sem = instance<CultSemantics>::make(ret);
+	ret->builtin_setSemantics(sem);
 
 	library::core::make_logic_globals(ret);
 	library::core::make_cast_globals(ret);

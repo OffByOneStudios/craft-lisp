@@ -116,7 +116,7 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED MultiMethod();
 
-        CRAFT_LISP_EXPORTED void attach(instance<PSubroutine>);
+        CRAFT_LISP_EXPORTED void attach(instance<BindSite>);
         
 		// A helper to call this multimethod without the normal stackframes...
 		//   could cause some weird stuff if it dispatches to a non-c function

@@ -140,7 +140,7 @@ void MultiMethod::setParent(instance<SCultSemanticNode> parent)
 	_parent = parent;
 }
 
-void MultiMethod::attach(instance<PSubroutine>)
+void MultiMethod::attach(instance<BindSite> binding)
 {
 
 }

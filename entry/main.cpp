@@ -46,6 +46,8 @@ int main(int argc, char** argv)
 
 	instance<Environment> global_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"));
 	instance<Namespace> ns = global_env->ns_user;
+	instance<Execution> exec = instance<Execution>::make(ns);
+	exec->makeCurrent();
 	
 	if (argc != 1)
 	{

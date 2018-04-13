@@ -34,8 +34,8 @@ void Namespace::craft_setupInstance()
 		{
 			backend->init(craft_instance()),
 			backend,
-			type.getFeature<PExecutor>(),
-			type.getFeature<PCompiler>(),
+			type.hasFeature<PExecutor>() ? type.getFeature<PExecutor>() : nullptr,
+			type.hasFeature<PCompiler>() ? type.getFeature<PCompiler>() : nullptr,
 		};
 	}
 

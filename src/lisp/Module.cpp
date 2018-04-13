@@ -47,8 +47,12 @@ void Module::load()
 {
 	// TODO call loader
 	// For the time being, assume the loader is the syntax structure, and that the Namespace has set it for us
-	_syntax_instance = _loader;
-	_syntax_syntax = _syntax_instance.getFeature<PSyntax>();
+	//  unless there are semantics (e.g. built in)
+	if (_semantics.size() == 0)
+	{
+		_syntax_instance = _loader;
+		_syntax_syntax = _syntax_instance.getFeature<PSyntax>();
+	}
 }
 
 bool Module::isInitialized() const
@@ -149,6 +153,8 @@ instance<> Module::require(types::TypeId type, bool force_read)
 				}
 
 				_semantics[type] = { semantics_instance, semantics };
+
+				return semantics_instance;
 			}
 		}
 

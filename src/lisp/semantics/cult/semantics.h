@@ -89,7 +89,13 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED std::vector<instance<Binding>> search(std::string const& search) const;
 
+		// Requirements:
+	public:
 		CRAFT_LISP_EXPORTED void addModule(instance<Module> m);
+
+		// special execution paths:
+	public:
+		CRAFT_LISP_EXPORTED instance<> appendModule(instance<Module> m);
 
 		// Builtin helpers
 	public:

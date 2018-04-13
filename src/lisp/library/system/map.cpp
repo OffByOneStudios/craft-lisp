@@ -13,10 +13,11 @@ CRAFT_DEFINE(Map)
 {
 	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("size", &Map::size)
-		->withMethod("at", &Map::at)
-		->withMethod("erase", &Map::erase)
+		//->withMethod("at", &Map::at)
+		//->withMethod("erase", &Map::erase)
 		->withMethod("clear", &Map::clear)
-		->withMethod("insert", &Map::insert);
+		//->withMethod("insert", &Map::insert)
+		;
 
 	_.use<PStringer>().singleton<FunctionalStringer>(
 		[](instance<Map> l) -> std::string

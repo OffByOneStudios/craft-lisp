@@ -109,6 +109,7 @@ instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke con
 CRAFT_DEFINE(BootstrapInterpreter)
 {
 	_.use<PBackend>().singleton<BootstrapInterpreterProvider>();
+	_.use<PExecutor>().singleton<BootstrapInterpreterProvider>();
 
 	_.defaults();
 }
@@ -122,6 +123,9 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 {
 	auto semantics = module->require<CultSemantics>();
 	auto binding = semantics->lookup(Symbol::makeSymbol(entry));
+
+	if (!binding)
+		throw stdext::exception("Execution entry point `{0}` not found in `{1}`.", entry, module);
 
 	auto potFunc = binding->getSite()->symbolAst();
 
