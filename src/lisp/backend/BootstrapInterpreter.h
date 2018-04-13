@@ -114,7 +114,5 @@ namespace lisp
 		virtual instance<> init(instance<Namespace> env) const override;
 
 		virtual instance<> exec(instance<> backend, instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const&) const override;
-
-		virtual void resume(instance<> backend) const override;
 	};
 }}

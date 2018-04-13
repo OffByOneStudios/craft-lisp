@@ -133,27 +133,14 @@ instance<SScope> Block::getParentScope() const
 	return _parentSymbols;
 }
 
-instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
+instance<Binding> Block::lookup(instance<Symbol> symbol) const
 {
 	auto it = _symbolTable.find(symbol->symbolStoreId);
 	if (it == _symbolTable.end())
-	{
-		for (auto m : _modules)
-		{
-			auto sem = m->get<CultSemantics>();
-			if (sem)
-			{
-				auto res = sem->lookup(symbol);
-				if (res)
-					return res;
-			}
-		}
-
 		return instance<>();
-	}
 	return it->second;
 }
-instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSite> ast)
+instance<Binding> Block::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
 	auto key = symbol->symbolStoreId;
 	auto lb = _symbolTable.lower_bound(key);

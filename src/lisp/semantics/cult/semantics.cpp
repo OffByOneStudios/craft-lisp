@@ -28,7 +28,7 @@ CultSemantics::CultSemantics(instance<lisp::Module> forModule)
 instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance<> syntax)
 {
 	if (syntax.typeId().isType<Symbol>())
-		return instance<GetValue>::make(rs->scope->lookup(syntax.asType<Symbol>()));
+		return instance<GetValue>::make(rs->scope->lookup_recurse(syntax.asType<Symbol>()));
 	else if (syntax.typeId().isType<Sexpr>())
 	{
 		instance<Sexpr> expr = syntax;
@@ -111,7 +111,20 @@ instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
 {
 	auto it = _symbolTable.find(symbol->symbolStoreId);
 	if (it == _symbolTable.end())
+	{
+		for (auto m : _modules)
+		{
+			auto sem = m->get<CultSemantics>();
+			if (sem)
+			{
+				auto res = sem->lookup(symbol);
+				if (res)
+					return res;
+			}
+		}
+
 		return instance<>();
+	}
 	return it->second;
 }
 instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSite> ast)

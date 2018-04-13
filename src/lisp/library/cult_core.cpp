@@ -4,7 +4,7 @@
 
 #include "lisp/semantics/cult/cult.h"
 #include "lisp/backend/BootstrapInterpreter.h"
-#include "lisp/backend/llvm/llvm_internal.h"
+//#include "lisp/backend/llvm/llvm_internal.h"
 
 using namespace craft;
 using namespace craft::types;
@@ -18,7 +18,6 @@ instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns)
 	// Aquire objects, set up returns
 	//
 	auto backend_interp = ns->get<BootstrapInterpreter>();
-	auto backend_llvm = ns->get<LlvmBackend>();
 
 	auto ret = instance<Module>::make(ns, "builtin:cult.core");
 

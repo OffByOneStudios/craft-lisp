@@ -60,6 +60,7 @@ namespace lisp
 
 		instance<Binding> _binding;
 
+		instance<SScope> _parentSymbols;
 		// TODO: Symbol equality
 		std::map<size_t, instance<Binding>> _symbolTable; // Internal table
 
@@ -81,7 +82,6 @@ namespace lisp
 
 		// SScope
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const override;
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParentScope() const override;
 
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;

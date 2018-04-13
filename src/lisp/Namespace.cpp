@@ -3,7 +3,7 @@
 #include "lisp/Namespace.h"
 
 #include "lisp/backend/BootstrapInterpreter.h"
-#include "lisp/backend/llvm/llvm_internal.h"
+//#include "lisp/backend/llvm/llvm_internal.h"
 #include "lisp/library/libraries.h"
 
 using namespace craft;
@@ -44,7 +44,7 @@ void Namespace::craft_setupInstance()
 
 Namespace::_Backend Namespace::preferedBackend() const
 {
-	return _backends.at(cpptype<LlvmBackend>::typeDesc());
+	return _backends.at(cpptype<BootstrapInterpreter>::typeDesc() /*cpptype<LlvmBackend>::typeDesc()*/);
 }
 
 Namespace::_Backend Namespace::fallbackBackend() const

@@ -77,12 +77,13 @@ CRAFT_DEFINE(List)
 	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("size", &List::size)
 		->withMethod("slice", &List::slice)
-		->withMethod("at", &List::at)
+		//->withMethod("at", &List::at)
 		->withMethod("insert", &List::insert)
 		->withMethod("erase", &List::erase)
 		->withMethod("reverse", &List::reverse)
 		->withMethod("push", &List::push)
-		->withMethod("pop", &List::pop);
+		//->withMethod("pop", &List::pop)
+		;
 
 	_.use<PStringer>().singleton<FunctionalStringer>(
 		[](instance<List> l) -> std::string

@@ -92,8 +92,8 @@ namespace lisp
 	private:
 		instance<SCultSemanticNode> _parent;
 
-		// TODO: Symbol equality
 		instance<SScope> _parentSymbols;
+		// TODO: Symbol equality
 		std::map<size_t, instance<Binding>> _symbolTable; // Internal table
 
 	private:
