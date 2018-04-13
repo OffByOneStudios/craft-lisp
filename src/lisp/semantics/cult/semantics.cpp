@@ -169,7 +169,7 @@ instance<> CultSemantics::appendModule(instance<Module> m)
 
 	size_t start = _ast.size();
 
-	for (auto appending_ast = sem->_ast)
+	for (auto appending_ast : sem->_ast)
 	{
 		_ast.push_back(appending_ast);
 	}
