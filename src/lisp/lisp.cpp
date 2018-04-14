@@ -1,5 +1,5 @@
-#include "common.h"
-#include "lisp.h"
+#include "lisp/common.h"
+#include "lisp/lisp.h"
 
 using namespace craft;
 using namespace craft::lisp;
