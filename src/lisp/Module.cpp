@@ -64,7 +64,7 @@ void Module::initialize()
 	if (isInitialized())
 		return;
 
-	_value = exec("$init", { craft_instance() });
+	_value = exec("::init", { craft_instance() });
 }
 
 instance<> Module::moduleValue() const
@@ -79,11 +79,11 @@ instance<> Module::lastExecutedResult() const
 
 void Module::appendModule(instance<lisp::Module> moduleToAppend)
 {
-	_value = exec("$append", { moduleToAppend });
+	_value = exec("::append", { moduleToAppend });
 }
 void Module::mergeModule(instance<lisp::Module> moduleToMerge)
 {
-	_value = exec("$merge", { moduleToMerge });
+	_value = exec("::merge", { moduleToMerge });
 }
 
 instance<> Module::get(types::TypeId type)

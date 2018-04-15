@@ -125,7 +125,12 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 	auto binding = semantics->lookup(Symbol::makeSymbol(entry));
 
 	if (!binding)
+	{
+		if (entry == "init")
+
+
 		throw stdext::exception("Execution entry point `{0}` not found in `{1}`.", entry, module);
+	}
 
 	auto potFunc = binding->getSite()->symbolAst();
 
