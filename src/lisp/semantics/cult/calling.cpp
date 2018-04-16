@@ -142,7 +142,18 @@ void MultiMethod::setParent(instance<SCultSemanticNode> parent)
 
 void MultiMethod::attach(instance<BindSite> binding)
 {
+	auto value = binding->valueAst();
 
+	if (value.isType<Constant>())
+		value = value.asType<Constant>()->getValue();
+
+	if (!value.hasFeature<PSubroutine>())
+		throw std::exception("Bindsite value is not a PSubroutine.");
+
+	auto psub = value.getFeature<PSubroutine>();
+	
+	auto it = _entries.insert({ value, psub });
+	_dispatcher.add(psub->expression(value), &*it);
 }
 
 instance<>  MultiMethod::call_internal(types::GenericInvoke const& invoke) const

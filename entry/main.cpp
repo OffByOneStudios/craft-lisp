@@ -79,6 +79,8 @@ int main(int argc, char** argv)
 	else
 	{
 		instance<Module> live_module = global_env->ns_user->requireModule("repl:console");
+		live_module->initialize();
+
 		using Replxx = replxx::Replxx;
 
 		Replxx rx;
@@ -140,8 +142,8 @@ int main(int argc, char** argv)
 		rx.set_highlighter_callback(colors, &live_module);
 
 
-
-		for (int i = 0; ; i += 1) {
+		size_t stmt_count = 0;
+		for (;;) {
 			// display the prompt and retrieve input from the user
 			auto cinp = rx.input("CμλΤ>");
 			if (cinp == nullptr) break;
@@ -151,7 +153,7 @@ int main(int argc, char** argv)
 			instance<Module> statement;
 			try
 			{
-				statement = ns->requireModule(fmt::format("anon:repl-{0}", i), input);
+				statement = ns->requireModule(fmt::format("anon:repl-{0}", stmt_count++), input);
 			}
 			catch (std::exception e)
 			{

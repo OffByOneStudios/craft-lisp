@@ -106,6 +106,7 @@ namespace lisp
 
 	public:
 		CRAFT_LISP_EXPORTED Constant(instance<> value);
+		CRAFT_LISP_EXPORTED Constant(Constant const& that);
 
 		CRAFT_LISP_EXPORTED instance<> getValue() const;
 

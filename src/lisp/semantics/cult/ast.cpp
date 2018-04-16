@@ -20,6 +20,8 @@ void SCultSemanticNode::validate(ValidationState* vs) const
 
 CRAFT_DEFINE(Constant)
 {
+	_.use<PClone>().singleton<DefaultCopyConstructor>();
+
 	_.use<SCultSemanticNode>().byCasting();
 
 	_.defaults();
@@ -28,6 +30,10 @@ CRAFT_DEFINE(Constant)
 Constant::Constant(instance<> value)
 {
 	_value = value;
+}
+Constant::Constant(Constant const& that)
+{
+	_value = that._value;
 }
 
 instance<> Constant::getValue() const

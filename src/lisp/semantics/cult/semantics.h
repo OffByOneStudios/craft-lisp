@@ -89,13 +89,17 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED std::vector<instance<Binding>> search(std::string const& search) const;
 
+		inline size_t countStatements() const { return _ast.size(); }
+		inline instance<SCultSemanticNode> getStatement(size_t index) const { return _ast[index]; }
+
 		// Requirements:
 	public:
-		CRAFT_LISP_EXPORTED void addModule(instance<Module> m);
+		CRAFT_LISP_EXPORTED void importModule(instance<Module> m);
 
-		// special execution paths:
+		// Compute merge/append and return execution point
 	public:
-		CRAFT_LISP_EXPORTED instance<> appendModule(instance<Module> m);
+		CRAFT_LISP_EXPORTED size_t append(instance<CultSemantics> sem);
+		CRAFT_LISP_EXPORTED std::vector<size_t> merge(instance<CultSemantics> sem);
 
 		// Builtin helpers
 	public:

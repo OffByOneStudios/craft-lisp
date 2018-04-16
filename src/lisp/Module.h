@@ -12,7 +12,8 @@ namespace lisp
 	private:
 		friend class Namespace;
 
-		instance<> _value; // value of initing the module
+		instance<> _value; // runtime value of initing the module
+
 		instance<Namespace> _ns;
 		std::string _uri;
 

@@ -38,6 +38,17 @@ InterpreterFrame::InterpreterFrame(instance<> backend)
 	_backend = backend;
 }
 
+instance<InterpreterFrame> InterpreterFrame::ensureCurrent(instance<BootstrapInterpreter> const& bi)
+{
+	auto exec = Execution::getCurrent();
+	auto top = exec->topIfOfType<InterpreterFrame>();
+	if (top) return top;
+
+	auto frame = instance<InterpreterFrame>::make(bi);
+	exec->push_frame(frame);
+	return frame;
+}
+
 void InterpreterFrame::setExecution(instance<Execution> exec)
 {
 	_execution = exec;
@@ -119,6 +130,73 @@ BootstrapInterpreter::BootstrapInterpreter(instance<Namespace> lisp)
 	_lisp = lisp;
 }
 
+instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, types::GenericInvoke const& call) const
+{
+	auto sem = module->get<CultSemantics>();
+	if (!sem)
+		throw stdext::exception("Cannot init {0}: no semantics.", module);
+
+	if (call.args.size() != 0)
+		throw stdext::exception("Cannot init {0}: expected 0 args.", module);
+
+	auto statement_count = sem->countStatements();
+	instance<RuntimeSlots> res = instance<RuntimeSlots>::make(module, statement_count);
+	for (auto stmt_i = 0; stmt_i < statement_count; ++stmt_i)
+	{
+		*RuntimeSlots::getSlot((instance<>*)&res, stmt_i) = InterpreterFrame::ensureCurrent(craft_instance())->interp_exec(sem->getStatement(stmt_i));
+	}
+
+	return res;
+}
+instance<> BootstrapInterpreter::_special_append(instance<lisp::Module> module, types::GenericInvoke const& call) const
+{
+	auto sem = module->get<CultSemantics>();
+	if (!sem)
+		throw stdext::exception("Cannot append {0}: no semantics.", module);
+
+	if (call.args.size() != 1 && !call.args[0].isType<lisp::Module>())
+		throw stdext::exception("Cannot init {0}: expected 1 arg as a lisp::Module.", module);
+
+	instance<RuntimeSlots> slots = module->moduleValue();
+
+	auto append_module = call.args[0].asType<lisp::Module>();
+	auto append_sem = append_module->require<CultSemantics>();
+
+	if (append_sem->countStatements() == 0)
+		return instance<>(); // no op
+
+	auto start = sem->append(append_sem);
+
+	auto statement_count = sem->countStatements();
+	RuntimeSlots::extend((instance<>*)&slots, statement_count);
+	for (auto stmt_i = start; stmt_i < statement_count; ++stmt_i)
+	{
+		*RuntimeSlots::getSlot((instance<>*)&slots, stmt_i) = InterpreterFrame::ensureCurrent(craft_instance())->interp_exec(sem->getStatement(stmt_i));
+	}
+
+	return RuntimeSlots::getLastSlot((instance<>*)&slots);
+}
+instance<> BootstrapInterpreter::_special_merge(instance<lisp::Module> module, types::GenericInvoke const& call) const
+{
+	auto sem = module->get<CultSemantics>();
+	if (!sem)
+		throw stdext::exception("Cannot merge {0}: no semantics.", module);
+
+	if (call.args.size() != 1 && !call.args[0].isType<lisp::Module>())
+		throw stdext::exception("Cannot init {0}: expected 1 arg as a lisp::Module.", module);
+
+	instance<RuntimeSlots> slots = module->moduleValue();
+
+	auto merge_module = call.args[0].asType<lisp::Module>();
+	auto merge_sem = merge_module->require<CultSemantics>();
+
+	auto merge_list = sem->append(merge_sem);
+
+	throw stdext::exception("Merge not implemented!.");
+
+	return RuntimeSlots::getLastSlot((instance<>*)&slots);
+}
+
 instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const& call)
 {
 	auto semantics = module->require<CultSemantics>();
@@ -126,7 +204,9 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 
 	if (!binding)
 	{
-		if (entry == "init")
+		if (entry == "::init") return _special_init(module, call);
+		if (entry == "::append") return _special_append(module, call);
+		if (entry == "::merge") return _special_merge(module, call);
 
 
 		throw stdext::exception("Execution entry point `{0}` not found in `{1}`.", entry, module);
@@ -134,10 +214,7 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 
 	auto potFunc = binding->getSite()->symbolAst();
 
-	auto frame = instance<InterpreterFrame>::make(craft_instance());
-	Execution::getCurrent()->push_frame(frame);
-
-	return frame->interp_call(potFunc, call);
+	return InterpreterFrame::ensureCurrent(craft_instance())->interp_call(potFunc, call);
 }
 
 void BootstrapInterpreter::builtin_validateSpecialForms(instance<lisp::Module> module)

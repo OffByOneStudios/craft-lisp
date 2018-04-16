@@ -107,7 +107,8 @@ namespace lisp
 
         struct _Entry
         {
-            instance<PSubroutine> subroutine;
+            instance<> subroutine;
+			PSubroutine* provider;
         };
         
 		plf::colony<_Entry> _entries;

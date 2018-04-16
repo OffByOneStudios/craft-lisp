@@ -72,7 +72,7 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 
 void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts)
 {
-	addModule(_module->getNamespace()->requireModule("builtin:cult.system"));
+	importModule(_module->getNamespace()->requireModule("builtin:cult.system"));
 
 	// TODO, make this executed by the interpreter with some special understanding about accessing
 	//  macros and a different set of special forms
@@ -85,7 +85,7 @@ void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOption
 
 		auto ret = read_cultLisp(&rs, syntax);
 
-		_ast.push_back(ret);
+		_ast.push_back(SCultSemanticNode::_ast(craft_instance(), ret));
 	}
 }
 
@@ -158,25 +158,25 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 	return res;
 }
 
-void CultSemantics::addModule(instance<Module> m)
+void CultSemantics::importModule(instance<Module> m)
 {
 	_modules.insert(_modules.begin(), m);
 }
 
-instance<> CultSemantics::appendModule(instance<Module> m)
+size_t CultSemantics::append(instance<CultSemantics> sem)
 {
-	auto sem = m->require<CultSemantics>();
-
 	size_t start = _ast.size();
 
 	for (auto appending_ast : sem->_ast)
 	{
-		_ast.push_back(appending_ast);
+		_ast.push_back(SCultSemanticNode::_ast(craft_instance(), appending_ast.getFeature<PClone>()->clone(appending_ast)));
 	}
 
-	// INVOKE from start onwards
-
-	return instance<>();
+	return start;
+}
+std::vector<size_t> CultSemantics::merge(instance<CultSemantics> sem)
+{
+	return {}; // TODO implement merge
 }
 
 /******************************************************************************
@@ -232,7 +232,7 @@ void CultSemantics::builtin_addSpecialForm(std::string const& symbol_name)
 {
 	auto symbol = Symbol::makeSymbol(symbol_name);
 	auto bindsite = instance<BindSite>::make(symbol, instance<SpecialForm>::makeFromPointer(new SpecialForm()));
-	_ast.push_back(bindsite);
+	_ast.push_back(SCultSemanticNode::_ast(craft_instance(), bindsite));
 	define(symbol, bindsite);
 }
 void CultSemantics::builtin_specialFormReader(std::string const& symbol_name, CultSemantics::f_specialFormReader reader)
@@ -245,7 +245,7 @@ void CultSemantics::builtin_addMultiMethod(std::string const& symbol_name)
 {
 	auto symbol = Symbol::makeSymbol(symbol_name);
 	auto bindsite = instance<BindSite>::make(symbol, instance<MultiMethod>::make());
-	_ast.push_back(bindsite);
+	_ast.push_back(SCultSemanticNode::_ast(craft_instance(), bindsite));
 	define(symbol, bindsite);
 }
 void CultSemantics::builtin_attachMultiMethod(std::string const& symbol_name, std::tuple<types::ExpressionStore, types::Function> impl)
@@ -263,7 +263,7 @@ void CultSemantics::builtin_attachMultiMethod(std::string const& symbol_name, st
 	auto multi = value.asType<MultiMethod>();
 
 	auto bindsite = instance<BindSite>::make(symbol, instance<Constant>::make(instance<CppFunctionPointer>::make(std::get<0>(impl), std::get<1>(impl))));
-	_ast.push_back(bindsite);
+	_ast.push_back(SCultSemanticNode::_ast(craft_instance(), bindsite));
 
 	multi->attach(bindsite); // TODO do this via define
 }

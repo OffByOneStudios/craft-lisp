@@ -6,23 +6,53 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
-CRAFT_DEFINE(BasicSlots)
+CRAFT_DEFINE(RuntimeSlots)
 {
 	_.defaults();
 }
 
-BasicSlots::BasicSlots(instance<> representing, size_t size)
+RuntimeSlots::RuntimeSlots(instance<> representing, size_t size)
 {
 	this->representing = representing;
 	this->size = size;
-	this->slots.reserve(size);
+	this->slots = new instance<>[size];
 }
 
-size_t BasicSlots::getSize(instance<>* inst)
+RuntimeSlots::~RuntimeSlots()
 {
-	return inst->asType<BasicSlots>()->size;
+	delete[] this->slots;
 }
-instance<>* BasicSlots::getSlot(instance<>* inst, size_t index)
+
+size_t RuntimeSlots::getSize(instance<>* inst)
 {
-	return &*(inst->asType<BasicSlots>()->slots.get_iterator_from_index(index));
+	return inst->asType<RuntimeSlots>()->size;
+}
+instance<>* RuntimeSlots::getSlot(instance<>* inst, size_t index)
+{
+	assert(index < inst->asType<RuntimeSlots>()->size);
+	return &(inst->asType<RuntimeSlots>()->slots[index]);
+}
+
+instance<> RuntimeSlots::getLastSlot(instance<>* inst)
+{
+	auto slots = inst->asType<RuntimeSlots>();
+
+	return slots->slots[slots->size - 1];
+}
+
+void RuntimeSlots::extend(instance<>* inst, size_t size)
+{
+	auto slots = inst->asType<RuntimeSlots>();
+
+	assert(size >= slots->size);
+
+	auto new_slots = new instance<>[size];
+
+	for (auto i = 0; i < slots->size; ++i)
+		new_slots[i] == slots->slots[i];
+
+	slots->size = size;
+	std::swap(slots->slots, new_slots);
+
+	delete[] new_slots;
 }

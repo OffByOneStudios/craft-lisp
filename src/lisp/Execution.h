@@ -34,6 +34,16 @@ namespace lisp
 		CRAFT_LISP_EXPORTED void push_frame(instance<SFrame> _push);
 		CRAFT_LISP_EXPORTED void pop();
 
+		template<typename T>
+		inline instance<T> topIfOfType() const
+		{
+			auto const& s = stack();
+			if (s.size() == 0) return instance<>();
+			auto t = s[0];
+			if (!t.isType<T>()) return instance<>();
+			return t;
+		}
+
 		// Helpers
 	public:
 		CRAFT_LISP_EXPORTED static instance<> exec_fromCurrentModule(std::string const& a, types::GenericInvoke const& b);

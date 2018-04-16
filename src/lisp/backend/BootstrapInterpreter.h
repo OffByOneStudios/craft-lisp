@@ -35,6 +35,9 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED InterpreterFrame(instance<> backend);
 
+		// Pushes a new interpreter frame if it isn't currently there.
+		CRAFT_LISP_EXPORTED static instance<InterpreterFrame> ensureCurrent(instance<BootstrapInterpreter> const& bi);
+
 		CRAFT_LISP_EXPORTED virtual void setExecution(instance<Execution>) override;
 		CRAFT_LISP_EXPORTED virtual instance<Execution> getExecution() const override;
 		CRAFT_LISP_EXPORTED virtual instance<> getBackend() const override;
@@ -90,6 +93,11 @@ namespace lisp
 
 		instance<Namespace> _lisp;
 		instance<MultiMethod> _fn_system_exec;
+
+	private:
+		CRAFT_LISP_EXPORTED instance<> _special_init(instance<lisp::Module> module, types::GenericInvoke const&) const;
+		CRAFT_LISP_EXPORTED instance<> _special_append(instance<lisp::Module> module, types::GenericInvoke const&) const;
+		CRAFT_LISP_EXPORTED instance<> _special_merge(instance<lisp::Module> module, types::GenericInvoke const&) const;
 
 	public:
 
