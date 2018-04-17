@@ -52,7 +52,7 @@ namespace lisp
 	******************************************************************************/
 
 	/*
-	Variable define node
+		Get the value of a symbol.
 	*/
 	class GetValue
 		: public virtual craft::types::Object
@@ -63,11 +63,14 @@ namespace lisp
 		instance<SCultSemanticNode> _parent;
 
 	private:
-		instance<Binding> _binding;
+		instance<Symbol> _symbol;
+		mutable instance<Binding> _binding;
 
 	public:
-		CRAFT_LISP_EXPORTED GetValue(instance<Binding> binding);
+		CRAFT_LISP_EXPORTED GetValue(instance<Symbol> binding);
+		CRAFT_LISP_EXPORTED GetValue(GetValue const& binding);
 
+		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 		CRAFT_LISP_EXPORTED instance<Binding> getBinding() const;
 
 		// SCultSemanticNode
@@ -94,7 +97,8 @@ namespace lisp
 
 		instance<SScope> _parentSymbols;
 		// TODO: Symbol equality
-		std::map<size_t, instance<Binding>> _symbolTable; // Internal table
+		std::vector<instance<Binding>> _bindings;
+		std::map<size_t, size_t> _symbolTable; // Internal table
 
 	private:
 		std::vector<instance<SCultSemanticNode>> _statements;

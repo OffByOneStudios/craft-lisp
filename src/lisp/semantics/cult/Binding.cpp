@@ -80,6 +80,11 @@ Binding::Binding(instance<SScope> scope, instance<Symbol> symbol, instance<BindS
 	_site = site;
 }
 
+size_t Binding::getIndex() const
+{
+	return _index;
+}
+
 instance<SScope> Binding::getScope() const
 {
 	return _scope;
@@ -93,6 +98,11 @@ instance<Symbol> Binding::getSymbol() const
 instance<BindSite> Binding::getSite() const
 {
 	return _site;
+}
+
+void Binding::setIndex(size_t i)
+{
+	_index = i;
 }
 
 void Binding::addMeta(std::string metaKey, instance<> value)
@@ -109,4 +119,40 @@ instance<> Binding::getMeta(std::string metaKey, TypeId type) const
 		return it->second;
 
 	return instance<>();
+}
+
+
+/******************************************************************************
+** Import
+******************************************************************************/
+
+CRAFT_DEFINE(Import)
+{
+	_.use<SCultSemanticNode>().byCasting();
+
+	_.defaults();
+}
+
+Import::Import(std::string uri)
+{
+	_importUri = uri;
+}
+Import::Import(Import const& that)
+{
+	_importUri = that._importUri;
+}
+
+std::string Import::getUri() const
+{
+	return _importUri;
+}
+
+instance<SCultSemanticNode> Import::getParent() const
+{
+	return _parent;
+}
+void Import::setParent(instance<SCultSemanticNode> parent)
+{
+	if (_parent) throw parent_already_set_error(craft_instance());
+	_parent = parent;
 }

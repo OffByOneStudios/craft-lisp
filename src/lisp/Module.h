@@ -11,8 +11,9 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Module);
 	private:
 		friend class Namespace;
+		friend class BootstrapInterpreter;
 
-		instance<> _value; // runtime value of initing the module
+		instance<> _value; // runtime value of initing the module, store this somewhere better
 
 		instance<Namespace> _ns;
 		std::string _uri;

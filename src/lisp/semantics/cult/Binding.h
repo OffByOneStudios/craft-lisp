@@ -37,6 +37,11 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> symbolAst() const;
 		CRAFT_LISP_EXPORTED instance<> valueAst() const;
 
+		inline instance<Symbol> getStaticSymbol() const
+		{
+			return symbolAst().asType<Constant>()->getValue().asType<Symbol>();
+		}
+
 		// SCultSemanticNode
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
@@ -55,6 +60,8 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Binding);
 	private:
+		size_t _index;
+
 		instance<SScope> _scope;
 		instance<Symbol> _symbol;
 		instance<BindSite> _site;
@@ -64,12 +71,45 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED Binding(instance<SScope>, instance<Symbol>, instance<BindSite>);
 
+		CRAFT_LISP_EXPORTED size_t getIndex() const;
 		CRAFT_LISP_EXPORTED instance<SScope> getScope() const;
 		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 		CRAFT_LISP_EXPORTED instance<BindSite> getSite() const;
 
+		CRAFT_LISP_EXPORTED void setIndex(size_t);
+
 		CRAFT_LISP_EXPORTED instance<> getMeta(std::string metaKey, types::TypeId type = types::None) const;
 		CRAFT_LISP_EXPORTED void addMeta(std::string metaKey, instance<>);
+	};
+
+	/******************************************************************************
+	** Import
+	******************************************************************************/
+
+	/*
+	Represents the edge between a symbol, the scope it was defined in, and the AST inside it.
+	*/
+	class Import
+		: public virtual craft::types::Object
+		, public craft::types::Implements<SCultSemanticNode>
+	{
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Import);
+	private:
+		instance<SCultSemanticNode> _parent;
+
+	private:
+		std::string _importUri;
+
+	public:
+		CRAFT_LISP_EXPORTED Import(std::string uri);
+		CRAFT_LISP_EXPORTED Import(Import const&);
+
+		CRAFT_LISP_EXPORTED std::string getUri() const;
+
+		// SCultSemanticNode
+	public:
+		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
+		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
 	};
 
 	/******************************************************************************
@@ -123,6 +163,19 @@ namespace lisp
 			}
 
 			return instance<>();
+		}
+
+		inline static instance<SScope> findScope(instance<SCultSemanticNode> node)
+		{
+			auto cur = node;
+			while (cur)
+			{
+				if (cur.hasFeature<SScope>())
+					break;
+				cur = cur->getParent();
+			}
+
+			return cur;
 		}
 	};
 }}

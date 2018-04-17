@@ -61,8 +61,10 @@ namespace lisp
 		instance<Binding> _binding;
 
 		instance<SScope> _parentSymbols;
+
 		// TODO: Symbol equality
-		std::map<size_t, instance<Binding>> _symbolTable; // Internal table
+		std::vector<instance<Binding>> _bindings;
+		std::map<size_t, size_t> _symbolTable; // Internal table
 
 	public:
 
@@ -107,6 +109,7 @@ namespace lisp
 
         struct _Entry
         {
+			types::Function function;
             instance<> subroutine;
 			PSubroutine* provider;
         };

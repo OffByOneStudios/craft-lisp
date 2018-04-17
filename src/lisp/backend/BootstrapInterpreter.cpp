@@ -12,15 +12,12 @@ using namespace craft::lisp;
 ** InterpreterFrame::SubFrame
 ******************************************************************************/
 
-InterpreterFrame::SubFrame::SubFrame(instance<SScope> scope)
-{
-	this->scope = scope;
-}
-InterpreterFrame::SubFrame::SubFrame(instance<SScope> scope, SubFrame* chain)
-{
-	this->scope = scope;
-	this->chain = chain;
-}
+InterpreterFrame::SubFrame::SubFrame(instance<SScope> scope, instance<RuntimeSlots> value)
+	: scope(scope), value(value), chain(nullptr)
+{ }
+InterpreterFrame::SubFrame::SubFrame(instance<SScope> scope, instance<RuntimeSlots> value, SubFrame* chain)
+	: scope(scope), value(value), chain(chain)
+{ }
 
 /******************************************************************************
 ** InterpreterFrame
@@ -72,6 +69,10 @@ std::string InterpreterFrame::getEntryName(size_t index) const
 {
 	return "";
 }
+instance<> InterpreterFrame::getEntryValue(size_t index) const
+{
+	return _entries.get_iterator_from_index(index)->value;
+}
 instance<> InterpreterFrame::getEntryRepresentative(size_t index) const
 {
 	return _entries.get_iterator_from_index(index)->scope;
@@ -81,14 +82,33 @@ instance<Module> InterpreterFrame::getEntryModule(size_t index) const
 	return _entries.get_iterator_from_index(index)->scope->getSemantics()->getModule();
 }
 
+size_t InterpreterFrame::getScopeEntryIndex(instance<SScope> scope) const
+{
+	auto cur = top();
+
+	while (cur != nullptr)
+	{
+		if (cur->scope == scope)
+			return _entries.get_index_from_iterator(_entries.get_iterator_from_pointer(const_cast<SubFrame*>(cur)));
+
+		cur = cur->chain;
+	}
+
+	throw stdext::exception("Could not find scope {0} on stack.", scope);
+}
+
 InterpreterFrame::SubFrame* InterpreterFrame::top()
 {
 	return &*_entries.rbegin();
 }
-
-void InterpreterFrame::push(instance<SScope> scope)
+InterpreterFrame::SubFrame const* InterpreterFrame::top() const
 {
-	_entries.insert(SubFrame(scope));
+	return &*_entries.rbegin();
+}
+
+void InterpreterFrame::push(instance<SScope> scope, instance<RuntimeSlots> value, SubFrame*)
+{
+	_entries.insert(SubFrame(scope, value));
 }
 void InterpreterFrame::pop()
 {
@@ -139,11 +159,15 @@ instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, ty
 	if (call.args.size() != 0)
 		throw stdext::exception("Cannot init {0}: expected 0 args.", module);
 
+	auto frame = InterpreterFrame::ensureCurrent(craft_instance());
+	InterpreterFrame::PushSubFrame _hold(frame, sem, module->moduleValue());
+
 	auto statement_count = sem->countStatements();
 	instance<RuntimeSlots> res = instance<RuntimeSlots>::make(module, statement_count);
+	module->_value = res;
 	for (auto stmt_i = 0; stmt_i < statement_count; ++stmt_i)
 	{
-		*RuntimeSlots::getSlot((instance<>*)&res, stmt_i) = InterpreterFrame::ensureCurrent(craft_instance())->interp_exec(sem->getStatement(stmt_i));
+		*RuntimeSlots::getSlot((instance<>*)&res, stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
 	}
 
 	return res;
@@ -167,11 +191,14 @@ instance<> BootstrapInterpreter::_special_append(instance<lisp::Module> module, 
 
 	auto start = sem->append(append_sem);
 
+	auto frame = InterpreterFrame::ensureCurrent(craft_instance());
+	InterpreterFrame::PushSubFrame _hold(frame, sem, module->moduleValue());
+
 	auto statement_count = sem->countStatements();
 	RuntimeSlots::extend((instance<>*)&slots, statement_count);
 	for (auto stmt_i = start; stmt_i < statement_count; ++stmt_i)
 	{
-		*RuntimeSlots::getSlot((instance<>*)&slots, stmt_i) = InterpreterFrame::ensureCurrent(craft_instance())->interp_exec(sem->getStatement(stmt_i));
+		*RuntimeSlots::getSlot((instance<>*)&slots, stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
 	}
 
 	return RuntimeSlots::getLastSlot((instance<>*)&slots);
@@ -191,6 +218,9 @@ instance<> BootstrapInterpreter::_special_merge(instance<lisp::Module> module, t
 	auto merge_sem = merge_module->require<CultSemantics>();
 
 	auto merge_list = sem->append(merge_sem);
+
+	auto frame = InterpreterFrame::ensureCurrent(craft_instance());
+	InterpreterFrame::PushSubFrame _hold(frame, sem, module->moduleValue());
 
 	throw stdext::exception("Merge not implemented!.");
 

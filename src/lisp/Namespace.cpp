@@ -39,7 +39,11 @@ void Namespace::craft_setupInstance()
 		};
 	}
 
-	// define(instance<Binding>::make("*ns*", craft_instance()));
+	instance<Execution> exec = instance<Execution>::make(craft_instance());
+	exec->makeCurrent();
+
+	requireModule("builtin:cult.system")->initialize();
+	requireModule("builtin:cult.core")->initialize();
 }
 
 Namespace::_Backend Namespace::preferedBackend() const

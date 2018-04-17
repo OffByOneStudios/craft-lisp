@@ -58,18 +58,38 @@ void Variable::setBinding(instance<Binding> binding)
 
 CRAFT_DEFINE(GetValue)
 {
+	_.use<PClone>().singleton<DefaultCopyConstructor>();
+
 	_.use<SCultSemanticNode>().byCasting();
 
 	_.defaults();
 }
 
-GetValue::GetValue(instance<Binding> binding)
+GetValue::GetValue(instance<Symbol> symbol)
 {
-	_binding = binding;
+	_symbol = symbol;
+}
+GetValue::GetValue(GetValue const& that)
+{
+	this->_symbol = that._symbol;
 }
 
+instance<Symbol> GetValue::getSymbol() const
+{
+	return _symbol;
+}
 instance<Binding> GetValue::getBinding() const
 {
+	if (!_binding) // Hack to allow cloning this node. May need to "re-read" the tree...
+	{
+		auto scope = SScope::findScope(_parent);
+		if (!scope)
+			throw stdext::exception("GetValue {0} is scopeless.", craft_instance());
+
+		_binding = scope->lookup_recurse(_symbol);
+		if (!_binding)
+			throw stdext::exception("GetValue {0} bad symbol {1}.", craft_instance(), _symbol->getValue());
+	}
 	return _binding;
 }
 instance<SCultSemanticNode> GetValue::getParent() const
@@ -138,7 +158,7 @@ instance<Binding> Block::lookup(instance<Symbol> symbol) const
 	auto it = _symbolTable.find(symbol->symbolStoreId);
 	if (it == _symbolTable.end())
 		return instance<>();
-	return it->second;
+	return _bindings[it->second];
 }
 instance<Binding> Block::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
@@ -149,6 +169,9 @@ instance<Binding> Block::define(instance<Symbol> symbol, instance<BindSite> ast)
 		throw stdext::exception("Symbol already defined.");
 
 	auto res = instance<Binding>::make(craft_instance(), symbol, ast);
-	_symbolTable.insert(lb, { key, res });
+	_bindings.push_back(res);
+	auto index = _bindings.size() - 1;
+	res->setIndex(index);
+	_symbolTable.insert(lb, { key, index });
 	return res;
 }

@@ -16,12 +16,12 @@ namespace lisp
 		struct SubFrame
 		{
 			instance<SScope> scope; // Scope entry
-			std::map<instance<Binding>, instance<>> values; // values bound to the scope
+			instance<RuntimeSlots> value; // values bound to the scope
 
 			SubFrame* chain; // Lexical Chain
 
-			CRAFT_LISP_EXPORTED SubFrame(instance<SScope> scope);
-			CRAFT_LISP_EXPORTED SubFrame(instance<SScope> scope, SubFrame* chain);
+			CRAFT_LISP_EXPORTED SubFrame(instance<SScope> scope, instance<RuntimeSlots> value);
+			CRAFT_LISP_EXPORTED SubFrame(instance<SScope> scope, instance<RuntimeSlots> value, SubFrame* chain);
 		};
 
 	private:
@@ -47,9 +47,27 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<> getEntryRepresentative(size_t index) const override;
 		CRAFT_LISP_EXPORTED virtual instance<Module> getEntryModule(size_t index) const override;
 
+		CRAFT_LISP_EXPORTED size_t getScopeEntryIndex(instance<SScope>) const;
+		CRAFT_LISP_EXPORTED virtual instance<> getEntryValue(size_t index) const;
+
 		CRAFT_LISP_EXPORTED SubFrame* top();
-		CRAFT_LISP_EXPORTED void push(instance<SScope> scope);
+		CRAFT_LISP_EXPORTED SubFrame const* top() const;
+		CRAFT_LISP_EXPORTED void push(instance<SScope> scope, instance<RuntimeSlots> value, SubFrame* = nullptr);
 		CRAFT_LISP_EXPORTED void pop();
+
+		inline instance<>* slot(instance<Binding> binding)
+		{
+			auto scope = binding->getScope();
+			auto module = getEntryModule(entries() - 1);
+
+			instance<RuntimeSlots> slots;
+			if (scope.isType<CultSemantics>())
+				slots = scope.asType<CultSemantics>()->getModule()->moduleValue();
+			else
+				slots = getEntryValue(getScopeEntryIndex(scope));
+
+			return slots->getSlot((instance<>*)&slots, binding->getIndex());
+		}
 
 		// Interpreter helpers
 		/*

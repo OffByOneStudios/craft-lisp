@@ -56,7 +56,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 			auto ret = instance<BindSite>::make(symbol, rs->read(sexpr, 2));
 			if (!ret->isDynamicBind())
-				rs->scope->define(ret->symbolAst().asType<Constant>()->getValue().asType<Symbol>(), ret);
+				rs->scope->define(ret->getStaticSymbol(), ret);
 			else
 				throw stdext::exception("Not Implemented: Dynamic Bindings");
 
@@ -138,9 +138,41 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return ast->getValue();
 	});
 	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<GetValue> ast) -> instance<>
+	{
+		return *interp->slot(ast->getBinding());
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<BindSite> ast) -> instance<>
+	{
+		auto symbol = ast->getStaticSymbol(); // TODO execute dynamic binding
+		auto binding = SScope::findScope(ast)->lookup_recurse(symbol);
+
+		auto value = interp->interp_exec(ast->valueAst());
+
+		*interp->slot(binding) = value;
+		return value;
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<CallSite> ast) -> instance<>
+	{
+		auto callee = interp->interp_exec(ast->calleeAst());
+
+		auto count = ast->argCount();
+		GenericInvoke invoke(count);
+		for (auto i = 0; i < count; i++)
+		{
+			invoke.args[i] = interp->interp_exec(ast->argAst(i));
+		}
+
+		auto value = interp->interp_call(callee, invoke);
+
+		return value;
+	});
+	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<Block> ast) -> instance<>
 	{
-		InterpreterFrame::PushSubFrame _hold(interp, ast);
+		InterpreterFrame::PushSubFrame _hold(interp, ast, instance<RuntimeSlots>::make(ast, 2));
 
 		auto count = ast->statementCount();
 		instance<> last_res;
@@ -150,6 +182,26 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		}
 
 		return last_res;
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<Condition> ast) -> instance<>
+	{
+		auto count = ast->branchCount();
+		for (auto i = 0; i < count; i++)
+		{
+			auto cond = interp->interp_exec(ast->branchConditionAst(i));
+			if (cond) // TODO truth
+			{
+				return interp->interp_exec(ast->branchAst(i));
+			}
+		}
+
+		return interp->interp_exec(ast->branchDefaultAst());
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<> ast) -> instance<>
+	{
+		return ast;
 	});
 
 	//

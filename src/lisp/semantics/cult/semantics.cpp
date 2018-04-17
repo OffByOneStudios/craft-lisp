@@ -30,7 +30,7 @@ CultSemantics::CultSemantics(instance<lisp::Module> forModule)
 instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance<> syntax)
 {
 	if (syntax.typeId().isType<Symbol>())
-		return instance<GetValue>::make(rs->scope->lookup_recurse(syntax.asType<Symbol>()));
+		return instance<GetValue>::make(syntax.asType<Symbol>());
 	else if (syntax.typeId().isType<Sexpr>())
 	{
 		instance<Sexpr> expr = syntax;
@@ -72,7 +72,9 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 
 void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts)
 {
+	// These are implict, and must be made available by these execution engine.
 	importModule(_module->getNamespace()->requireModule("builtin:cult.system"));
+	importModule(_module->getNamespace()->requireModule("builtin:cult.core"));
 
 	// TODO, make this executed by the interpreter with some special understanding about accessing
 	//  macros and a different set of special forms
@@ -127,7 +129,7 @@ instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
 
 		return instance<>();
 	}
-	return it->second;
+	return _bindings[it->second];
 }
 instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
@@ -138,7 +140,10 @@ instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSi
 		throw stdext::exception("Symbol already defined.");
 
 	auto res = instance<Binding>::make(craft_instance(), symbol, ast);
-	_symbolTable.insert(lb, { key, res });
+	_bindings.push_back(res);
+	auto index = _bindings.size() - 1;
+	res->setIndex(index);
+	_symbolTable.insert(lb, { key, index });
 	return res;
 }
 
@@ -153,7 +158,7 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 		auto const& sym = symbols.getValue(it.first);
 
 		if (size <= sym.size() && search == sym.substr(0, size))
-			res.push_back(it.second);
+			res.push_back(_bindings[it.second]);
 	}
 	return res;
 }

@@ -30,7 +30,7 @@ namespace lisp
 		struct parent_already_set_error : ast_error
 		{
 			parent_already_set_error(instance<SCultSemanticNode> node)
-				: ast_error("Node `{0}` has alreayd has parent set.", node.toString())
+				: ast_error("Node `{0}` has already has parent set.", node.toString())
 			{ }
 		};
 

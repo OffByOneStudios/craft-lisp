@@ -99,7 +99,7 @@ instance<Binding> lisp::Function::lookup(instance<Symbol> symbol) const
 	auto it = _symbolTable.find(symbol->symbolStoreId);
 	if (it == _symbolTable.end())
 		return instance<>();
-	return it->second;
+	return _bindings[it->second];
 }
 instance<Binding> lisp::Function::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
@@ -110,7 +110,10 @@ instance<Binding> lisp::Function::define(instance<Symbol> symbol, instance<BindS
 		throw stdext::exception("Symbol already defined.");
 
 	auto res = instance<Binding>::make(craft_instance(), symbol, ast);
-	_symbolTable.insert(lb, { key, res });
+	_bindings.push_back(res);
+	auto index = _bindings.size() - 1;
+	res->setIndex(index);
+	_symbolTable.insert(lb, { key, index });
 	return res;
 }
 
@@ -148,17 +151,33 @@ void MultiMethod::attach(instance<BindSite> binding)
 		value = value.asType<Constant>()->getValue();
 
 	if (!value.hasFeature<PSubroutine>())
-		throw std::exception("Bindsite value is not a PSubroutine.");
+		throw stdext::exception("Bindsite value is not a PSubroutine.");
 
 	auto psub = value.getFeature<PSubroutine>();
 	
-	auto it = _entries.insert({ value, psub });
+	auto it = _entries.insert({ psub->function(value), value, psub });
 	_dispatcher.add(psub->expression(value), &*it);
 }
 
 instance<>  MultiMethod::call_internal(types::GenericInvoke const& invoke) const
 {
-	return instance<>();
+	std::vector<TypeId> exprs;
+	exprs.reserve(invoke.args.size());
+	std::transform(invoke.args.begin(), invoke.args.end(), std::back_inserter(exprs),
+		[](instance<> const& inst) { return inst.typeId(); });
+
+	auto res = _dispatcher.dispatchWithRecord(exprs);
+	auto entry = (_Entry*)std::get<0>(res);
+
+	if (entry == nullptr)
+	{
+		std::string dispatchList = stdext::join<char, std::vector<TypeId>::iterator>(
+			std::string(", "), exprs.begin(), exprs.end(),
+			[](auto it) { return it->toString(); });
+		throw stdext::exception("Dispatch failed for [{0}].", dispatchList);
+	}
+
+	return types::invoke(*std::get<1>(res), entry->function, invoke);
 }
 
 instance<Binding> MultiMethod::getBinding() const
