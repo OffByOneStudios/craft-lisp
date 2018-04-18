@@ -39,32 +39,32 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 		if (size == 0)
 			throw stdext::exception("Unquoted empty list.");
 
-		// -- Evaluate Head --
+		// -- Read Time Dispatch --
 		instance<> head = expr->cells[0];
 
-		head = read_cultLisp(rs, head);
-
-		instance<> inspect_head = head;
-		if (inspect_head.typeId().isType<GetValue>())
+		if (head.typeId().isType<Symbol>())
 		{
-			auto deep_inspect_head = inspect_head.asType<GetValue>()->getBinding()->getSite()->valueAst();
-			if (!deep_inspect_head)
+			instance<Binding> binding = lookup_recurse(head.asType<Symbol>()); // TODO: read state lookup of macros?
+			if (binding)
 			{
-				// -- Evaluate Special Forms --
-				if (deep_inspect_head.typeId().isType<SpecialForm>())
-					return deep_inspect_head.asType<SpecialForm>()->_read(rs, expr);
+				auto siteValue = binding->getSite()->valueAst();
 
-				// -- Macro Expand --
-				//if (inspect_head.typeId().isType<Macro>())
-				//{
+				// Special Form
+				if (siteValue.isType<SpecialForm>())
+					return siteValue.asType<SpecialForm>()->_read(rs, expr);
+
+				// Macro Form
+				if (siteValue.isType<Macro>())
+				{
+					throw stdext::exception("Macros not finished.");
 				//	ast = inspect_head.asType<Macro>()->expand(scope, expr->cells);
 				//	return read(scope, ast);
-				//}
+				}
 			}
 		}
 
 		// -- Call Site --
-		return instance<CallSite>::make(inspect_head, rs->readAll(expr));
+		return instance<CallSite>::make(read_cultLisp(rs, head), rs->readAll(expr));
 	}
 	else // Raw Value
 		return instance<Constant>::make(syntax);
@@ -83,11 +83,11 @@ void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOption
 
 	for (auto syntax : syntax->getRootForms())
 	{
-		ReadState rs { craft_instance(), craft_instance() };
+		ReadState rs { craft_instance() };
 
 		auto ret = read_cultLisp(&rs, syntax);
 
-		_ast.push_back(SCultSemanticNode::_ast(craft_instance(), ret));
+		_ast.push_back(_astbind(ret));
 	}
 }
 
@@ -149,6 +149,8 @@ instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSi
 
 std::vector<instance<Binding>> CultSemantics::search(std::string const & search) const
 {
+	// TODO search symbols using a trie, and then look for those symbols in modules.
+
 	auto const size = search.size();
 	auto const& symbols = _module->getNamespace()->symbolStore;
 
@@ -160,6 +162,17 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 		if (size <= sym.size() && search == sym.substr(0, size))
 			res.push_back(_bindings[it.second]);
 	}
+
+	for (auto module : _modules)
+	{
+		auto sem = module->get<CultSemantics>();
+		if (sem)
+		{
+			auto mres = sem->search(search);
+			std::copy(mres.begin(), mres.end(), std::back_inserter(res));
+		}
+	}
+
 	return res;
 }
 
@@ -174,7 +187,7 @@ size_t CultSemantics::append(instance<CultSemantics> sem)
 
 	for (auto appending_ast : sem->_ast)
 	{
-		_ast.push_back(SCultSemanticNode::_ast(craft_instance(), appending_ast.getFeature<PClone>()->clone(appending_ast)));
+		_ast.push_back(_astclonebind(appending_ast));
 	}
 
 	return start;
@@ -237,8 +250,7 @@ void CultSemantics::builtin_addSpecialForm(std::string const& symbol_name)
 {
 	auto symbol = Symbol::makeSymbol(symbol_name);
 	auto bindsite = instance<BindSite>::make(symbol, instance<SpecialForm>::makeFromPointer(new SpecialForm()));
-	_ast.push_back(SCultSemanticNode::_ast(craft_instance(), bindsite));
-	define(symbol, bindsite);
+	_ast.push_back(_astbind(bindsite));
 }
 void CultSemantics::builtin_specialFormReader(std::string const& symbol_name, CultSemantics::f_specialFormReader reader)
 {
@@ -250,8 +262,7 @@ void CultSemantics::builtin_addMultiMethod(std::string const& symbol_name)
 {
 	auto symbol = Symbol::makeSymbol(symbol_name);
 	auto bindsite = instance<BindSite>::make(symbol, instance<MultiMethod>::make());
-	_ast.push_back(SCultSemanticNode::_ast(craft_instance(), bindsite));
-	define(symbol, bindsite);
+	_ast.push_back(_astbind(bindsite));
 }
 void CultSemantics::builtin_attachMultiMethod(std::string const& symbol_name, std::tuple<types::ExpressionStore, types::Function> impl)
 {
@@ -268,9 +279,7 @@ void CultSemantics::builtin_attachMultiMethod(std::string const& symbol_name, st
 	auto multi = value.asType<MultiMethod>();
 
 	auto bindsite = instance<BindSite>::make(symbol, instance<Constant>::make(instance<CppFunctionPointer>::make(std::get<0>(impl), std::get<1>(impl))));
-	_ast.push_back(SCultSemanticNode::_ast(craft_instance(), bindsite));
-
-	multi->attach(bindsite); // TODO do this via define
+	_ast.push_back(_astbind(bindsite));
 }
 
 void CultSemantics::builtin_eval(std::string const& contents)

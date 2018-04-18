@@ -13,6 +13,18 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(Condition)
 {
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<Condition> that)
+	{
+		auto clone = instance<Condition>::make();
+
+		auto count = that->branchCount();
+		clone->preSize(count);
+		for (auto i = 0; i < count; ++count)
+			clone->push(_clone(that->branchConditionAst(i)), _clone(that->branchAst(i)));
+
+		return clone;
+	});
+
 	_.use<SCultSemanticNode>().byCasting();
 
 	_.defaults();
@@ -38,7 +50,7 @@ void Condition::push(instance<SCultSemanticNode> cond, instance<SCultSemanticNod
 	}
 	else
 	{
-		_entries.push_back({ _ast(craft_instance(), cond) , _ast(craft_instance(), branch) });
+		_entries.push_back({ _ast(cond) , _ast(branch) });
 	}
 }
 
@@ -59,14 +71,15 @@ instance<SCultSemanticNode> Condition::branchDefaultAst() const
 	return _defaultBranch;
 }
 
-instance<SCultSemanticNode> Condition::getParent() const
+void Condition::bind()
 {
-	return _parent;
-}
-void Condition::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
+	for (auto entry : _entries)
+	{
+		entry.branch->bind();
+		entry.condition->bind();
+	}
+
+	if (_defaultBranch) _defaultBranch->bind();
 }
 
 /******************************************************************************
@@ -75,6 +88,11 @@ void Condition::setParent(instance<SCultSemanticNode> parent)
 
 CRAFT_DEFINE(Loop)
 {
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<Loop> that)
+	{
+		return instance<Loop>::make(_clone(that->conditionAst()), _clone(that->bodyAst()));
+	});
+
 	_.use<SCultSemanticNode>().byCasting();
 
 	_.defaults();
@@ -83,8 +101,14 @@ CRAFT_DEFINE(Loop)
 
 Loop::Loop(instance<SCultSemanticNode> cond, instance<SCultSemanticNode> body)
 {
-	_condition = _ast(craft_instance(), cond);
-	_body = _ast(craft_instance(), body);
+	_condition = cond;
+	_body = body;
+}
+
+void Loop::craft_setupInstance()
+{
+	_ast(_condition);
+	_ast(_body);
 }
 
 instance<SCultSemanticNode> Loop::conditionAst() const
@@ -96,12 +120,8 @@ instance<SCultSemanticNode> Loop::bodyAst() const
 	return _body;
 }
 
-instance<SCultSemanticNode> Loop::getParent() const
+void Loop::bind()
 {
-	return _parent;
-}
-void Loop::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
+	_condition->bind();
+	_body->bind();
 }

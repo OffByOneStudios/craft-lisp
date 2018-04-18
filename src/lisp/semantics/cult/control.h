@@ -44,8 +44,7 @@ namespace lisp
 
 		// SCultSemanticNode
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
+		CRAFT_LISP_EXPORTED virtual void bind() override;
 	};
 
 	/******************************************************************************
@@ -60,10 +59,8 @@ namespace lisp
 		, public craft::types::Implements<SCultSemanticNode>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Loop);
-	private:
-		instance<SCultSemanticNode> _parent;
 
-	public:
+	private:
 
 		instance<SCultSemanticNode> _condition;
 		instance<SCultSemanticNode> _body;
@@ -71,12 +68,13 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED Loop(instance<SCultSemanticNode> cond, instance<SCultSemanticNode> body);
 
+		CRAFT_LISP_EXPORTED void craft_setupInstance();
+
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> conditionAst() const;
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> bodyAst() const;
 
 		// SCultSemanticNode
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
+		CRAFT_LISP_EXPORTED virtual void bind() override;
 	};
 }}

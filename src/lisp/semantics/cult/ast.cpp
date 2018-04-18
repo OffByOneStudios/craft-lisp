@@ -9,9 +9,24 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(craft::lisp::SCultSemanticNode) { _.defaults(); }
 
+instance<SCultSemanticNode> SCultSemanticNode::getParent() const
+{
+	return _parent;
+}
+void SCultSemanticNode::setParent(instance<SCultSemanticNode> parent)
+{
+	if (_parent) throw parent_already_set_error(craft_featuredInstance());
+	_parent = parent;
+}
+
+void SCultSemanticNode::bind()
+{
+
+}
+
 void SCultSemanticNode::validate(ValidationState* vs) const
 {
-	vs->warning(const_cast<SCultSemanticNode*>(this)->craft_featuredInstance().asFeature<SCultSemanticNode>(), "Not-Implemented");
+	vs->warning(const_cast<SCultSemanticNode*>(this)->craft_featuredInstance().asFeature<SCultSemanticNode>(), "validate-not-implemented");
 }
 
 /******************************************************************************
@@ -20,7 +35,10 @@ void SCultSemanticNode::validate(ValidationState* vs) const
 
 CRAFT_DEFINE(Constant)
 {
-	_.use<PClone>().singleton<DefaultCopyConstructor>();
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<Constant> that)
+	{
+		return instance<Constant>::make(that->getValue());
+	});
 
 	_.use<SCultSemanticNode>().byCasting();
 
@@ -31,22 +49,8 @@ Constant::Constant(instance<> value)
 {
 	_value = value;
 }
-Constant::Constant(Constant const& that)
-{
-	_value = that._value;
-}
 
 instance<> Constant::getValue() const
 {
 	return _value;
-}
-
-instance<SCultSemanticNode> Constant::getParent() const
-{
-	return _parent;
-}
-void Constant::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
 }

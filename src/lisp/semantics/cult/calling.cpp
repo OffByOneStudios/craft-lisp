@@ -13,6 +13,17 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(CallSite)
 {
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<CallSite> that)
+	{
+		auto count = that->argCount();
+		std::vector<instance<SCultSemanticNode>> args;
+		args.reserve(count);
+		for (auto i = 0; i < count; ++i)
+			args.push_back(SCultSemanticNode::_clone(that->argAst(i)));
+
+		return instance<CallSite>::make(_clone(that->calleeAst()), args);
+	});
+
 	_.use<SCultSemanticNode>().byCasting();
 
 	_.defaults();
@@ -20,11 +31,20 @@ CRAFT_DEFINE(CallSite)
 
 CallSite::CallSite(instance<SCultSemanticNode> callee, std::vector<instance<SCultSemanticNode>> args)
 {
-	_callee = _ast(craft_instance(), callee);
+	_callee = callee;
 
 	_args.reserve(args.size());
 	for (auto arg : args)
-		_args.push_back(_ast(craft_instance(), arg));
+		_args.push_back(arg);
+}
+
+void CallSite::craft_setupInstance()
+{
+	Object::craft_setupInstance();
+
+	_ast(_callee);
+	for (auto arg : _args)
+		_ast(arg);
 }
 
 instance<> CallSite::calleeAst() const
@@ -41,14 +61,13 @@ instance<> CallSite::argAst(size_t index) const
 	return _args.at(index);
 }
 
-instance<SCultSemanticNode> CallSite::getParent() const
+void CallSite::bind()
 {
-	return _parent;
-}
-void CallSite::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
+	_callee->bind();
+	for (auto arg : _args)
+	{
+		arg->bind();
+	}
 }
 
 /******************************************************************************
@@ -68,16 +87,6 @@ CRAFT_DEFINE(lisp::Function)
 
 lisp::Function::Function()
 {
-}
-
-instance<SCultSemanticNode> lisp::Function::getParent() const
-{
-	return _parent;
-}
-void lisp::Function::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
 }
 
 instance<Binding> lisp::Function::getBinding() const
@@ -121,8 +130,55 @@ instance<Binding> lisp::Function::define(instance<Symbol> symbol, instance<BindS
 ** MultiMethod
 ******************************************************************************/
 
+class craft::lisp::MultiMethodSubroutineProvider
+	: public Implements<PSubroutine>::For<MultiMethod>
+{
+	static ExpressionStore MultiMethodAny;
+
+	virtual types::Function function(instance<> _) const override
+	{
+		throw stdext::exception("Needs to support closures....");
+	}
+	virtual types::ExpressionStore expression(instance<> _) const override
+	{
+		ExpressionStore any = (new ExpressionArrow(new ExpressionTuple({}, &ExpressionAny::Value), &ExpressionAny::Value));
+
+		return any;
+	}
+
+	//
+	// Performs a full call on the subroutine, including pushing to the current execution
+	//
+	virtual instance<> execute(instance<> _, types::GenericInvoke const& call) const override
+	{
+		instance<MultiMethod> mm = _;
+
+		// TODO push a multimethod dispatch frame...
+
+		std::vector<TypeId> exprs;
+		exprs.reserve(call.args.size());
+		std::transform(call.args.begin(), call.args.end(), std::back_inserter(exprs),
+			[](instance<> const& inst) { return inst.typeId(); });
+
+		auto res = mm->_dispatcher.dispatchWithRecord(exprs);
+		auto entry = (MultiMethod::_Entry*)std::get<0>(res);
+
+		if (entry == nullptr)
+		{
+			std::string dispatchList = stdext::join<char, std::vector<TypeId>::iterator>(
+				std::string(", "), exprs.begin(), exprs.end(),
+				[](auto it) { return it->toString(); });
+			throw stdext::exception("Dispatch failed for [{0}].", dispatchList);
+		}
+
+		return types::invoke(*std::get<1>(res), entry->function, call);
+	}
+};
+
 CRAFT_DEFINE(MultiMethod)
 {
+	_.use<PSubroutine>().singleton<MultiMethodSubroutineProvider>();
+
 	_.use<SCultSemanticNode>().byCasting();
 	_.use<SBindable>().byCasting();
 
@@ -131,16 +187,6 @@ CRAFT_DEFINE(MultiMethod)
 
 MultiMethod::MultiMethod()
 {
-}
-
-instance<SCultSemanticNode> MultiMethod::getParent() const
-{
-	return _parent;
-}
-void MultiMethod::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
 }
 
 void MultiMethod::attach(instance<BindSite> binding)
@@ -159,7 +205,7 @@ void MultiMethod::attach(instance<BindSite> binding)
 	_dispatcher.add(psub->expression(value), &*it);
 }
 
-instance<>  MultiMethod::call_internal(types::GenericInvoke const& invoke) const
+instance<> MultiMethod::call_internal(types::GenericInvoke const& invoke) const
 {
 	std::vector<TypeId> exprs;
 	exprs.reserve(invoke.args.size());

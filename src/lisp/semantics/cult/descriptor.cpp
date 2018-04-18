@@ -33,16 +33,6 @@ instance<SCultSemanticNode> Variable::typeAst() const
 	return _type_ast;
 }
 
-instance<SCultSemanticNode> Variable::getParent() const
-{
-	return _parent;
-}
-void Variable::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
-}
-
 instance<Binding> Variable::getBinding() const
 {
 	return _binding;
@@ -58,7 +48,10 @@ void Variable::setBinding(instance<Binding> binding)
 
 CRAFT_DEFINE(GetValue)
 {
-	_.use<PClone>().singleton<DefaultCopyConstructor>();
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<GetValue> that)
+	{
+		return instance<GetValue>::make(that->getSymbol());
+	});
 
 	_.use<SCultSemanticNode>().byCasting();
 
@@ -69,10 +62,6 @@ GetValue::GetValue(instance<Symbol> symbol)
 {
 	_symbol = symbol;
 }
-GetValue::GetValue(GetValue const& that)
-{
-	this->_symbol = that._symbol;
-}
 
 instance<Symbol> GetValue::getSymbol() const
 {
@@ -80,26 +69,14 @@ instance<Symbol> GetValue::getSymbol() const
 }
 instance<Binding> GetValue::getBinding() const
 {
-	if (!_binding) // Hack to allow cloning this node. May need to "re-read" the tree...
-	{
-		auto scope = SScope::findScope(_parent);
-		if (!scope)
-			throw stdext::exception("GetValue {0} is scopeless.", craft_instance());
-
-		_binding = scope->lookup_recurse(_symbol);
-		if (!_binding)
-			throw stdext::exception("GetValue {0} bad symbol {1}.", craft_instance(), _symbol->getValue());
-	}
 	return _binding;
 }
-instance<SCultSemanticNode> GetValue::getParent() const
+
+void GetValue::bind()
 {
-	return _parent;
-}
-void GetValue::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
+	_binding = SScope::findScope(_parent)->lookup_recurse(_symbol);
+	if (!_binding)
+		throw stdext::exception("GetValue {0} bad symbol {1}.", craft_instance(), _symbol->getValue());
 }
 
 /******************************************************************************
@@ -108,6 +85,18 @@ void GetValue::setParent(instance<SCultSemanticNode> parent)
 
 CRAFT_DEFINE(Block)
 {
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<Block> that)
+	{
+		auto clone = instance<Block>::make();
+
+		auto count = that->statementCount();
+		clone->preSize(count);
+		for (auto i = 0; i < count; ++count)
+			clone->push(_clone(that->statementAst(i)));
+
+		return clone;
+	});
+
 	_.use<SCultSemanticNode>().byCasting();
 	_.use<SScope>().byCasting();
 
@@ -115,9 +104,8 @@ CRAFT_DEFINE(Block)
 }
 
 
-Block::Block(instance<SScope> parent_scope)
+Block::Block()
 {
-	_parentSymbols = parent_scope;
 }
 
 void Block::preSize(size_t cap)
@@ -126,7 +114,7 @@ void Block::preSize(size_t cap)
 }
 void Block::push(instance<SCultSemanticNode> s)
 {
-	_statements.push_back(_ast(craft_instance(), s));
+	_statements.push_back(_ast(s));
 }
 
 size_t Block::statementCount() const
@@ -138,19 +126,19 @@ instance<SCultSemanticNode> Block::statementAst(size_t index) const
 	return _statements[index];
 }
 
-instance<SCultSemanticNode> Block::getParent() const
+void Block::bind()
 {
-	return _parent;
-}
-void Block::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
+	_parentScope = SScope::findScope(_parent);
+
+	for (auto stmt : _statements)
+	{
+		stmt->bind();
+	}
 }
 
 instance<SScope> Block::getParentScope() const
 {
-	return _parentSymbols;
+	return _parentScope;
 }
 
 instance<Binding> Block::lookup(instance<Symbol> symbol) const

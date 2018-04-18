@@ -54,21 +54,14 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 				throw stdext::exception(ex, "Not Implemented: Dynamic Bindings");
 			}
 
-			auto ret = instance<BindSite>::make(symbol, rs->read(sexpr, 2));
-			if (!ret->isDynamicBind())
-				rs->scope->define(ret->getStaticSymbol(), ret);
-			else
-				throw stdext::exception("Not Implemented: Dynamic Bindings");
-
-			return ret;
+			return instance<BindSite>::make(symbol, rs->read(sexpr, 2));
 		});
 
 	sem->builtin_addSpecialForm("do");
 	sem->builtin_specialFormReader("do",
 		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
-		auto ret = instance<Block>::make(rs->scope);
-		CultSemantics::ReadState::PushScope _hold(rs, ret);
+		auto ret = instance<Block>::make();
 
 		auto size = sexpr->cells.size();
 		ret->preSize(size - 1);
@@ -150,7 +143,8 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 		auto value = interp->interp_exec(ast->valueAst());
 
-		*interp->slot(binding) = value;
+		if (!ast->isAttachSite())
+			*interp->slot(binding) = value;
 		return value;
 	});
 	sem->builtin_implementMultiMethod("exec",
@@ -162,7 +156,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		GenericInvoke invoke(count);
 		for (auto i = 0; i < count; i++)
 		{
-			invoke.args[i] = interp->interp_exec(ast->argAst(i));
+			invoke.args.push_back(interp->interp_exec(ast->argAst(i)));
 		}
 
 		auto value = interp->interp_call(callee, invoke);

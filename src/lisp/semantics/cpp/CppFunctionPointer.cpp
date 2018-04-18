@@ -34,6 +34,13 @@ class craft::lisp::CppFunctionPointerSubroutineProvider
 	{
 		instance<CppFunctionPointer> cfp = _;
 
+		ExpressionStore expres(new ExpressionArrow(to_expression_tuple(call), &ExpressionBottom::Value));
+
+		if (!isSubtype(expres.root(), cfp->expression.root()))
+		{
+			stdext::exception("Given invoke does not match function expression.");
+		}
+
 		return types::invoke(cfp->expression, cfp->function, call);
 	}
 };

@@ -25,29 +25,9 @@ namespace lisp
 		struct ReadState final
 		{
 			instance<CultSemantics> semantics;
-			instance<SScope> scope;
 
 			inline instance<SCultSemanticNode> read(instance<Sexpr>, size_t index);
 			inline std::vector<instance<SCultSemanticNode>> readAll(instance<Sexpr>, size_t start_index = 1);
-
-			struct PushScope final
-			{
-			private:
-				ReadState* rs;
-				instance<SScope> oldScope;
-
-				PushScope(PushScope const&) = delete;
-				PushScope(PushScope &&) = delete;
-
-			public:
-				inline PushScope(ReadState* rs, instance<SScope> newScope)
-					: rs(rs), oldScope(rs->scope)
-				{
-					rs->scope = newScope;
-				}
-
-				inline ~PushScope() { rs->scope = oldScope; }
-			};
 		};
 
 		// TODO: Make this a multiMethod

@@ -129,7 +129,7 @@ instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke con
 	}
 	else
 	{
-		throw stdext::exception("Interpreter asked to call object (`{0}`) with no subroutine hints.", fn.toString());
+		throw stdext::exception("Interpreter asked to call object `{0}` with no subroutine hints.", fn.toString());
 	}
 }
 
@@ -242,7 +242,7 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 		throw stdext::exception("Execution entry point `{0}` not found in `{1}`.", entry, module);
 	}
 
-	auto potFunc = binding->getSite()->symbolAst();
+	auto potFunc = binding->getSite()->valueAst();
 
 	return InterpreterFrame::ensureCurrent(craft_instance())->interp_call(potFunc, call);
 }

@@ -10,6 +10,11 @@ using namespace craft::lisp;
 CRAFT_DEFINE(craft::lisp::SBindable) { _.defaults(); }
 CRAFT_DEFINE(craft::lisp::SScope) { _.defaults(); }
 
+void SBindable::attach(instance<BindSite>)
+{
+	throw stdext::exception("This bindable does not support attachement.");
+}
+
 instance<CultSemantics> SScope::getSemantics() const
 {
 	instance<SScope> scope = getParentScope();
@@ -31,8 +36,8 @@ CRAFT_DEFINE(BindSite)
 
 BindSite::BindSite(instance<SCultSemanticNode> symbol, instance<SCultSemanticNode> value)
 {
-	_bindSymbol = _ast(craft_instance(), symbol);
-	_bindValue = _ast(craft_instance(), value);
+	_bindSymbol = symbol;
+	_bindValue = value;
 }
 
 BindSite::BindSite(instance<Symbol> symbol, instance<SCultSemanticNode> value)
@@ -40,9 +45,22 @@ BindSite::BindSite(instance<Symbol> symbol, instance<SCultSemanticNode> value)
 {
 }
 
+void BindSite::craft_setupInstance()
+{
+	Object::craft_setupInstance();
+
+	_ast(_bindSymbol);
+	_ast(_bindValue);
+}
+
 bool BindSite::isDynamicBind() const
 {
-	return _bindSymbol.isType<Constant>();
+	return !_bindSymbol.isType<Constant>();
+}
+
+bool BindSite::isAttachSite() const
+{
+	return _boundTo->getSite() != craft_instance();
 }
 
 instance<> BindSite::symbolAst() const
@@ -54,14 +72,37 @@ instance<> BindSite::valueAst() const
 	return _bindValue;
 }
 
-instance<SCultSemanticNode> BindSite::getParent() const
+void BindSite::bind()
 {
-	return _parent;
-}
-void BindSite::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
+	_bindSymbol->bind();
+	_bindValue->bind();
+
+	if (!isDynamicBind())
+	{
+		auto staticSymbol = getStaticSymbol();
+		auto bindScope = SScope::findScope(_parent);
+
+		auto binding = bindScope->lookup(staticSymbol);
+
+		if (!binding)
+			binding = bindScope->define(staticSymbol, craft_instance());
+		else
+		{
+			auto binded = binding->getSite()->valueAst();
+
+			if (binded.hasFeature<SBindable>())
+				binded.getFeature<SBindable>()->attach(craft_instance());
+			else
+				throw stdext::exception("Symbol already defined (target AST {0} does not support attach).", binded);
+		}
+
+		if (_bindValue.hasFeature<SBindable>())
+			_bindValue.getFeature<SBindable>()->setBinding(binding);
+
+		_boundTo = binding;
+	}
+	else
+		throw stdext::exception("Not Implemented: Dynamic Bindings");
 }
 
 /******************************************************************************
@@ -128,6 +169,11 @@ instance<> Binding::getMeta(std::string metaKey, TypeId type) const
 
 CRAFT_DEFINE(Import)
 {
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<Import> that)
+	{
+		return instance<Import>::make(that->getUri());
+	});
+
 	_.use<SCultSemanticNode>().byCasting();
 
 	_.defaults();
@@ -137,22 +183,8 @@ Import::Import(std::string uri)
 {
 	_importUri = uri;
 }
-Import::Import(Import const& that)
-{
-	_importUri = that._importUri;
-}
 
 std::string Import::getUri() const
 {
 	return _importUri;
-}
-
-instance<SCultSemanticNode> Import::getParent() const
-{
-	return _parent;
-}
-void Import::setParent(instance<SCultSemanticNode> parent)
-{
-	if (_parent) throw parent_already_set_error(craft_instance());
-	_parent = parent;
 }

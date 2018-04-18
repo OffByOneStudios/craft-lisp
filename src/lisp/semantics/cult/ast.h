@@ -21,6 +21,9 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SCultSemanticNode, "lisp.cult.semantic", types::FactoryAspectManager);
 
+	protected:
+		instance<SCultSemanticNode> _parent;
+
 	public:
 		struct ast_error : stdext::exception
 		{
@@ -73,16 +76,42 @@ namespace lisp
 			}
 		};
 
+		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const;
+		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>);
+
+		// Binds (or re-binds) each member of the tree. Call your children.
+		CRAFT_LISP_EXPORTED virtual void bind();
+
 		CRAFT_LISP_EXPORTED virtual void validate(ValidationState*) const;
 
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const = 0;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) = 0;
-
 	protected:
-		inline static instance<SCultSemanticNode> _ast(instance<SCultSemanticNode> parent, instance<SCultSemanticNode> child)
+		inline instance<SCultSemanticNode> _ast(instance<SCultSemanticNode> child)
 		{
-			child->setParent(parent);
+			child->setParent(craft_featuredInstance());
 			return child;
+		}
+
+		inline static instance<SCultSemanticNode> _clone(instance<SCultSemanticNode> to_clone)
+		{
+			return to_clone.getFeature<types::PClone>()->clone(to_clone);
+		}
+
+		inline instance<SCultSemanticNode> _astclone(instance<SCultSemanticNode> to_clone)
+		{
+			if (!to_clone) return to_clone;
+			return _ast(_clone(to_clone));
+		}
+		inline instance<SCultSemanticNode> _astbind(instance<SCultSemanticNode> to_bind)
+		{
+			auto ret = _ast(to_bind);
+			ret->bind();
+			return ret;
+		}
+		inline instance<SCultSemanticNode> _astclonebind(instance<SCultSemanticNode> to_clonebind)
+		{
+			auto ret = _astclone(to_clonebind);
+			ret->bind();
+			return ret;
 		}
 	};
 
@@ -98,21 +127,13 @@ namespace lisp
 		, public craft::types::Implements<SCultSemanticNode>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Constant);
-	private:
-		instance<SCultSemanticNode> _parent;
 
 	private:
 		instance<> _value;
 
 	public:
 		CRAFT_LISP_EXPORTED Constant(instance<> value);
-		CRAFT_LISP_EXPORTED Constant(Constant const& that);
 
 		CRAFT_LISP_EXPORTED instance<> getValue() const;
-
-		// SCultSemanticNode
-	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
 	};
 }}

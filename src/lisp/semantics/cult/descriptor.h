@@ -20,8 +20,6 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Variable);
 	private:
-		instance<SCultSemanticNode> _parent;
-
 		instance<Binding> _binding;
 
 	public:
@@ -34,11 +32,6 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> initalizerAst() const;
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> typeAst() const;
-
-		// SCultSemanticNode
-	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
 
 		// SBindable
 	public:
@@ -60,23 +53,18 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::GetValue);
 	private:
-		instance<SCultSemanticNode> _parent;
-
-	private:
 		instance<Symbol> _symbol;
-		mutable instance<Binding> _binding;
+		instance<Binding> _binding;
 
 	public:
 		CRAFT_LISP_EXPORTED GetValue(instance<Symbol> binding);
-		CRAFT_LISP_EXPORTED GetValue(GetValue const& binding);
 
 		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 		CRAFT_LISP_EXPORTED instance<Binding> getBinding() const;
 
 		// SCultSemanticNode
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
+		CRAFT_LISP_EXPORTED virtual void bind() override;
 	};
 
 	/******************************************************************************
@@ -95,7 +83,7 @@ namespace lisp
 	private:
 		instance<SCultSemanticNode> _parent;
 
-		instance<SScope> _parentSymbols;
+		instance<SScope> _parentScope;
 		// TODO: Symbol equality
 		std::vector<instance<Binding>> _bindings;
 		std::map<size_t, size_t> _symbolTable; // Internal table
@@ -104,7 +92,7 @@ namespace lisp
 		std::vector<instance<SCultSemanticNode>> _statements;
 
 	public:
-		CRAFT_LISP_EXPORTED Block(instance<SScope> parent_scope);
+		CRAFT_LISP_EXPORTED Block();
 
 		CRAFT_LISP_EXPORTED void preSize(size_t);
 		CRAFT_LISP_EXPORTED void push(instance<SCultSemanticNode>);
@@ -114,8 +102,7 @@ namespace lisp
 
 		// SCultSemanticNode
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
+		CRAFT_LISP_EXPORTED virtual void bind() override;
 
 		// SScope
 	public:

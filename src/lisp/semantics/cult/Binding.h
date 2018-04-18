@@ -8,6 +8,7 @@ namespace lisp
 {
 	class SScope;
 	class SBindable;
+	class Binding;
 
 	/******************************************************************************
 	** BindSite
@@ -22,17 +23,19 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::BindSite);
 	private:
-		instance<SCultSemanticNode> _parent;
-
-	private:
 		instance<SCultSemanticNode> _bindSymbol;
 		instance<SCultSemanticNode> _bindValue;
+
+		instance<Binding> _boundTo;
 
 	public:
 		CRAFT_LISP_EXPORTED BindSite(instance<SCultSemanticNode> symbol, instance<SCultSemanticNode> value);
 		CRAFT_LISP_EXPORTED BindSite(instance<Symbol> symbol, instance<SCultSemanticNode> value);
 
+		CRAFT_LISP_EXPORTED void craft_setupInstance();
+
 		CRAFT_LISP_EXPORTED bool isDynamicBind() const;
+		CRAFT_LISP_EXPORTED bool isAttachSite() const;
 
 		CRAFT_LISP_EXPORTED instance<> symbolAst() const;
 		CRAFT_LISP_EXPORTED instance<> valueAst() const;
@@ -44,8 +47,7 @@ namespace lisp
 
 		// SCultSemanticNode
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
+		CRAFT_LISP_EXPORTED virtual void bind() override;
 	};
 
 	/******************************************************************************
@@ -94,22 +96,14 @@ namespace lisp
 		, public craft::types::Implements<SCultSemanticNode>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Import);
-	private:
-		instance<SCultSemanticNode> _parent;
 
 	private:
 		std::string _importUri;
 
 	public:
 		CRAFT_LISP_EXPORTED Import(std::string uri);
-		CRAFT_LISP_EXPORTED Import(Import const&);
 
 		CRAFT_LISP_EXPORTED std::string getUri() const;
-
-		// SCultSemanticNode
-	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
 	};
 
 	/******************************************************************************
@@ -127,6 +121,8 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<Binding> getBinding() const = 0;
 		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) = 0;
+
+		CRAFT_LISP_EXPORTED virtual void attach(instance<BindSite>);
 	};
 
 	/******************************************************************************

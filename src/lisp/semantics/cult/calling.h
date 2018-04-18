@@ -18,17 +18,16 @@ namespace lisp
 		, public craft::types::Implements<SCultSemanticNode>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::CallSite);
+
 	private:
-		instance<SCultSemanticNode> _parent;
-
-	public:
-
 		instance<SCultSemanticNode> _callee;
 
 		std::vector<instance<SCultSemanticNode>> _args;
 
 	public:
 		CRAFT_LISP_EXPORTED CallSite(instance<SCultSemanticNode> callee, std::vector<instance<SCultSemanticNode>> args);
+
+		CRAFT_LISP_EXPORTED void craft_setupInstance();
 
 		CRAFT_LISP_EXPORTED instance<> calleeAst() const;
 
@@ -37,8 +36,7 @@ namespace lisp
 
 		// SCultSemanticNode
 	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
+		CRAFT_LISP_EXPORTED virtual void bind() override;
 	};
 
 	/******************************************************************************
@@ -55,9 +53,9 @@ namespace lisp
 		, public craft::types::Implements<SScope>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Function);
-	private:
-		instance<SCultSemanticNode> _parent;
 
+		friend class FunctionSubroutineProvider;
+	private:
 		instance<Binding> _binding;
 
 		instance<SScope> _parentSymbols;
@@ -71,11 +69,6 @@ namespace lisp
 
 	public:
 		CRAFT_LISP_EXPORTED Function();
-
-		// SCultSemanticNode
-	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
 
 		// SBindable
 	public:
@@ -103,10 +96,13 @@ namespace lisp
 		, public craft::types::Implements<SBindable>
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::MultiMethod);
+
+		friend class MultiMethodSubroutineProvider;
 	private:
 		instance<SCultSemanticNode> _parent;
 		instance<Binding> _binding;
 
+	private:
         struct _Entry
         {
 			types::Function function;
@@ -119,21 +115,16 @@ namespace lisp
         
 	public:
 		CRAFT_LISP_EXPORTED MultiMethod();
-
-        CRAFT_LISP_EXPORTED void attach(instance<BindSite>);
         
 		// A helper to call this multimethod without the normal stackframes...
 		//   could cause some weird stuff if it dispatches to a non-c function
 		CRAFT_LISP_EXPORTED instance<> call_internal(types::GenericInvoke const& invoke) const;
 
-		// SCultSemanticNode
-	public:
-		CRAFT_LISP_EXPORTED virtual instance<SCultSemanticNode> getParent() const override;
-		CRAFT_LISP_EXPORTED virtual void setParent(instance<SCultSemanticNode>) override;
-
 		// SBindable
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<Binding> getBinding() const override;
 		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) override;
+
+		CRAFT_LISP_EXPORTED virtual void attach(instance<BindSite>) override;
 	};
 }}
