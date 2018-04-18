@@ -144,9 +144,10 @@ instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSi
 
 	auto res = instance<Binding>::make(craft_instance(), symbol, ast);
 	_bindings.push_back(res);
-	auto index = _bindings.size() - 1;
+	//auto index = _bindings.size() - 1; 
+	auto index = _ast.size(); // hack untill we improve the runtime features
 	res->setIndex(index);
-	_symbolTable.insert(lb, { key, index });
+	_symbolTable.insert(lb, { key, _bindings.size() - 1 });
 	return res;
 }
 

@@ -49,7 +49,7 @@ void RuntimeSlots::extend(instance<>* inst, size_t size)
 	auto new_slots = new instance<>[size];
 
 	for (auto i = 0; i < slots->size; ++i)
-		new_slots[i] == slots->slots[i];
+		new_slots[i] = slots->slots[i];
 
 	slots->size = size;
 	std::swap(slots->slots, new_slots);

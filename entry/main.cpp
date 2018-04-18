@@ -167,8 +167,12 @@ int main(int argc, char** argv)
 				{
 					live_module->appendModule(statement);
 					instance<> res = live_module->lastExecutedResult();
-
+					
 					std::cout << res.toString() << '\n';
+
+					//instance<RuntimeSlots> slots = live_module->moduleValue();
+					//for (auto i = 0; i < slots->getSize((instance<>*)&slots); ++i)
+					//	std::cout << slots->getSlot((instance<>*)&slots, i)->toString() << '\n';
 				}
 			}
 			catch (std::exception const& e)

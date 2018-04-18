@@ -139,6 +139,7 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 	
 	if (ret)
 	{
+		uri = ret->uri();
 		ret->load();
 	}
 	else
