@@ -91,7 +91,7 @@ CRAFT_DEFINE(Block)
 
 		auto count = that->statementCount();
 		clone->preSize(count);
-		for (auto i = 0; i < count; ++count)
+		for (auto i = 0; i < count; ++i)
 			clone->push(_clone(that->statementAst(i)));
 
 		return clone;

@@ -74,10 +74,47 @@ void CallSite::bind()
 ** Function
 ******************************************************************************/
 
-using lisp::Function;
+class craft::lisp::FunctionSubroutineProvider
+	: public Implements<PSubroutine>::For<Function>
+{
+	static ExpressionStore MultiMethodAny;
+
+	virtual types::Function function(instance<> _) const override
+	{
+		throw stdext::exception("Needs to support closures....");
+	}
+	virtual types::ExpressionStore expression(instance<> _) const override
+	{
+		instance<Function> fn = _;
+
+		return ExpressionStore();
+	}
+
+	//
+	// Performs a full call on the subroutine, including pushing to the current execution
+	//
+	virtual instance<> execute(instance<> _, types::GenericInvoke const& call) const override
+	{
+		instance<Function> fn = _;
+
+		// Invoke interpreter
+
+		return instance<>();
+	}
+};
 
 CRAFT_DEFINE(lisp::Function)
 {
+	_.use<PSubroutine>().singleton<FunctionSubroutineProvider>();
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<lisp::Function> that)
+	{
+		auto clone = instance<lisp::Function>::make();
+
+		clone->setBodyAst(_clone(that->bodyAst()));
+
+		return clone;
+	});
+
 	_.use<SCultSemanticNode>().byCasting();
 	_.use<SBindable>().byCasting();
 	_.use<SScope>().byCasting();
@@ -87,6 +124,27 @@ CRAFT_DEFINE(lisp::Function)
 
 lisp::Function::Function()
 {
+}
+
+void lisp::Function::setBodyAst(instance<SCultSemanticNode> body)
+{
+	_body = _ast(body);
+}
+instance<SCultSemanticNode> lisp::Function::bodyAst() const
+{
+	return _body;
+}
+
+void lisp::Function::bind()
+{
+	_parentScope = SScope::findScope(_parent);
+
+	for (auto arg : _args)
+	{
+		arg->bind();
+	}
+
+	_body->bind();
 }
 
 instance<Binding> lisp::Function::getBinding() const
@@ -100,7 +158,7 @@ void lisp::Function::setBinding(instance<Binding> binding)
 
 instance<SScope> lisp::Function::getParentScope() const
 {
-	return _parentSymbols;
+	return _parentScope;
 }
 
 instance<Binding> lisp::Function::lookup(instance<Symbol> symbol) const

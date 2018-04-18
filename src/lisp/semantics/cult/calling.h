@@ -58,17 +58,26 @@ namespace lisp
 	private:
 		instance<Binding> _binding;
 
-		instance<SScope> _parentSymbols;
+		instance<SScope> _parentScope;
 
 		// TODO: Symbol equality
 		std::vector<instance<Binding>> _bindings;
 		std::map<size_t, size_t> _symbolTable; // Internal table
 
-	public:
+	private:
 
+		std::vector<instance<SCultSemanticNode>> _args;
+		instance<SCultSemanticNode> _body;
 
 	public:
 		CRAFT_LISP_EXPORTED Function();
+
+		CRAFT_LISP_EXPORTED void setBodyAst(instance<SCultSemanticNode>);
+		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> bodyAst() const;
+
+		// SCultSemanticNode
+	public:
+		CRAFT_LISP_EXPORTED virtual void bind() override;
 
 		// SBindable
 	public:

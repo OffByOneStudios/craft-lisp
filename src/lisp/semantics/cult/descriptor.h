@@ -81,8 +81,6 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Block);
 	private:
-		instance<SCultSemanticNode> _parent;
-
 		instance<SScope> _parentScope;
 		// TODO: Symbol equality
 		std::vector<instance<Binding>> _bindings;

@@ -109,6 +109,24 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	{
 		auto ret = instance<Function>::make();
 
+		// Read the arg expression
+
+		// check for void args expression
+		if (!(sexpr->cells[1].isType<Sexpr>() && sexpr->cells[1].asType<Sexpr>()->cells.size() == 0))
+		{
+			auto args = rs->read(sexpr, 1); // Need a special read?
+		}
+
+		// Read the body
+		auto body_block = instance<Block>::make();
+		auto size = sexpr->cells.size();
+		body_block->preSize(size - 2);
+		for (auto i = 2; i < size; i++)
+		{
+			body_block->push(rs->read(sexpr, i));
+		}
+		ret->setBodyAst(body_block);
+
 		return ret;
 	});
 

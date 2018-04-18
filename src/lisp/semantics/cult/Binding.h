@@ -152,7 +152,7 @@ namespace lisp
 			instance<SScope> scope = getParentScope();
 			while (!bindRet && scope)
 			{
-				bindRet = lookup(sym);
+				bindRet = scope->lookup(sym);
 				if (bindRet) return bindRet;
 
 				scope = scope->getParentScope();
