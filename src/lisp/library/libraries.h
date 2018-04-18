@@ -79,8 +79,8 @@ namespace lisp {
 			void make_json_globals(instance<Module> m);
 		}
 
-		instance<Module> make_module_builtin_cult_system(instance<Namespace> ns);
-		instance<Module> make_module_builtin_cult_core(instance<Namespace> ns);
+		instance<Module> make_module_builtin_cult_system(instance<Namespace> ns, instance<> loader);
+		instance<Module> make_module_builtin_cult_core(instance<Namespace> ns, instance<> loader);
 	}
 }}
 

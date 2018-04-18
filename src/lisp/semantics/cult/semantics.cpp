@@ -70,12 +70,15 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 		return instance<Constant>::make(syntax);
 }
 
-void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts)
+void CultSemantics::readPrepDefaults()
 {
 	// These are implict, and must be made available by these execution engine.
 	importModule(_module->getNamespace()->requireModule("builtin:cult.system"));
 	importModule(_module->getNamespace()->requireModule("builtin:cult.core"));
+}
 
+void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts)
+{
 	// TODO, make this executed by the interpreter with some special understanding about accessing
 	//  macros and a different set of special forms
 	// TODO, make this execute on one node at a time (e.g. to prevent blowing the stack) should
@@ -214,6 +217,10 @@ instance<> CultSemanticsProvider::read(instance<> syntax_, instance<lisp::Module
 {
 	auto building = instance<CultSemantics>::make(into);
 	
+	auto loader = into->getLoader();
+	auto prepReplacedDefault = loader.getFeature<PModuleLoader>()->prepSemantics(loader, building);
+	if (!prepReplacedDefault) building->readPrepDefaults();
+
 	if (syntax_.typeId().isType<CultLispSyntax>())
 	{
 		building->read(syntax_.asType<CultLispSyntax>(), opts);

@@ -15,10 +15,11 @@ CRAFT_DEFINE(Module)
 }
 
 
-Module::Module(instance<Namespace> ns, std::string uri)
+Module::Module(instance<Namespace> ns, instance<> loader)
 {
 	_ns = ns;
-	_uri = uri;
+	_loader = loader;
+	_uri = _loader.getFeature<PModuleLoader>()->getUri(_loader);
 }
 
 void Module::craft_setupInstance()
@@ -38,21 +39,20 @@ instance<Namespace> Module::getNamespace() const
 	return _ns;
 }
 
-bool Module::isLoaded() const
+instance<> Module::getLoader() const
 {
 	return _loader;
 }
 
+bool Module::isLoaded() const
+{
+	return _syntax_instance;
+}
+
 void Module::load()
 {
-	// TODO call loader
-	// For the time being, assume the loader is the syntax structure, and that the Namespace has set it for us
-	//  unless there are semantics (e.g. built in)
-	if (_semantics.size() == 0)
-	{
-		_syntax_instance = _loader;
-		_syntax_syntax = _syntax_instance.getFeature<PSyntax>();
-	}
+	_syntax_instance = _loader.getFeature<PModuleLoader>()->getContent(_loader);
+	_syntax_syntax = _syntax_instance.getFeature<PSyntax>();
 }
 
 bool Module::isInitialized() const
@@ -171,9 +171,6 @@ instance<> Module::exec(std::string method, types::GenericInvoke const& call)
 
 void Module::builtin_setSemantics(instance<> semantics)
 {
-	// TODO build a syntax "representation" of the semantics
-	// TODO fill in the loader correctly
-	_loader = semantics;
-
+	// TODO build a syntax "representation" of the semantics (let the builtin loaders do it?)
 	_semantics[semantics.typeId()] = { semantics, semantics.getFeature<PSemantics>() };
 }

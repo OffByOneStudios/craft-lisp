@@ -70,7 +70,7 @@ instance<> Namespace::parse(std::string contents, TypeId type, PSyntax::ParseOpt
 	// context variable with: ParseOptions
 	instance<Module> module = requireModule("anon:", instance<std::string>::make(contents));
 
-	return module->_syntax_instance;
+	return module->get(type);
 }
 
 instance<> Namespace::read(instance<> source, TypeId type, PSemantics::ReadOptions const* ropts)
@@ -121,43 +121,16 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 
 	try
 	{
-		// HACK: for the time being we assume cult syntax:
-		auto syntax = cpptype<CultLispSyntax>::typeDesc().getFeature<PSyntax>();
-
-		// TODO set uri to the canonical version of the uri from the resolver
-		uri = uri;
-
-		// TODO implement resolvers/loaders for these
-		// All of this should go somewhere else, and be made internal to Module
-		if (protocol == "builtin")
+		if (protocol == "anon")
 		{
-			if (rest == "cult.system")
-				ret = library::make_module_builtin_cult_system(craft_instance());
-			else if (rest == "cult.core")
-				ret = library::make_module_builtin_cult_core(craft_instance());
+			rest = fmt::format("{0}--{1}", rest, std::to_string(++_loaderVar_anonCount));
 		}
-		else if (protocol == "repl")
-		{
-			ret = instance<Module>::make(craft_instance(), uri);
-			ret->_loader = syntax->parse("", ret, nullptr); // hack
-		}
-		else if (protocol == "file")
-		{
-			auto s = path::normalize(path::absolute(rest));
-			if (!path::exists(s))
-				throw stdext::exception("Module path `{0}` does not exist.", s);
 
-			auto text = craft::fs::read<std::string>(s, &craft::fs::string_read).get();
-			ret = instance<Module>::make(craft_instance(), uri);
-			ret->_loader = syntax->parse(text, ret, nullptr); // hack
-		}
-		else if (protocol == "anon")
-		{
-			uri = uri + std::to_string(++_loaderVar_anonCount);
+		auto ml = types::system().getManager<PModuleLoader>()->index(protocol);
+		if (ml == nullptr)
+			throw stdext::exception("Unknown module loader protocol `{0}`", protocol);
 
-			ret = instance<Module>::make(craft_instance(), uri);
-			ret->_loader = syntax->parse(*resolver_specific_extra.asType<std::string>(), ret, nullptr); // hack
-		}
+		ret = ml.getFeature<PModuleLoader>()->loadModule(craft_instance(), rest, resolver_specific_extra);
 	}
 	catch (std::exception const& ex)
 	{

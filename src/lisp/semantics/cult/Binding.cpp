@@ -29,6 +29,11 @@ instance<CultSemantics> SScope::getSemantics() const
 
 CRAFT_DEFINE(BindSite)
 {
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<BindSite> that)
+	{
+		return instance<BindSite>::make(_clone(that->symbolAst()), _clone(that->valueAst()));
+	});
+
 	_.use<SCultSemanticNode>().byCasting();
 
 	_.defaults();

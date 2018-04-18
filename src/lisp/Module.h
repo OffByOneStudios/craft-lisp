@@ -10,7 +10,6 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Module);
 	private:
-		friend class Namespace;
 		friend class BootstrapInterpreter;
 
 		instance<> _value; // runtime value of initing the module, store this somewhere better
@@ -35,10 +34,11 @@ namespace lisp
 		// Module management
 	public:
 
-		CRAFT_LISP_EXPORTED Module(instance<Namespace> ns, std::string uri);
+		CRAFT_LISP_EXPORTED Module(instance<Namespace> ns, instance<> loader);
 		CRAFT_LISP_EXPORTED void craft_setupInstance();
 
 		CRAFT_LISP_EXPORTED instance<Namespace> getNamespace() const;
+		CRAFT_LISP_EXPORTED instance<> getLoader() const;
 
 		CRAFT_LISP_EXPORTED bool isLoaded() const;
 		CRAFT_LISP_EXPORTED void load();

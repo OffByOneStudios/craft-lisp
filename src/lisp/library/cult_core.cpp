@@ -12,14 +12,14 @@ using namespace craft::lisp;
 using namespace craft::lisp::library::helper;
 
 
-instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns)
+instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns, instance<> loader)
 {
 	//
 	// Aquire objects, set up returns
 	//
 	auto backend_interp = ns->get<BootstrapInterpreter>();
 
-	auto ret = instance<Module>::make(ns, "builtin:cult.core");
+	auto ret = instance<Module>::make(ns, loader);
 	auto sem = instance<CultSemantics>::make(ret);
 	ret->builtin_setSemantics(sem);
 

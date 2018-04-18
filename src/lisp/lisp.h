@@ -31,6 +31,8 @@ namespace lisp
 #include "PCompiler.hpp"
 #include "SFrame.hpp"
 
+#include "loaders.h"
+
 #include "Namespace.h"
 #include "Module.h"
 #include "Execution.h"

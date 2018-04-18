@@ -66,6 +66,7 @@ namespace lisp
 		inline instance<lisp::Module> getModule() const { return _module; }
 		inline instance<> getSource() const { return _source; }
 
+		CRAFT_LISP_EXPORTED void readPrepDefaults();
 		CRAFT_LISP_EXPORTED void read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts);
 
 		CRAFT_LISP_EXPORTED std::vector<instance<Binding>> search(std::string const& search) const;

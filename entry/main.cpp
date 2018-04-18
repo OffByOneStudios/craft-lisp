@@ -140,8 +140,8 @@ int main(int argc, char** argv)
 		rx.set_highlighter_callback(colors, &live_module);
 
 
-		size_t stmt_count = 0;
-		for (;;) {
+		for (;;)
+		{
 			// display the prompt and retrieve input from the user
 			auto cinp = rx.input("CμλΤ>");
 			if (cinp == nullptr) break;
@@ -151,11 +151,14 @@ int main(int argc, char** argv)
 			instance<Module> statement;
 			try
 			{
-				statement = ns->requireModule(fmt::format("anon:repl-{0}", stmt_count++), input);
+				auto statement_loader = instance<AnonLoader>::make();
+				statement_loader->setContent(input);
+				statement_loader->setModule(live_module);
+				statement = ns->requireModule("anon:repl", statement_loader);
 			}
-			catch (std::exception e)
+			catch (std::exception const& ex)
 			{
-				std::cout << "parser: " << e.what() << '\n';
+				std::cout << "parser: " << ex.what() << '\n';
 			}
 
 			try
