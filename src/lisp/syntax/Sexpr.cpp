@@ -39,3 +39,24 @@ std::string Sexpr::toString() const
 
 	return "(" + stdext::join(' ', std::begin(child_strs), std::end(child_strs)) + ")";
 }
+
+std::string Sexpr::toRepr() const
+{
+	// TODO, use an external recursive pretty printer
+	std::vector<std::string> child_strs;
+	std::transform(std::begin(cells), std::end(cells), std::back_inserter(child_strs),
+		[](instance<> const& cell)
+		{
+			if (cell.isType<Sexpr>())
+				return cell.asType<Sexpr>()->toRepr();
+			if (cell.isType<Symbol>())
+				return cell.asType<Symbol>()->getValue();
+			if (cell.isType<Keyword>())
+				return ":" + cell.asType<Keyword>()->getValue();
+			if (cell.isType<std::string>())
+				return fmt::format("\"{0}\"", *cell.asType<std::string>());
+			return cell.toString();
+		});
+
+	return "(" + stdext::join(' ', std::begin(child_strs), std::end(child_strs)) + ")";
+}

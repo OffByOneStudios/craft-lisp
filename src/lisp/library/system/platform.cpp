@@ -32,9 +32,7 @@ void core::make_platform_globals(instance<Module> ret)
 #ifdef _WIN32
 		auto handle = LoadLibraryA(target.c_str());
 		if (handle == nullptr) throw stdext::exception(_impl::GetLastErrorAsString());
-		
 #endif
-		craft::types::system()._update();
 		
 		return instance<int64_t>::make(int64_t(handle));
 	});

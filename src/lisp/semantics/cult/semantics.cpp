@@ -161,7 +161,7 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 	std::vector<instance<Binding>> res;
 	for (auto& it : _symbolTable)
 	{
-		auto const& sym = symbols.Resolve(it.first);
+		auto const& sym = symbols.getValue(it.first);
 
 		if (size <= sym.size() && search == sym.substr(0, size))
 			res.push_back(_bindings[it.second]);

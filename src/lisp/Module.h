@@ -68,10 +68,10 @@ namespace lisp
 	public:
 		template<typename T> // TODO, implements PSemantics or PSyntax
 		inline instance<T> get()
-		{ return get(cpptype<T>::typeDesc()); }
+		{ return get(types::cpptype<T>::typeDesc()); }
 		template<typename T> // TODO, implements PSemantics or PSyntax
 		inline instance<T> require()
-		{ return require(cpptype<T>::typeDesc()); }
+		{ return require(types::cpptype<T>::typeDesc()); }
 
 		inline bool isBuiltin() { return stdext::starts_with(uri(), std::string("builtin")); }
 

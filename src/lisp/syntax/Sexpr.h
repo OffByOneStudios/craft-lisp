@@ -24,5 +24,6 @@ namespace lisp
 
 	public:
 		CRAFT_LISP_EXPORTED std::string toString() const;
+		CRAFT_LISP_EXPORTED std::string toRepr() const;
 	};
 }}

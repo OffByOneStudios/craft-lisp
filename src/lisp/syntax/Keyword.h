@@ -22,7 +22,7 @@ namespace lisp
 
 		size_t symbolStoreId;
 
-		CRAFT_LISP_EXPORTED std::string const& Resolve() const;
+		CRAFT_LISP_EXPORTED std::string const& getValue() const;
 
 		static CRAFT_LISP_EXPORTED instance<Keyword> makeKeyword(std::string const&);
 	};

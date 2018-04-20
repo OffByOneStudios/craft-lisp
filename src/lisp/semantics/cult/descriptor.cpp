@@ -89,7 +89,7 @@ void Resolve::bind()
 {
 	_binding = SScope::findScope(_parent)->lookup_recurse(_symbol);
 	if (!_binding)
-		throw stdext::exception("Resolve {0} bad symbol {1}.", craft_instance(), _symbol->Resolve());
+		throw stdext::exception("Resolve {0} bad symbol {1}.", craft_instance(), _symbol->getValue());
 }
 
 /******************************************************************************
