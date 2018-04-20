@@ -8,14 +8,14 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(Symbol)
 {
-	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Symbol> i) { return i->getValue(); });
+	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Symbol> i) { return i->Resolve(); });
 
 	_.defaults();
 }
 
-std::string const& Symbol::getValue() const
+std::string const& Symbol::Resolve() const
 {
-	return Execution::getCurrent()->getNamespace()->symbolStore.getValue(symbolStoreId);
+	return Execution::getCurrent()->getNamespace()->symbolStore.Resolve(symbolStoreId);
 }
 
 instance<Symbol> Symbol::makeSymbol(instance<Keyword> keyword)

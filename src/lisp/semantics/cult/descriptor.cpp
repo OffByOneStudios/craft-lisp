@@ -19,9 +19,10 @@ CRAFT_DEFINE(Variable)
 	_.defaults();
 }
 
-Variable::Variable()
+Variable::Variable(instance<SCultSemanticNode> initalizer, instance<SCultSemanticNode> type)
 {
-
+	_initalizer = _ast(initalizer);
+	_type = _ast(type);
 }
 
 instance<SCultSemanticNode> Variable::initalizerAst() const
@@ -30,7 +31,13 @@ instance<SCultSemanticNode> Variable::initalizerAst() const
 }
 instance<SCultSemanticNode> Variable::typeAst() const
 {
-	return _type_ast;
+	return _type;
+}
+
+void Variable::bind()
+{
+	if (_initalizer) _initalizer->bind();
+	if (_type) _type->bind();
 }
 
 instance<Binding> Variable::getBinding() const
@@ -43,14 +50,14 @@ void Variable::setBinding(instance<Binding> binding)
 }
 
 /******************************************************************************
-** GetValue
+** Resolve
 ******************************************************************************/
 
-CRAFT_DEFINE(GetValue)
+CRAFT_DEFINE(Resolve)
 {
-	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<GetValue> that)
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<Resolve> that)
 	{
-		return instance<GetValue>::make(that->getSymbol());
+		return instance<Resolve>::make(that->getSymbol());
 	});
 
 	_.use<SCultSemanticNode>().byCasting();
@@ -58,25 +65,31 @@ CRAFT_DEFINE(GetValue)
 	_.defaults();
 }
 
-GetValue::GetValue(instance<Symbol> symbol)
+Resolve::Resolve(instance<Symbol> symbol, Mode mode)
 {
 	_symbol = symbol;
+	_mode = mode;
 }
 
-instance<Symbol> GetValue::getSymbol() const
+bool Resolve::isGetter()
+{
+	return _mode == Mode::ResolveAndGet;
+}
+
+instance<Symbol> Resolve::getSymbol() const
 {
 	return _symbol;
 }
-instance<Binding> GetValue::getBinding() const
+instance<Binding> Resolve::getBinding() const
 {
 	return _binding;
 }
 
-void GetValue::bind()
+void Resolve::bind()
 {
 	_binding = SScope::findScope(_parent)->lookup_recurse(_symbol);
 	if (!_binding)
-		throw stdext::exception("GetValue {0} bad symbol {1}.", craft_instance(), _symbol->getValue());
+		throw stdext::exception("Resolve {0} bad symbol {1}.", craft_instance(), _symbol->Resolve());
 }
 
 /******************************************************************************

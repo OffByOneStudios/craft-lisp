@@ -27,6 +27,8 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	// Multimethods
 	//
 	sem->builtin_addMultiMethod("truth");
+	sem->builtin_addMultiMethod("get");
+	sem->builtin_addMultiMethod("set");
 
 	//
 	// Multimethod Implementations
@@ -134,7 +136,11 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_specialFormReader("variable",
 		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
-		auto ret = instance<Variable>::make();
+		auto size = sexpr->cells.size();
+		auto ret = instance<Variable>::make(
+			(size > 1 ? rs->read(sexpr, 1) : instance<>()),
+			(size > 2 ? rs->read(sexpr, 2) : instance<>())
+		);
 
 		return ret;
 	});
@@ -149,9 +155,21 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return ast->getValue();
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<GetValue> ast) -> instance<>
+		[](instance<InterpreterFrame> interp, instance<Resolve> ast) -> instance<>
 	{
-		return *interp->slot(ast->getBinding());
+		instance<>* slot = interp->slot(ast->getBinding());
+		
+		if (ast->isGetter())
+		{
+			// TODO
+		}
+
+		return *slot;
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<Variable> ast) -> instance<>
+	{
+		return interp->interp_exec(ast->initalizerAst());
 	});
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<BindSite> ast) -> instance<>
@@ -198,17 +216,31 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<Condition> ast) -> instance<>
 	{
+		auto truth = interp->getBackend().asType<BootstrapInterpreter>()->builtin_truth;
 		auto count = ast->branchCount();
 		for (auto i = 0; i < count; i++)
 		{
 			auto cond = interp->interp_exec(ast->branchConditionAst(i));
-			if (cond) // TODO truth
+			if (interp->interp_call(truth, { cond }))
 			{
 				return interp->interp_exec(ast->branchAst(i));
 			}
 		}
 
 		return interp->interp_exec(ast->branchDefaultAst());
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<Loop> ast) -> instance<>
+	{
+		auto truth = interp->getBackend().asType<BootstrapInterpreter>()->builtin_truth;
+
+		auto cond = interp->interp_exec(ast->conditionAst());
+		instance<> last;
+		while (interp->interp_call(truth, { cond }))
+		{
+			last = interp->interp_exec(ast->bodyAst());
+		}
+		return last;
 	});
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<> ast) -> instance<>

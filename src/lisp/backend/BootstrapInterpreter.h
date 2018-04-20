@@ -112,6 +112,11 @@ namespace lisp
 		instance<Namespace> _lisp;
 		instance<MultiMethod> _fn_system_exec;
 
+	public:
+		instance<MultiMethod> builtin_truth;
+		instance<MultiMethod> builtin_get;
+		instance<MultiMethod> builtin_set;
+
 	private:
 		CRAFT_LISP_EXPORTED instance<> _special_init(instance<lisp::Module> module, types::GenericInvoke const&) const;
 		CRAFT_LISP_EXPORTED instance<> _special_append(instance<lisp::Module> module, types::GenericInvoke const&) const;

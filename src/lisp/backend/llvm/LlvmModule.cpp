@@ -38,7 +38,7 @@ void LlvmModule::generate()
 			continue;
 		instance<Binding> binding(b);
 		
-		auto v = binding->getValue(instance<>());
+		auto v = binding->Resolve(instance<>());
 		if (v.typeId().isType<Function>())
 		{
 			instance<Function> f = v;

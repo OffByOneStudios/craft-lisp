@@ -22,16 +22,20 @@ namespace lisp
 	private:
 		instance<Binding> _binding;
 
-	public:
+	private:
 
 		instance<SCultSemanticNode> _initalizer;
-		instance<SCultSemanticNode> _type_ast;
+		instance<SCultSemanticNode> _type;
 
 	public:
-		CRAFT_LISP_EXPORTED Variable();
+		CRAFT_LISP_EXPORTED Variable(instance<SCultSemanticNode> initalizer = instance<>(), instance<SCultSemanticNode> type = instance<>());
 
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> initalizerAst() const;
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> typeAst() const;
+
+		// SCultSemanticNode
+	public:
+		CRAFT_LISP_EXPORTED virtual void bind() override;
 
 		// SBindable
 	public:
@@ -41,23 +45,34 @@ namespace lisp
 	};
 
 	/******************************************************************************
-	** GetValue
+	** Resolve
 	******************************************************************************/
 
 	/*
-		Get the value of a symbol.
+		Resolves the value of a symbol.
 	*/
-	class GetValue
+	class Resolve
 		: public virtual craft::types::Object
 		, public craft::types::Implements<SCultSemanticNode>
 	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::GetValue);
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Resolve);
+	public:
+		enum class Mode
+		{
+			ResolveOnly = 0,
+			ResolveAndGet = 1,
+		};
+
 	private:
 		instance<Symbol> _symbol;
+		Mode _mode;
+
 		instance<Binding> _binding;
 
 	public:
-		CRAFT_LISP_EXPORTED GetValue(instance<Symbol> binding);
+		CRAFT_LISP_EXPORTED Resolve(instance<Symbol> binding, Mode mode = Mode::ResolveOnly);
+
+		CRAFT_LISP_EXPORTED bool isGetter();
 
 		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 		CRAFT_LISP_EXPORTED instance<Binding> getBinding() const;

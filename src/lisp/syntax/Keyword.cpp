@@ -9,14 +9,14 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(Keyword)
 {
-	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Keyword> i) { return ":" + i->getValue(); });
+	_.use<PStringer>().singleton<FunctionalStringer>([](instance<Keyword> i) { return ":" + i->Resolve(); });
 
 	_.defaults();
 }
 
-std::string const& Keyword::getValue() const
+std::string const& Keyword::Resolve() const
 {
-	return Execution::getCurrent()->getNamespace()->symbolStore.getValue(symbolStoreId);
+	return Execution::getCurrent()->getNamespace()->symbolStore.Resolve(symbolStoreId);
 }
 
 instance<Keyword> Keyword::makeKeyword(std::string const& s)

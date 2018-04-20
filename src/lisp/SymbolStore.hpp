@@ -55,7 +55,7 @@ namespace lisp
 			return intern(fmt::format("$SYM-{0}-{1}", s_prefix, ++_anon_count));
 		}
 
-		std::string const& getValue(size_t value) const
+		std::string const& Resolve(size_t value) const
 		{
 			return *_strings.get_iterator_from_index(value);
 		}

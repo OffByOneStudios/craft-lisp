@@ -250,6 +250,10 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 void BootstrapInterpreter::builtin_validateSpecialForms(instance<lisp::Module> module)
 {
 	_fn_system_exec = module->get<CultSemantics>()->lookup(Symbol::makeSymbol("exec"))->getSite()->valueAst();
+
+	builtin_truth = module->get<CultSemantics>()->lookup(Symbol::makeSymbol("truth"))->getSite()->valueAst();
+	builtin_get = module->get<CultSemantics>()->lookup(Symbol::makeSymbol("get"))->getSite()->valueAst();
+	builtin_set = module->get<CultSemantics>()->lookup(Symbol::makeSymbol("set"))->getSite()->valueAst();
 }
 
 /******************************************************************************

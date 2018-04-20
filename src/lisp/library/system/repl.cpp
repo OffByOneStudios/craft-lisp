@@ -52,7 +52,7 @@ void core::make_repl_globals(instance<Module> ret)
 		//	if (s.typeId().isType<Symbol>())
 		//	{
 		//		auto sym = s.asType<Symbol>();
-		//		auto bindings = m->require<CultSemantics>()->search(sym->getValue());
+		//		auto bindings = m->require<CultSemantics>()->search(sym->Resolve());
 
 		//		if (target.typeId().isType<MultiMethod>())
 		//		{
@@ -69,7 +69,7 @@ void core::make_repl_globals(instance<Module> ret)
 
 		//						if (argType.typeId().isType<lisp::types::CraftType>())
 		//						{
-		//							auto bindingId = b->getValue(frame).typeId();
+		//							auto bindingId = b->Resolve(frame).typeId();
 		//							auto argtypeId = argType.asType<lisp::types::CraftType>()->type;
 		//							if (bindingId == argtypeId)
 		//							{
@@ -126,11 +126,11 @@ void core::make_repl_globals(instance<Module> ret)
 			{
 				auto sym = s.asType<Symbol>();
 				
-				auto choices = m->require<CultSemantics>()->search(sym->getValue());
+				auto choices = m->require<CultSemantics>()->search(sym->Resolve());
 				for (auto s : choices)
 				{
 					
-					res->push(instance<std::string>::make(s->getSymbol()->getValue()));
+					res->push(instance<std::string>::make(s->getSymbol()->Resolve()));
 				}
 			}
 		}
@@ -146,7 +146,7 @@ void core::make_repl_globals(instance<Module> ret)
 				{
 					auto target = m->require<CultSemantics>()->lookup(sym);
 
-					auto query = instance<std::string>::make(a->substr(a->find(sym->getValue()) + sym->getValue().size()));
+					auto query = instance<std::string>::make(a->substr(a->find(sym->Resolve()) + sym->Resolve().size()));
 					auto disp = Execution::exec_fromCurrentModule("completion", { m, target, query });
 					if (disp.typeId().isType<List>()) return disp.asType<List>();
 					else return res;

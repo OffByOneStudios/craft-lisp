@@ -287,7 +287,7 @@ instance<Module> lisp::make_library_globals(instance<Namespace> ns)
 
 		auto binding = lookup_scope->lookup(lookup_name);
 		if (binding)
-			return binding->getValue(frame);
+			return binding->Resolve(frame);
 
 		return instance<>();
 	}));

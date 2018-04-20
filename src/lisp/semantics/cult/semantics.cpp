@@ -30,7 +30,7 @@ CultSemantics::CultSemantics(instance<lisp::Module> forModule)
 instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance<> syntax)
 {
 	if (syntax.typeId().isType<Symbol>())
-		return instance<GetValue>::make(syntax.asType<Symbol>());
+		return instance<Resolve>::make(syntax.asType<Symbol>(), Resolve::Mode::ResolveAndGet);
 	else if (syntax.typeId().isType<Sexpr>())
 	{
 		instance<Sexpr> expr = syntax;
@@ -161,7 +161,7 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 	std::vector<instance<Binding>> res;
 	for (auto& it : _symbolTable)
 	{
-		auto const& sym = symbols.getValue(it.first);
+		auto const& sym = symbols.Resolve(it.first);
 
 		if (size <= sym.size() && search == sym.substr(0, size))
 			res.push_back(_bindings[it.second]);
