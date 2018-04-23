@@ -10,7 +10,7 @@ using namespace craft::lisp::library::helper;
 
 void core::make_shim_globals(instance<Module> ret)
 {
-
+	/*
 	auto semantics = ret->require<CultSemantics>();
 
 	semantics->builtin_implementMultiMethod("types",
@@ -86,5 +86,5 @@ void core::make_shim_globals(instance<Module> ret)
 		}
 
 		throw stdext::exception("No Matching Manipulator for method");
-	});
+	});*/
 }

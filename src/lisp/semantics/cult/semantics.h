@@ -91,7 +91,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED void builtin_addSpecialForm(std::string const& symbol_name);
 		CRAFT_LISP_EXPORTED void builtin_specialFormReader(std::string const& symbol_name, f_specialFormReader reader);
 
-		CRAFT_LISP_EXPORTED void builtin_addMultiMethod(std::string const& symbol_name);
+		CRAFT_LISP_EXPORTED void builtin_addMultiMethod(std::string const& symbol_name, types::cpp::Multimethod<types::ExpressionDispatcher>* existing = nullptr);
 		CRAFT_LISP_EXPORTED void builtin_attachMultiMethod(std::string const& symbol_name, std::tuple<types::ExpressionStore, types::Function> impl);
 
 		template<typename T>

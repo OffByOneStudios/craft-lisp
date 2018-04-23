@@ -98,7 +98,7 @@ CRAFT_DEFINE(List)
 			else if (it.hasFeature<PRepr>()) res << it.getFeature<PRepr>()->toRepr(it);
 			else
 			{
-				res << fmt::format("{0}<{1}>", it.getFeature<PIdentifier>()->identifier(), (void*)it.get());
+				res << fmt::format("{0}<{1}>", it.typeId().toString(), (void*)it.get());
 			}
 			if(i != s - 1) res << ", ";
 		}

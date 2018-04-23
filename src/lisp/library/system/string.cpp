@@ -30,9 +30,10 @@ void core::make_string_globals(instance<Module> ret)
 		return instance<std::string>::make(a.getFeature<PRepr>()->toRepr(a));
 	});
 	semantics->builtin_implementMultiMethod("string",
-		[](instance<PIdentifier> a) -> instance<std::string>
+		[](instance<> a) -> instance<std::string>
 	{
-		return instance<std::string>::make(a.getFeature<PIdentifier>()->identifier());
+		if (a.isNull()) return instance<std::string>::make("null");
+		return instance<std::string>::make(a.typeId().toString());
 	});
 
 	semantics->builtin_implementMultiMethod("print",

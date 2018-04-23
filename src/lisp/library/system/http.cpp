@@ -88,7 +88,7 @@ namespace library {
 				if (res.get() == nullptr) rep.data << "null";
 				else if (res.hasFeature<PStringer>()) rep.data << res.getFeature<PStringer>()->toString(res);
 				else if (res.hasFeature<PRepr>()) rep.data << res.getFeature<PRepr>()->toRepr(res);
-				else rep.data << fmt::format("{0}<{1}>", res.getFeature<PIdentifier>()->identifier(), (void*)res.get());
+				else rep.data << fmt::format("{0}<{1}>", res.typeId().toString(), (void*)res.get());
 			}
 			catch (stdext::exception e)
 			{

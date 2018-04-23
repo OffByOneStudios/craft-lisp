@@ -266,7 +266,7 @@ void CultSemantics::builtin_specialFormReader(std::string const& symbol_name, Cu
 	auto value = binding->getSite()->valueAst().asType<SpecialForm>()->_read = reader;
 }
 
-void CultSemantics::builtin_addMultiMethod(std::string const& symbol_name)
+void CultSemantics::builtin_addMultiMethod(std::string const& symbol_name, types::cpp::Multimethod<types::ExpressionDispatcher>* existing)
 {
 	auto symbol = Symbol::makeSymbol(symbol_name);
 	auto bindsite = instance<BindSite>::make(symbol, instance<MultiMethod>::make());

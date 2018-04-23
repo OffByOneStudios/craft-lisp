@@ -26,6 +26,8 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	//
 	// Multimethods
 	//
+	sem->builtin_addMultiMethod("is-subtype");
+
 	sem->builtin_addMultiMethod("truth");
 	sem->builtin_addMultiMethod("get");
 	sem->builtin_addMultiMethod("set");
