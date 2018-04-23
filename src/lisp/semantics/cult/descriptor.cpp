@@ -13,6 +13,11 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(Variable)
 {
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<lisp::Variable> that)
+	{
+		return instance<Variable>::make(that->initalizerAst(), that->typeAst());
+	});
+
 	_.use<SCultSemanticNode>().byCasting();
 	_.use<SBindable>().byCasting();
 
@@ -21,8 +26,8 @@ CRAFT_DEFINE(Variable)
 
 Variable::Variable(instance<SCultSemanticNode> initalizer, instance<SCultSemanticNode> type)
 {
-	_initalizer = _ast(initalizer);
-	_type = _ast(type);
+	if (initalizer) _initalizer = _ast(initalizer);
+	if (type) _type = _ast(type);
 }
 
 instance<SCultSemanticNode> Variable::initalizerAst() const

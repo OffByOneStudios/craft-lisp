@@ -116,9 +116,21 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		// Read the arg expression
 
 		// check for void args expression
-		if (!(sexpr->cells[1].isType<Sexpr>() && sexpr->cells[1].asType<Sexpr>()->cells.size() == 0))
+		if (sexpr->cells[1].isType<Sexpr>())
 		{
-			auto args = rs->read(sexpr, 1); // Need a special read?
+			// Special reed:
+			for (auto arg_cell : sexpr->cells[1].asType<Sexpr>()->cells)
+			{
+				if (arg_cell.isType<Sexpr>())
+				{
+
+				}
+				else
+				{
+					auto symbol = library::helper::symbol(arg_cell);
+					ret->pushArg(instance<BindSite>::make(symbol, instance<Variable>::make()));
+				}
+			}
 		}
 
 		// Read the body
@@ -129,7 +141,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		{
 			body_block->push(rs->read(sexpr, i));
 		}
-		ret->setBodyAst(body_block);
+		ret->setBody(body_block);
 
 		return ret;
 	});
@@ -204,7 +216,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<Block> ast) -> instance<>
 	{
-		InterpreterFrame::PushSubFrame _hold(interp, ast, instance<RuntimeSlots>::make(ast, 2));
+		InterpreterFrame::PushSubFrame _hold(interp, ast, instance<RuntimeSlots>::make(ast, 2), interp->top());
 
 		auto count = ast->statementCount();
 		instance<> last_res;
@@ -243,6 +255,11 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 			last = interp->interp_exec(ast->bodyAst());
 		}
 		return last;
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<Function> ast) -> instance<>
+	{
+		return ast;
 	});
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<> ast) -> instance<>

@@ -106,9 +106,9 @@ InterpreterFrame::SubFrame const* InterpreterFrame::top() const
 	return &*_entries.rbegin();
 }
 
-void InterpreterFrame::push(instance<SScope> scope, instance<RuntimeSlots> value, SubFrame*)
+void InterpreterFrame::push(instance<SScope> scope, instance<RuntimeSlots> value, SubFrame* chain)
 {
-	_entries.insert(SubFrame(scope, value));
+	_entries.insert(SubFrame(scope, value, chain));
 }
 void InterpreterFrame::pop()
 {
@@ -122,6 +122,25 @@ instance<> InterpreterFrame::interp_exec(instance<SCultSemanticNode> node)
 
 instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke const& call)
 {
+	if (fn.isType<Function>())
+	{
+		auto fnast = fn.asType<Function>();
+		auto rtv = instance<RuntimeSlots>::make(fnast, fnast->argCount());
+		InterpreterFrame::PushSubFrame _hold(craft_instance(), fnast, rtv);
+
+		if (call.args.size() != fnast->argCount())
+			throw stdext::exception("Interpreter asked to execute function with mismatched arguments ({0} calling {1}).", call.args.size(), fnast->argCount());
+
+		auto count = fnast->argCount();
+		for (auto i = 0; i < count; ++i)
+		{
+			// TODO bindsites manip here instead maybe?
+			// TODO argument AST node?
+			*rtv->getSlot((instance<>*)(&rtv), i) = call.args[i];
+		}
+
+		return interp_exec(fnast->bodyAst());
+	}
 	if (fn.hasFeature<PSubroutine>())
 	{
 		auto psub = fn.getFeature<PSubroutine>();

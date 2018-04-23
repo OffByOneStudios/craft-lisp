@@ -72,8 +72,12 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED Function();
 
-		CRAFT_LISP_EXPORTED void setBodyAst(instance<SCultSemanticNode>);
+		CRAFT_LISP_EXPORTED void setBody(instance<SCultSemanticNode>);
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> bodyAst() const;
+
+		CRAFT_LISP_EXPORTED size_t argCount() const;
+		CRAFT_LISP_EXPORTED void pushArg(instance<SCultSemanticNode>);
+		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> argAst(size_t index) const;
 
 		// SCultSemanticNode
 	public:

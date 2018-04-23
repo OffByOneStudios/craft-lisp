@@ -3,6 +3,8 @@
 #include "lisp/semantics/cult/cult.h"
 #include "lisp/semantics/cult/calling.h"
 
+#include "lisp/backend/BootstrapInterpreter.h" // For Function calling interpreter
+
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
@@ -97,7 +99,10 @@ class craft::lisp::FunctionSubroutineProvider
 	{
 		instance<Function> fn = _;
 
-		// Invoke interpreter
+		// TODO make this generic
+		auto frame = InterpreterFrame::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
+
+		frame->interp_exec(fn);
 
 		return instance<>();
 	}
@@ -110,7 +115,12 @@ CRAFT_DEFINE(lisp::Function)
 	{
 		auto clone = instance<lisp::Function>::make();
 
-		clone->setBodyAst(_clone(that->bodyAst()));
+		clone->setBody(_clone(that->bodyAst()));
+
+		auto count = that->argCount();
+		//clone->preSize(count);
+		for (auto i = 0; i < count; ++i)
+			clone->pushArg(_clone(that->argAst(i)));
 
 		return clone;
 	});
@@ -126,13 +136,26 @@ lisp::Function::Function()
 {
 }
 
-void lisp::Function::setBodyAst(instance<SCultSemanticNode> body)
+void lisp::Function::setBody(instance<SCultSemanticNode> body)
 {
 	_body = _ast(body);
 }
 instance<SCultSemanticNode> lisp::Function::bodyAst() const
 {
 	return _body;
+}
+
+size_t lisp::Function::argCount() const
+{
+	return _args.size();
+}
+void lisp::Function::pushArg(instance<SCultSemanticNode> arg)
+{
+	_args.push_back(_ast(arg));
+}
+instance<SCultSemanticNode> lisp::Function::argAst(size_t index) const
+{
+	return _args[index];
 }
 
 void lisp::Function::bind()
