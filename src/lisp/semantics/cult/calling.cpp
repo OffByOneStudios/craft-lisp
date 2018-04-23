@@ -102,7 +102,7 @@ class craft::lisp::FunctionSubroutineProvider
 		// TODO make this generic
 		auto frame = InterpreterFrame::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
 
-		frame->interp_exec(fn);
+		frame->interp_call(fn, call);
 
 		return instance<>();
 	}
