@@ -1,36 +1,15 @@
-
 #include "lisp/common.h"
 #include "lisp/library/libraries.h"
-#include "prelude.h"
+#include "lisp/library/system/prelude.h"
+
+#include "util/platform_windows.h"
 
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
-
-namespace _impl {
-#ifdef _WIN32
-	std::string GetLastErrorAsString()
-	{
-		//Get the error message, if any.
-		DWORD errorMessageID = ::GetLastError();
-		if (errorMessageID == 0)
-			return std::string(); //No error message has been recorded
-
-		LPSTR messageBuffer = nullptr;
-		size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-
-		std::string message(messageBuffer, size);
-
-		//Free the buffer.
-		LocalFree(messageBuffer);
-
-		return message;
-	}
-#endif
-}
+using namespace platform::windows;
 
 namespace craft {
 namespace lisp {
@@ -87,24 +66,24 @@ namespace library
 
 			if (!CreatePipe(&_stdoutRead, &_stdoutWrite, &saAttr, 0))
 			{
-				throw stdext::exception("Failed to Create stdout Pipe: {0}", _impl::GetLastErrorAsString());
+				throw stdext::exception("Failed to Create stdout Pipe: {0}", GetLastErrorAsString());
 			}
 
 			if (!SetHandleInformation(_stdoutRead, HANDLE_FLAG_INHERIT, 0))
 			{
-				throw stdext::exception("Failed to set stdout Pipe's security info {0}", _impl::GetLastErrorAsString());
+				throw stdext::exception("Failed to set stdout Pipe's security info {0}", GetLastErrorAsString());
 			}
 
 			if (!CreatePipe(&_stdinRead, &_stdinWrite, &saAttr, 0))
 			{
-				throw stdext::exception("Failed to Create stdin Pipe {0}", _impl::GetLastErrorAsString());
+				throw stdext::exception("Failed to Create stdin Pipe {0}", GetLastErrorAsString());
 			}
 
 			// Ensure the write handle to the pipe for STDIN is not inherited. 
 
 			if (!SetHandleInformation(_stdinWrite, HANDLE_FLAG_INHERIT, 0))
 			{
-				throw stdext::exception("Failed to set stdin Pipe's security info {0}", _impl::GetLastErrorAsString());
+				throw stdext::exception("Failed to set stdin Pipe's security info {0}", GetLastErrorAsString());
 			}
 			
 			si.cb = sizeof(STARTUPINFOA);
@@ -126,7 +105,7 @@ namespace library
 				&pi)           // Pointer to PROCESS_INFORMATION structure
 				)
 			{
-				throw stdext::exception("Failed to Create Subprocess: {0}", _impl::GetLastErrorAsString());
+				throw stdext::exception("Failed to Create Subprocess: {0}", GetLastErrorAsString());
 			}
 
 			return;

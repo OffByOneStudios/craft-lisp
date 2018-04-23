@@ -10,3 +10,9 @@ CRAFT_DEFINE(PBackend) { _.defaults(); }
 CRAFT_DEFINE(PExecutor) { _.defaults(); }
 CRAFT_DEFINE(PCompiler) { _.defaults(); }
 CRAFT_DEFINE(SFrame) { _.defaults(); }
+
+/******************************************************************************
+** DLL ENTRY
+******************************************************************************/
+
+#include "types/dll_entry.inc"

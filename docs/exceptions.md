@@ -1,0 +1,1 @@
+We use a [condition and restart](http://www.gigamonkeys.com/book/beyond-exception-handling-conditions-and-restarts.html) based exception system.

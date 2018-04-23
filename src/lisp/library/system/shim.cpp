@@ -1,7 +1,6 @@
-
 #include "lisp/common.h"
 #include "lisp/library/libraries.h"
-#include "prelude.h"
+#include "lisp/library/system/prelude.h"
 
 using namespace craft;
 using namespace craft::types;

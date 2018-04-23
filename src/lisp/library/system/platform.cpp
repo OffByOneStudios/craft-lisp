@@ -1,19 +1,16 @@
-
 #include "lisp/common.h"
 #include "lisp/library/libraries.h"
-#include "prelude.h"
+#include "lisp/library/system/prelude.h"
+
+#include "util/platform_windows.h"
 
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
+using namespace platform::windows;
 
-namespace _impl {
-#ifdef _WIN32
-	extern std::string GetLastErrorAsString();
-#endif
-}
 
 void core::make_platform_globals(instance<Module> ret)
 {
@@ -26,14 +23,9 @@ void core::make_platform_globals(instance<Module> ret)
 	});
 
 	semantics->builtin_implementMultiMethod("platform/loaddll",
-		[](instance<std::string> a) -> instance<int64_t>
+		[](instance<std::string> a)
 	{
-		auto target = path::normalize(*a);
-#ifdef _WIN32
-		auto handle = LoadLibraryA(target.c_str());
-		if (handle == nullptr) throw stdext::exception(_impl::GetLastErrorAsString());
-#endif
+
 		
-		return instance<int64_t>::make(int64_t(handle));
 	});
 }
