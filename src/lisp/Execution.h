@@ -13,7 +13,7 @@ namespace lisp
 
 		instance<Namespace> _namespace;
 
-		std::vector<instance<SFrame>> _stack;
+		std::list<instance<SFrame>> _stack;
 
 		static thread_local instance<Execution> _tl_current;
 
@@ -30,7 +30,7 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED instance<Namespace> getNamespace() const;
 
-		CRAFT_LISP_EXPORTED std::vector<instance<SFrame>> const& stack() const;
+		CRAFT_LISP_EXPORTED std::list<instance<SFrame>> const& stack() const;
 		CRAFT_LISP_EXPORTED void push_frame(instance<SFrame> _push);
 		CRAFT_LISP_EXPORTED void pop();
 
@@ -39,9 +39,16 @@ namespace lisp
 		{
 			auto const& s = stack();
 			if (s.size() == 0) return instance<>();
-			auto t = s[0];
+			auto t = s.front();
 			if (!t.isType<T>()) return instance<>();
 			return t;
+		}
+
+		inline instance<SFrame> top() const
+		{
+			auto const& s = stack();
+			if (s.size() == 0) return instance<>();
+			return s.front();
 		}
 
 		// Helpers

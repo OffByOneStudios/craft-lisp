@@ -39,33 +39,38 @@ instance<Namespace> Execution::getNamespace() const
 	return _namespace;
 }
 
-std::vector<instance<SFrame>> const& Execution::stack() const
+std::list<instance<SFrame>> const& Execution::stack() const
 {
 	return _stack;
 }
 void Execution::push_frame(instance<SFrame> _push)
 {
 	_push->setExecution(craft_instance());
-	_stack.push_back(_push);
+	_stack.push_front(_push);
 }
 void Execution::pop()
 {
 	if (_stack.size() == 0)
 		throw stdext::exception("Execution: stack underflow");
 
-	_stack.pop_back();
+	_stack.pop_front();
 }
 
 instance<> Execution::exec_fromCurrentModule(std::string const& a, types::GenericInvoke const& b)
 {
-	throw stdext::exception("Not Implemented");
-	return instance<>();
+	auto cur = getCurrent();
+	auto frame = cur->top();
+	if (!frame)
+		throw stdext::exception("No Frame");
+
+	auto entries = frame->entries();
+	auto module = frame->getEntryModule(entries - 1);
+	return module->exec(a, b);
 }
 
 instance<> Execution::exec(instance<PSubroutine> a, types::GenericInvoke const & b)
 {
-	throw stdext::exception("Not Implemented");
-	return instance<>();
+	return a->execute(a, b);
 }
 
 instance<> Execution::eval(std::string const& a)
