@@ -32,11 +32,11 @@ CRAFT_DEFINE(Map)
 		{
 			std::string f, s;
 			if (it.first.hasFeature<PRepr>()) f = it.first.getFeature<PRepr>()->toRepr(it.first);
-			else f = fmt::format("{0}<{1}>", it.first.typeId().toString(), (void*)it.first.get());
+			else f = fmt::format("{0}<{1}>", it.first.typeId(), (void*)it.first.get());
 
 			if (it.second.get() == nullptr) s = "null";
 			else if (it.second.hasFeature<PRepr>()) s = it.second.getFeature<PRepr>()->toRepr(it.second);
-			else s = fmt::format("{0}<{1}>", it.second.typeId().toString(), (void*)it.second.get());
+			else s = fmt::format("{0}<{1}>", it.second.typeId(), (void*)it.second.get());
 
 
 			res << fmt::format("{0}: {1}", f, s);

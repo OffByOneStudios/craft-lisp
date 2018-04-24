@@ -12,7 +12,7 @@ CRAFT_DEFINE(craft::lisp::SScope) { _.defaults(); }
 
 void SBindable::attach(instance<BindSite>)
 {
-	throw stdext::exception("This bindable does not support attachement.");
+	throw stdext::exception("This bindable ({0}) does not support attachement.", craft_featuredInstance().typeId());
 }
 
 instance<CultSemantics> SScope::getSemantics() const

@@ -29,7 +29,7 @@ namespace lisp {
 				else if (s.typeId().isType<std::string>())
 					return Symbol::makeSymbol(*s.asType<std::string>());
 				else
-					throw stdext::exception("The given {0} cannot be used as a symbol", s.typeId().toString());
+					throw stdext::exception("The given {0} cannot be used as a symbol", s.typeId());
 			}
 
 			/* Throw an exception if a given argument is not of the expected type
@@ -44,7 +44,7 @@ namespace lisp {
 				if (inst.typeId().isType<T>())
 					return inst;
 
-				throw stdext::exception("Expected {0} got {1}", types::cpptype<T>::typeDesc().toString(), inst.typeId().toString());
+				throw stdext::exception("Expected {0} got {1}", types::cpptype<T>::typeDesc(), inst.typeId());
 			}
 
 			/* Takes an sexpr represting a function binding, and returns a signature
