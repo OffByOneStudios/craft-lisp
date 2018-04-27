@@ -29,8 +29,17 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_addMultiMethod("is-subtype");
 
 	sem->builtin_addMultiMethod("truth");
+	sem->builtin_implementMultiMethod("truth",
+		[](instance<bool> value) -> instance<bool>
+	{
+		return value;
+	});
+	sem->builtin_implementMultiMethod("truth",
+		[](instance<> value) -> instance<bool>
+	{
+		return instance<bool>::make(!value.isNull());
+	});
 	sem->builtin_addMultiMethod("get");
-	sem->builtin_addMultiMethod("set");
 
 	//
 	// Multimethod Implementations
@@ -45,6 +54,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_specialFormReader("define",
 		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 		{
+			bool force = false;
 			if (sexpr->cells.size() != 3)
 				throw stdext::exception("malformed: (define <symbol> <expr>)");
 
@@ -151,9 +161,30 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
 		auto size = sexpr->cells.size();
+
+		if (size > 3 || size < 2)
+			throw stdext::exception("malformed: (variable <value> [<type>])");
+
 		auto ret = instance<Variable>::make(
 			(size > 1 ? rs->read(sexpr, 1) : instance<>()),
 			(size > 2 ? rs->read(sexpr, 2) : instance<>())
+		);
+
+		return ret;
+	});
+
+	sem->builtin_addSpecialForm("set");
+	sem->builtin_specialFormReader("set",
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
+	{
+		if (sexpr->cells.size() != 3)
+			throw stdext::exception("malformed: (set <target> <value>)");
+
+		auto symbol = library::helper::symbol(sexpr->cells[1]);
+
+		auto ret = instance<Assign>::make(
+			instance<Resolve>::make(symbol, Resolve::Mode::ResolveOnly),
+			rs->read(sexpr, 2)
 		);
 
 		return ret;
@@ -171,14 +202,29 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<Resolve> ast) -> instance<>
 	{
-		instance<>* slot = interp->slot(ast->getBinding());
-		
+		auto slot = interp->slot(ast->getBinding());
+
 		if (ast->isGetter())
 		{
-			// TODO
+			// TODO call getter
+			return slot->getValue();
 		}
 
-		return *slot;
+		return slot;
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<Assign> ast) -> instance<>
+	{
+		auto destination = interp->interp_exec(ast->slotAst());
+
+		if (!destination.typeId().isType<RuntimeSlotReference>())
+			throw stdext::exception("Slot AST failed....");
+
+		auto value = interp->interp_exec(ast->valueAst());
+
+		destination.asType<RuntimeSlotReference>()->setValue(value);
+
+		return value;
 	});
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<Variable> ast) -> instance<>
@@ -194,7 +240,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		auto value = interp->interp_exec(ast->valueAst());
 
 		if (!ast->isAttachSite())
-			*interp->slot(binding) = value;
+			interp->slot(binding)->setValue(value);
 		return value;
 	});
 	sem->builtin_implementMultiMethod("exec",
@@ -235,7 +281,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		for (auto i = 0; i < count; i++)
 		{
 			auto cond = interp->interp_exec(ast->branchConditionAst(i));
-			if (interp->interp_call(truth, { cond }))
+			if (*interp->interp_call(truth, { cond }).asType<bool>())
 			{
 				return interp->interp_exec(ast->branchAst(i));
 			}
@@ -247,10 +293,9 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		[](instance<InterpreterFrame> interp, instance<Loop> ast) -> instance<>
 	{
 		auto truth = interp->getBackend().asType<BootstrapInterpreter>()->builtin_truth;
-
-		auto cond = interp->interp_exec(ast->conditionAst());
+		
 		instance<> last;
-		while (interp->interp_call(truth, { cond }))
+		while (*interp->interp_call(truth, { interp->interp_exec(ast->conditionAst()) }).asType<bool>())
 		{
 			last = interp->interp_exec(ast->bodyAst());
 		}

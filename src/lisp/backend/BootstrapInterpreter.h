@@ -55,7 +55,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED void push(instance<SScope> scope, instance<RuntimeSlots> value, SubFrame* = nullptr);
 		CRAFT_LISP_EXPORTED void pop();
 
-		inline instance<>* slot(instance<Binding> binding)
+		inline instance<RuntimeSlotReference> slot(instance<Binding> binding)
 		{
 			auto scope = binding->getScope();
 			auto module = getEntryModule(entries() - 1);
@@ -66,7 +66,7 @@ namespace lisp
 			else
 				slots = getEntryValue(getScopeEntryIndex(scope));
 
-			return slots->getSlot((instance<>*)&slots, binding->getIndex());
+			return instance<RuntimeSlotReference>::make(slots, binding->getIndex());
 		}
 
 		// Interpreter helpers

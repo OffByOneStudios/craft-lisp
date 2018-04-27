@@ -57,7 +57,7 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Resolve);
 	public:
-		enum class Mode
+		enum class Mode // TODO make evaluation results inspectable to issue gets as necessary
 		{
 			ResolveOnly = 0,
 			ResolveAndGet = 1,
@@ -76,6 +76,36 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 		CRAFT_LISP_EXPORTED instance<Binding> getBinding() const;
+
+		// SCultSemanticNode
+	public:
+		CRAFT_LISP_EXPORTED virtual void bind() override;
+	};
+
+	/******************************************************************************
+	** Assign
+	******************************************************************************/
+
+	/*
+		Assigns into a slot (or symbol).
+	*/
+	class Assign
+		: public virtual craft::types::Object
+		, public craft::types::Implements<SCultSemanticNode>
+	{
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Assign);
+	public:
+
+	private:
+		instance<SCultSemanticNode> _slot;
+		instance<SCultSemanticNode> _value;
+
+	public:
+		CRAFT_LISP_EXPORTED Assign(instance<SCultSemanticNode> slot, instance<SCultSemanticNode> value);
+		CRAFT_LISP_EXPORTED void craft_setupInstance();
+
+		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> slotAst() const;
+		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> valueAst() const;
 
 		// SCultSemanticNode
 	public:

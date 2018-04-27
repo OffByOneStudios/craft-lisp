@@ -6,6 +6,10 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
+/******************************************************************************
+** RuntimeSlots
+******************************************************************************/
+
 CRAFT_DEFINE(RuntimeSlots)
 {
 	_.defaults();
@@ -55,4 +59,28 @@ void RuntimeSlots::extend(instance<>* inst, size_t size)
 	std::swap(slots->slots, new_slots);
 
 	delete[] new_slots;
+}
+
+/******************************************************************************
+** RuntimeSlotReference
+******************************************************************************/
+
+CRAFT_DEFINE(RuntimeSlotReference)
+{
+	_.defaults();
+}
+
+RuntimeSlotReference::RuntimeSlotReference(instance<RuntimeSlots> slots, size_t index)
+{
+	_slots = slots;
+	_index = index;
+}
+
+instance<> RuntimeSlotReference::getValue()
+{
+	return *_slots->getSlot((instance<>*)(&_slots), _index);
+}
+void RuntimeSlotReference::setValue(instance<> value)
+{
+	*_slots->getSlot((instance<>*)(&_slots), _index) = value;
 }

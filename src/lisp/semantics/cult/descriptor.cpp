@@ -62,7 +62,7 @@ CRAFT_DEFINE(Resolve)
 {
 	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<Resolve> that)
 	{
-		return instance<Resolve>::make(that->getSymbol());
+		return instance<Resolve>::make(that->getSymbol(), that->_mode);
 	});
 
 	_.use<SCultSemanticNode>().byCasting();
@@ -95,6 +95,55 @@ void Resolve::bind()
 	_binding = SScope::findScope(_parent)->lookup_recurse(_symbol);
 	if (!_binding)
 		throw stdext::exception("Resolve {0} bad symbol {1}.", craft_instance(), _symbol->getValue());
+}
+
+/******************************************************************************
+** Assign
+******************************************************************************/
+
+CRAFT_DEFINE(Assign)
+{
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<lisp::Assign> that)
+	{
+		return instance<Assign>::make(_clone(that->slotAst()), _clone(that->valueAst()));
+	});
+
+	_.use<SCultSemanticNode>().byCasting();
+
+	_.defaults();
+}
+
+Assign::Assign(instance<SCultSemanticNode> slot, instance<SCultSemanticNode> value)
+{
+	_slot = slot;
+	_value = value;
+}
+
+void Assign::craft_setupInstance()
+{
+	Object::craft_setupInstance();
+
+	_ast(_slot);
+	_ast(_value);
+}
+
+instance<SCultSemanticNode> Assign::slotAst() const
+{
+	return _slot;
+}
+instance<SCultSemanticNode> Assign::valueAst() const
+{
+	return _value;
+}
+
+void Assign::bind()
+{
+	_slot->bind();
+	_value->bind();
+
+	auto binding = _slot.asType<Resolve>()->getBinding();
+	if (!binding->getSite()->valueAst().isType<Variable>())
+		throw stdext::exception("Error, can only assign slots.");
 }
 
 /******************************************************************************
