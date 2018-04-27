@@ -257,7 +257,7 @@ instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string cons
 void CultSemantics::builtin_addSpecialForm(std::string const& symbol_name)
 {
 	auto symbol = Symbol::makeSymbol(symbol_name);
-	auto bindsite = instance<BindSite>::make(symbol, instance<SpecialForm>::makeFromPointer(new SpecialForm()));
+	auto bindsite = instance<BindSite>::make(symbol, instance<SpecialForm>::makeThroughLambda([](auto p) { return new (p) SpecialForm(); }));
 	_ast.push_back(_astbind(bindsite));
 }
 void CultSemantics::builtin_specialFormReader(std::string const& symbol_name, CultSemantics::f_specialFormReader reader)

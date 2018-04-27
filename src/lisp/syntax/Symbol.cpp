@@ -20,7 +20,7 @@ std::string const& Symbol::getValue() const
 
 instance<Symbol> Symbol::makeSymbol(instance<Keyword> keyword)
 {
-	auto nsym = instance<Symbol>::makeFromPointer(new Symbol());
+	auto nsym = instance<Symbol>::makeThroughLambda([](auto p) { return new (p) Symbol(); });
 	nsym->symbolStoreId = keyword->symbolStoreId;
 
 	return nsym;
@@ -29,7 +29,7 @@ instance<Symbol> Symbol::makeSymbol(std::string const& s)
 {
 	auto& symbol_store = Execution::getCurrent()->getNamespace()->symbolStore;
 
-	auto nsym = instance<Symbol>::makeFromPointer(new Symbol());
+	auto nsym = instance<Symbol>::makeThroughLambda([](auto p) { return new (p) Symbol(); });
 	nsym->symbolStoreId = symbol_store.intern(s);
 	
 	return nsym;

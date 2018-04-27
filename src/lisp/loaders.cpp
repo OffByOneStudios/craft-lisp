@@ -26,7 +26,7 @@ CRAFT_DEFINE(BuiltinLoader)
 
 instance<Module> BuiltinLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
 {
-	auto ret = instance<BuiltinLoader>::makeFromPointer(new BuiltinLoader());
+	auto ret = instance<BuiltinLoader>::makeThroughLambda([](auto p) { return new (p) BuiltinLoader(); });
 	ret->_builtinName = proto_string;
 
 	if (proto_string == "cult.system")
@@ -61,7 +61,7 @@ CRAFT_DEFINE(FileLoader)
 
 instance<Module> FileLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
 {
-	auto ret = instance<FileLoader>::makeFromPointer(new FileLoader());
+	auto ret = instance<FileLoader>::makeThroughLambda([](auto p) { return new (p) FileLoader(); });
 	ret->_filePath = path::normalize(path::absolute(proto_string));
 
 	return ret->_module = instance<Module>::make(ns, ret);
@@ -95,7 +95,7 @@ CRAFT_DEFINE(ReplLoader)
 
 instance<Module> ReplLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
 {
-	auto ret = instance<ReplLoader>::makeFromPointer(new ReplLoader());
+	auto ret = instance<ReplLoader>::makeThroughLambda([](auto p) { return new (p) ReplLoader(); });
 	ret->_replName = proto_string;
 
 	return ret->_module = instance<Module>::make(ns, ret);

@@ -28,7 +28,7 @@ instance<Keyword> Keyword::makeKeyword(std::string const& s)
 
 	auto& symbol_store = Execution::getCurrent()->getNamespace()->symbolStore;
 
-	auto nsym = instance<Keyword>::makeFromPointer(new Keyword());
+	auto nsym = instance<Keyword>::makeThroughLambda([](auto p) { return new (p) Keyword(); });
 	nsym->symbolStoreId = symbol_store.intern(value);
 	return nsym;
 
