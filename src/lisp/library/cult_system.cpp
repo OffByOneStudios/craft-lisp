@@ -95,7 +95,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 		auto size = sexpr->cells.size();
 		ret->preSize(size / 2);
-		for (auto i = 1; i < size; i += 2)
+		for (auto i = 1; i + 1 < size; i += 2)
 		{
 			ret->push(rs->read(sexpr, i), rs->read(sexpr, i + 1));
 		}
