@@ -19,8 +19,10 @@ CRAFT_DEFINE(Condition)
 
 		auto count = that->branchCount();
 		clone->preSize(count);
-		for (auto i = 0; i < count; ++count)
+		for (auto i = 0; i < count; ++i)
 			clone->push(_clone(that->branchConditionAst(i)), _clone(that->branchAst(i)));
+		auto defaultBranch = that->branchDefaultAst();
+		if (defaultBranch) clone->push(instance<>(), defaultBranch);
 
 		return clone;
 	});
