@@ -37,9 +37,14 @@ void core::make_string_globals(instance<Module> ret)
 	});
 
 	semantics->builtin_implementMultiMethod("print",
-		[](instance<> a)
+		[](types::VarArgs<instance<>> args)
 	{
-		std::cout << *Execution::exec_fromCurrentModule("string", { a }).asType<std::string>();
+		for (auto& it : args.args)
+		{
+			std::cout << *Execution::exec_fromCurrentModule("string", { it }).asType<std::string>();
+			std::cout << " ";
+		}
+		std::cout << "\n";
 	});
 
 	semantics->builtin_implementMultiMethod("fmt",

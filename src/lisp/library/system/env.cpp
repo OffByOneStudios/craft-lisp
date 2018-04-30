@@ -80,20 +80,20 @@ void core::make_env_globals(instance<Module> ret)
 {
 	auto semantics = ret->require<CultSemantics>();
 
-	semantics->builtin_implementMultiMethod("getenv",
+	semantics->builtin_implementMultiMethod("env/get",
 		[](instance<std::string> a) -> instance<std::string>
 	{
 		return _impl::getEnv(a);
 	});
 
-	semantics->builtin_implementMultiMethod("setenv",
+	semantics->builtin_implementMultiMethod("env/set",
 		[](instance<std::string> a, instance<std::string> b) -> instance<std::string>
 	{
 		return _impl::setEnv(a, b);
 
 	});
 
-	semantics->builtin_implementMultiMethod("listenv",
+	semantics->builtin_implementMultiMethod("env",
 		[]() -> instance<Map>
 	{
 		return _impl::listEnv();

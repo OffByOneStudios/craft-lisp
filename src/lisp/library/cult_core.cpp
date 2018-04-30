@@ -26,6 +26,7 @@ instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns, 
 	library::core::make_logic_globals(ret);
 	library::core::make_cast_globals(ret);
 	library::core::make_arithmatic_globals(ret);
+	library::core::make_buffer_globals(ret);
 	library::core::make_string_globals(ret);
 	library::core::make_shim_globals(ret);
 	library::core::make_fs_globals(ret);

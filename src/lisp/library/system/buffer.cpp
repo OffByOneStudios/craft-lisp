@@ -11,32 +11,34 @@ using namespace craft::lisp::library::helper;
 
 CRAFT_DEFINE(Buffer)
 {
-	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
+	/*_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("size", &Buffer::size)
 		->withMethod("at", &Buffer::at)
 		->withMethod("set", &Buffer::set)
-		->withMethod("join", &Buffer::join);
+		->withMethod("join", &Buffer::join);*/
 
 	_.use<PStringer>().singleton<FunctionalStringer>(
 		[](instance<Buffer> l) -> std::string
 	{
 		std::ostringstream res;
 
-		
+		for (auto it : l->data())
+		{
+			res << it;
 
-		res << "0x";
+		}
+		return res.str();
+	});
+	_.use<PRepr>().singleton<FunctionalRepr>(
+		[](instance<Buffer> l) -> std::string
+	{
+		std::ostringstream res;  res << "0x";
 		for (auto it : l->data())
 		{
 			res << std::hex << it;
 
 		}
 		return res.str();
-
-	});
-	_.use<PRepr>().singleton<FunctionalRepr>(
-		[](instance<Buffer> l) -> std::string
-	{
-		return l.getFeature<PStringer>()->toString(l);
 	});
 	_.defaults();
 }
@@ -83,10 +85,46 @@ instance<Buffer> Buffer::join(instance<Buffer> other)
 	return res;
 }
 
-
 void core::make_buffer_globals(instance<Module> ret)
 {
 	auto semantics = ret->require<CultSemantics>();
+
+
+	semantics->builtin_implementMultiMethod("join",
+		[](types::VarArgs<instance<Buffer>> args) -> instance<Buffer>
+	{
+		size_t total = 0;
+		for (auto& i : args.args)
+		{
+			total += *i->size();
+		}
+
+		auto res = instance<Buffer>::make(instance<int64_t>::make(total));
+		
+		auto& r_data = res->data();
+		size_t p = 0;
+		for (auto& i : args.args)
+		{
+			memcpy((uint8_t*)r_data.data() + p, i->data().data(), i->data().size());
+			p += i->data().size();
+		}
+
+		return res;
+	});
+
+	semantics->builtin_implementMultiMethod("buffer/join",
+		[](instance<List> buffer) -> instance<Buffer>
+	{
+		size_t total = 0;
+		GenericInvoke res(*buffer->size());
+		for (auto& i : buffer->data())
+		{
+			if (!i.isType<Buffer>()) throw stdext::exception("List must contain homogenous collection of Buffers");
+			res.args.push_back(i.asType<Buffer>());
+		}
+
+		return Execution::exec_fromCurrentModule("join", res);
+	});
 }
 
 

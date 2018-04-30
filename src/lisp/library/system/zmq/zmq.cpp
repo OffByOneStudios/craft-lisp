@@ -20,25 +20,25 @@ using namespace craft::lisp::library::helper;
 
 CRAFT_DEFINE(ZMessage)
 {
-	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
+	/*_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("get", &ZMessage::get)
-		->withMethod("fill", &ZMessage::fill);
+		->withMethod("fill", &ZMessage::fill);*/
 	_.defaults();
 }
 
 CRAFT_DEFINE(ZSocket)
 {
-	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
+	/*_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("send", &ZSocket::send)
-		->withMethod("recv", &ZSocket::recv);
+		->withMethod("recv", &ZSocket::recv);*/
 	_.defaults();
 }
 
 CRAFT_DEFINE(ZContext)
 {
-	_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
+	/*_.use<SObjectManipulation>().byConfiguring<ObjectManipulater>()
 		->withMethod("bind", &ZContext::bind)
-		->withMethod("connect", &ZContext::connect);
+		->withMethod("connect", &ZContext::connect);*/
 	_.defaults();
 }
 

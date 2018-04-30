@@ -13,7 +13,7 @@ void core::make_shim_globals(instance<Module> ret)
 	/*
 	auto semantics = ret->require<CultSemantics>();
 
-	semantics->builtin_implementMultiMethod("types",
+	/*semantics->builtin_implementMultiMethod("types",
 		[]() -> instance<List>
 	{
 		std::vector<instance<>> res;
