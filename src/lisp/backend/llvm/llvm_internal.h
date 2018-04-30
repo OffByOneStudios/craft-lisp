@@ -13,6 +13,61 @@
 #pragma warning( disable : 4624 )
 #endif
 
+// Depreciated in C++ 17, llvm uses them
+namespace std
+{
+	template <class Arg, class Result>
+	struct unary_function {
+		typedef Arg argument_type;
+		typedef Result result_type;
+	};
+
+	template <class Arg1, class Arg2, class Result>
+		struct binary_function {
+		typedef Arg1 first_argument_type;
+		typedef Arg2 second_argument_type;
+		typedef Result result_type;
+	};
+
+	template <class Arg, class Result>
+	class pointer_to_unary_function : public unary_function <Arg, Result>
+	{
+	protected:
+		Result(*pfunc)(Arg);
+	public:
+		explicit pointer_to_unary_function(Result(*f)(Arg)) : pfunc(f) {}
+		Result operator() (Arg x) const
+		{
+			return pfunc(x);
+		}
+	};
+
+	template <class Arg1, class Arg2, class Result>
+	class pointer_to_binary_function : public binary_function <Arg1, Arg2, Result>
+	{
+	protected:
+		Result(*pfunc)(Arg1, Arg2);
+	public:
+		explicit pointer_to_binary_function(Result(*f)(Arg1, Arg2)) : pfunc(f) {}
+		Result operator() (Arg1 x, Arg2 y) const
+		{
+			return pfunc(x, y);
+		}
+	};
+
+	template <class Arg, class Result>
+	pointer_to_unary_function<Arg, Result> ptr_fun(Result(*f)(Arg))
+	{
+		return pointer_to_unary_function<Arg, Result>(f);
+	}
+
+	template <class Arg1, class Arg2, class Result>
+	pointer_to_binary_function<Arg1, Arg2, Result> ptr_fun(Result(*f)(Arg1, Arg2))
+	{
+		return pointer_to_binary_function<Arg1, Arg2, Result>(f);
+	}
+}
+
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"

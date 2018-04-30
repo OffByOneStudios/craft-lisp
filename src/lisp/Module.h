@@ -60,6 +60,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> get(types::TypeId type);
 		CRAFT_LISP_EXPORTED instance<> require(types::TypeId type, bool force_read = true);
 
+		CRAFT_LISP_EXPORTED instance<> eval(std::string const& code);
 		CRAFT_LISP_EXPORTED instance<> exec(std::string method, types::GenericInvoke const& call = {});
 
 		CRAFT_LISP_EXPORTED void builtin_setSemantics(instance<> semantics);

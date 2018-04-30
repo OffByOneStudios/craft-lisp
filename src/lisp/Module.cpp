@@ -169,6 +169,12 @@ instance<> Module::exec(std::string method, types::GenericInvoke const& call)
 	return _ns->exec(craft_instance(), method, call);
 }
 
+instance<> Module::eval(std::string const& code)
+{
+	// TODO
+	return instance<>();
+}
+
 void Module::builtin_setSemantics(instance<> semantics)
 {
 	// TODO build a syntax "representation" of the semantics (let the builtin loaders do it?)

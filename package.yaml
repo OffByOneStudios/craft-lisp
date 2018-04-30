@@ -139,8 +139,9 @@ platform-dependencies:
   osx_x64_clang: []
   debian_x64_gcc: []
 
-platform-flags:
-  x86_64-pc-windows-msvccoff: []
+platform-compile-flags:
+  x86_64-pc-windows-msvccoff:
+    - "/std:c++latest"
   osx_x64_clang:
     - "-std=c++1z"
     - "-stdlib=libc++"
@@ -155,7 +156,8 @@ platform-link-flags:
     - "/ignore:4099"
 
 platform-defines:
-  x86_64-pc-windows-msvccoff: {}
+  x86_64-pc-windows-msvccoff:
+    _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS: yes
   osx_x64_clang: {}
   debian_x64_gcc: {}
 

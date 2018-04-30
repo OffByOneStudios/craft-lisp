@@ -9,7 +9,7 @@ using namespace craft::types;
 using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
-using namespace platform::windows;
+using namespace util::platform::windows;
 
 namespace craft {
 namespace lisp {

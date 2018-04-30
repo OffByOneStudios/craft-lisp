@@ -2,14 +2,11 @@
 #include "lisp/library/libraries.h"
 #include "lisp/library/system/prelude.h"
 
-#include "util/platform_windows.h"
-
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
-using namespace platform::windows;
 
 
 void core::make_platform_globals(instance<Module> ret)
