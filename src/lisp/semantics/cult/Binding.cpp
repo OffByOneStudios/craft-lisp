@@ -80,14 +80,14 @@ instance<> BindSite::valueAst() const
 void BindSite::bind()
 {
 	_bindSymbol->bind();
-	_bindValue->bind();
 
+	instance<Binding> binding;
 	if (!isDynamicBind())
 	{
 		auto staticSymbol = getStaticSymbol();
 		auto bindScope = SScope::findScope(_parent);
 
-		auto binding = bindScope->lookup(staticSymbol);
+		binding = bindScope->lookup(staticSymbol);
 
 		if (!binding)
 			binding = bindScope->define(staticSymbol, craft_instance());
@@ -101,13 +101,15 @@ void BindSite::bind()
 				throw stdext::exception("Symbol already defined (target AST {0} does not support attach).", binded);
 		}
 
-		if (_bindValue.hasFeature<SBindable>())
-			_bindValue.getFeature<SBindable>()->setBinding(binding);
-
 		_boundTo = binding;
 	}
 	else
 		throw stdext::exception("Not Implemented: Dynamic Bindings");
+
+	_bindValue->bind();
+
+	if (_bindValue.hasFeature<SBindable>())
+		_bindValue.getFeature<SBindable>()->setBinding(binding);
 }
 
 /******************************************************************************
