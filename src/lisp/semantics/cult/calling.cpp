@@ -276,7 +276,7 @@ void MultiMethod::attach(instance<BindSite> binding)
 		value = value.asType<Constant>()->getValue();
 
 	if (!value.hasFeature<PSubroutine>())
-		throw stdext::exception("Bindsite value is not a PSubroutine.");
+		throw stdext::exception("Bindsite `{0}` value is not a PSubroutine.", binding->getStaticSymbol()->getValue());
 
 	auto psub = value.getFeature<PSubroutine>();
 	
