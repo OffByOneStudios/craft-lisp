@@ -22,7 +22,7 @@ CRAFT_DEFINE(Condition)
 		for (auto i = 0; i < count; ++i)
 			clone->push(_clone(that->branchConditionAst(i)), _clone(that->branchAst(i)));
 		auto defaultBranch = that->branchDefaultAst();
-		if (defaultBranch) clone->push(instance<>(), defaultBranch);
+		if (defaultBranch) clone->push(instance<>(), _clone(defaultBranch));
 
 		return clone;
 	});
@@ -48,7 +48,7 @@ void Condition::push(instance<SCultSemanticNode> cond, instance<SCultSemanticNod
 	{
 		if (_defaultBranch)
 			throw ast_error("Node `{0}` (Condition) already has a default branch.");
-		_defaultBranch = branch;
+		_defaultBranch = _ast(branch);
 	}
 	else
 	{
