@@ -119,7 +119,7 @@ void core::make_repl_globals(instance<Module> ret)
 
 		auto last = parse.top();
 		if (last->cells.size() == 0) return res;
-		else if (last->cells.size() == 1)
+		else if (last->cells.size() == 1 || true) // TODO Fixup Secondary lookups
 		{
 			auto s = last->cells[0];
 			if (s.typeId().isType<Symbol>())

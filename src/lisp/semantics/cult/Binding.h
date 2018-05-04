@@ -104,6 +104,10 @@ namespace lisp
 		CRAFT_LISP_EXPORTED Import(std::string uri);
 
 		CRAFT_LISP_EXPORTED std::string getUri() const;
+
+		// SCultSemanticNode
+	public:
+		CRAFT_LISP_EXPORTED virtual void bind() override;
 	};
 
 	/******************************************************************************

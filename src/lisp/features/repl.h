@@ -22,9 +22,23 @@ namespace features
 		replxx::Replxx _rx;
 	public:
 
-		CRAFT_LISP_EXPORTED LispRepl();
+		CRAFT_LISP_EXPORTED LispRepl(std::function<void(instance<Module>)> init = nullptr);
 
+		CRAFT_LISP_EXPORTED inline instance<Environment> getEnv() { return _env; }
+		CRAFT_LISP_EXPORTED inline instance<Namespace> getNamespace() { return _ns; }
+		CRAFT_LISP_EXPORTED inline instance<Module> getModule() { return _live_module; }
+		
+		CRAFT_LISP_EXPORTED instance<> invoke(instance<std::string> s, bool record = false);
+		CRAFT_LISP_EXPORTED instance<> step();
+	};
 
-		CRAFT_LISP_EXPORTED bool step();
+	class ReplExitException : public stdext::exception {
+	public:
+		inline ReplExitException() : stdext::exception("Repl Exit") {};
+	};
+
+	class ReplParseException : public stdext::exception {
+	public:
+		inline ReplParseException(std::string what) : stdext::exception("Parse Error {0}", what)  {};
 	};
 }}}

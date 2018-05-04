@@ -144,6 +144,7 @@ instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke con
 	if (fn.hasFeature<PSubroutine>())
 	{
 		auto psub = fn.getFeature<PSubroutine>();
+		//TODO Mason Push CFFI Frame
 		return psub->execute(fn, call);
 	}
 	else

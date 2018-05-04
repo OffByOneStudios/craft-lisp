@@ -44,12 +44,13 @@ CRAFT_DEFINE(LispRepl)
 	_.defaults();
 }
 
-LispRepl::LispRepl()
+LispRepl::LispRepl(std::function<void(instance<Module>)> init)
 {
 	_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"));
 	_ns = _env->ns_user;
 
 	_live_module = _env->ns_user->requireModule("repl:console");
+	if (init) init(_live_module);
 	_live_module->initialize();
 
 	using Replxx = replxx::Replxx;
@@ -114,13 +115,14 @@ LispRepl::LispRepl()
 }
 
 
-bool LispRepl::step()
+instance<> LispRepl::invoke(instance<std::string> input, bool record)
 {
-	// display the prompt and retrieve input from the user
-	auto cinp = _rx.input("CμλΤ>");
-	if (cinp == nullptr) return false;
+	if (record)
+	{
+		_rx.history_add(*input);
+		_rx.history_save(_history_file);
+	}
 
-	auto input = instance<std::string>::make(cinp);
 
 	instance<Module> statement;
 	try
@@ -132,30 +134,24 @@ bool LispRepl::step()
 	}
 	catch (std::exception const& ex)
 	{
-		std::cout << "parser: " << ex.what() << '\n';
+		throw ReplParseException(ex.what());
 	}
 
-	try
+	if (statement)
 	{
-		if (statement)
-		{
-			_live_module->appendModule(statement);
-			instance<> res = _live_module->lastExecutedResult();
-
-			std::cout << res.toString() << '\n';
-
-			//instance<RuntimeSlots> slots = live_module->moduleValue();
-			//for (auto i = 0; i < slots->getSize((instance<>*)&slots); ++i)
-			//	std::cout << slots->getSlot((instance<>*)&slots, i)->toString() << '\n';
-		}
+		_live_module->appendModule(statement);
+		return _live_module->lastExecutedResult();
 	}
-	catch (std::exception const& e)
-	{
-		std::cout << e.what() << '\n';
-	}
+}
+instance<> LispRepl::step()
+{
+	// display the prompt and retrieve input from the user
+	auto cinp = _rx.input("CμλΤ>");
+	if (cinp == nullptr) throw ReplExitException();
 
-	_rx.history_add(*input);
-	_rx.history_save(_history_file);
-	return true;
+
+	auto input = instance<std::string>::make(cinp);
+
+	return invoke(input, true);
 }
 

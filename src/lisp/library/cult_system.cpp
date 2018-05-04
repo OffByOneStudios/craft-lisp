@@ -49,6 +49,15 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	// Special forms - Reader
 	//
 	// TODO, make this a multimethod
+	sem->builtin_addSpecialForm("require");
+	sem->builtin_specialFormReader("require",
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
+	{
+		if (sexpr->cells.size() != 2 || !sexpr->cells[1].isType<std::string>())
+			throw stdext::exception("malformed: (require \"<uri>\")");
+
+		return instance<Import>::make(*sexpr->cells[1].asType<std::string>());
+	});
 
 	sem->builtin_addSpecialForm("define");
 	sem->builtin_specialFormReader("define",
@@ -225,6 +234,14 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		destination.asType<RuntimeSlotReference>()->setValue(value);
 
 		return value;
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrame> interp, instance<Import> ast) -> instance<>
+	{
+		// TODO call top-level here
+		// ast
+
+		return instance<>(); // return module value?
 	});
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<Variable> ast) -> instance<>

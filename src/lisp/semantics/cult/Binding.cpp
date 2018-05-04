@@ -195,3 +195,15 @@ std::string Import::getUri() const
 {
 	return _importUri;
 }
+
+void Import::bind()
+{
+	auto parent_scope = SScope::findScope(_parent);
+	if (!parent_scope.isType<CultSemantics>())
+		throw stdext::exception("Can only import at module scope.");
+
+	instance<CultSemantics> sem = parent_scope;
+	auto required_module = sem->getModule()->getNamespace()->requireModule(_importUri); // TODO store reference somewhere for this node?
+	sem->importModule(required_module);
+	required_module->initialize();
+}

@@ -81,7 +81,7 @@ std::string FileLoader::getUri()
 }
 bool FileLoader::prepSemantics(instance<>)
 {
-	return true;
+	return false;
 }
 
 
