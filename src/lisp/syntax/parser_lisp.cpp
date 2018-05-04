@@ -40,8 +40,32 @@ namespace lisp_grammar
 	struct symbol : lisp_ident {};
 	struct keyword : seq< one< ':' >, lisp_ident > {};
 
-	struct number : seq< opt< one < '-' > >, digit, star < lisp_ident_char > > {};
-	
+	struct floatsize : seq <one<'f'>, sor<
+		string<'3', '2'>,
+		string<'6', '4'>,
+		string<'i'>
+		>> {};
+
+	struct uintsize : seq <one<'u'>, opt<
+		sor<string<'8'>,
+		string<'1', '6'>,
+		string<'3', '2'>,
+		string<'6', '4'>
+		>>> {};
+
+	struct intsize : seq <one<'i'>, opt<sor<
+		string<'8'>,
+		string<'1', '6'>,
+		string<'3', '2'>,
+		string<'6', '4'>,
+		string<'i'>
+		>>> {};
+
+	struct floatliteral : seq< opt< one < '-' > >, plus<digit>, one<'.'>, plus<digit>, opt<floatsize>> {};
+	struct intliteral : seq< opt< one < '-' > >, plus<digit>, opt<intsize>> {};
+	struct uintliteral : seq< plus<digit>, uintsize> {};
+	struct number : sor<floatliteral, uintliteral, intliteral> {};
+
 	struct null : tao::pegtl::string< 'n', 'u', 'l', 'l' > {};
 	struct true_ : tao::pegtl::string< 't', 'r', 'u', 'e' > {};
 	struct false_ : tao::pegtl::string < 'f', 'a', 'l', 's', 'e'> {};
@@ -51,10 +75,7 @@ namespace lisp_grammar
 
 	struct triplestring : if_must< triplequote, until<triplequote> > {};
 	struct singlestring : if_must< one< '"' >, until< one< '"' > > > {};
-	struct strings : sor<
-		triplestring,
-		singlestring
-	>{};
+	struct strings : sor<triplestring, singlestring>{};
 
 	struct atom : sor<null, true_, false_, strings, number, keyword, symbol > {};
 
@@ -126,19 +147,81 @@ namespace lisp_grammar
 	};
 
 	template<>
-	struct lisp_action< number >
+	struct lisp_action< uintliteral >
 	{
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)
 		{
 			ps.top()->cell_locs.push_back(in.position().byte);
 			std::string s = in.string();
-			// TODO specialized parse function returning arbitrary percision number
-			// and/or deciding on the prefered type/size of the number
-			if (s.find('.', 0) != std::string::npos)
-				ps.top()->cells.push_back(craft::types::cpptype<double>::typeDesc().getFeature<PParse>()->parse(s));
+			auto ind = s.find('i');
+			if (ind == s.npos)
+			{
+				ps.top()->cells.push_back(craft::types::cpptype<uint64_t>::typeDesc().getFeature<PParse>()->parse(s));
+			}
 			else
+			{
+				auto suf = s.substr(ind);
+				if (suf == "") ps.top()->cells.push_back(craft::types::cpptype<uint64_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "i8") ps.top()->cells.push_back(craft::types::cpptype<uint8_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "i16") ps.top()->cells.push_back(craft::types::cpptype<uint16_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "i32") ps.top()->cells.push_back(craft::types::cpptype<uint32_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "i64") ps.top()->cells.push_back(craft::types::cpptype<uint64_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else throw stdext::exception("No Such Integer Literal Suffix: {0}", suf);
+			}
+
+		}
+
+	};
+	template<>
+	struct lisp_action< intliteral >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			ps.top()->cell_locs.push_back(in.position().byte);
+			std::string s = in.string();
+			auto ind = s.find('i');
+			if (ind == s.npos)
+			{
 				ps.top()->cells.push_back(craft::types::cpptype<int64_t>::typeDesc().getFeature<PParse>()->parse(s));
+			}
+			else
+			{
+				auto suf = s.substr(ind);
+				if (suf == "") ps.top()->cells.push_back(craft::types::cpptype<int64_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "i8") ps.top()->cells.push_back(craft::types::cpptype<int8_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "i16") ps.top()->cells.push_back(craft::types::cpptype<int16_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "i32") ps.top()->cells.push_back(craft::types::cpptype<int32_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "i64") ps.top()->cells.push_back(craft::types::cpptype<int64_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "ii") ps.top()->cells.push_back(craft::types::cpptype<mpz_class>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else throw stdext::exception("No Such Integer Literal Suffix: {0}", suf);
+			}
+		}
+	};
+
+	template<>
+	struct lisp_action< floatliteral >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			ps.top()->cell_locs.push_back(in.position().byte);
+			std::string s = in.string();
+			auto ind = s.find('f');
+			if (ind == s.npos)
+			{
+				ps.top()->cells.push_back(craft::types::cpptype<double>::typeDesc().getFeature<PParse>()->parse(s));
+			}
+			else
+			{
+				auto suf = s.substr(ind);
+				if (suf == "") ps.top()->cells.push_back(craft::types::cpptype<double>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "f32") ps.top()->cells.push_back(craft::types::cpptype<float>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "f64") ps.top()->cells.push_back(craft::types::cpptype<double>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "fi") ps.top()->cells.push_back(craft::types::cpptype<mpf_class>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else throw stdext::exception("No Such Float Literal Suffix: {0}", suf);
+			}
 		}
 	};
 
