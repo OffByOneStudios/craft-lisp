@@ -120,14 +120,14 @@ void core::make_map_globals(instance<Module> ret)
 	auto semantics = ret->require<CultSemantics>();
 
 	semantics->builtin_implementMultiMethod("map",
-		[]() -> instance<Map>
+		[](types::VarArgs<instance<>> args) -> instance<Map>
 	{
-		//if (args.size() % 2 != 0) throw stdext::exception("Arguments must be in key value order");
+		if (args.args.size() % 2 != 0) throw stdext::exception("Arguments must be in key value order");
 		auto res = instance<Map>::make();
-		/*for (auto it = 0; it < args.size(); it += 2)
+		for (auto it = 0; it < args.args.size(); it += 2)
 		{
-			res->insert(args[it], args[it + 1]);
-		}*/
+			res->insert(args.args[it], args.args[it + 1]);
+		}
 		return res;
 	});
 

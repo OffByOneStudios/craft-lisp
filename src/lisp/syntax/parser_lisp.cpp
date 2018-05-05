@@ -23,6 +23,14 @@ namespace lisp_grammar
 	struct sexpr_open : one< '(' > {};
 	struct sexpr_close : one < ')' > {};
 
+	// vector primitives
+	struct vector_open : one< '[' > {};
+	struct vector_close : one < ']' > {};
+
+	// map primitives
+	struct map_open : one< '{' > {};
+	struct map_close : one < '}' > {};
+
 	// Comments are introduced by a ';' and proceed to the end-of-line/file,
 	// or until the matching paren, e.g. ;(comment)
 	struct line_comment : until< eolf > {};
@@ -34,7 +42,7 @@ namespace lisp_grammar
 	struct nothing : sor< space, comment > {};
 
 	// Atom types
-	struct lisp_ident_char : utf8::not_one < ')', '"', ';', ' ', '\n', '\r', '\t', '\v', '\f' > {};
+	struct lisp_ident_char : utf8::not_one < ')', '"', ';', ' ', '{', '}', '\n', '\r', '\t', '\v', '\f' > {};
 	struct lisp_ident : plus < lisp_ident_char > {};
 
 	struct symbol : lisp_ident {};
@@ -81,9 +89,10 @@ namespace lisp_grammar
 
 	// List type
 	struct sexpr : if_must< sexpr_open, until< sexpr_close, anything > >{};
-	
+	struct vector : if_must< vector_open, until< vector_close, anything > > {};
+	struct map : if_must< map_open, until< map_close, anything > > {};
 	// Meta
-	struct something : sor< sexpr, atom > {};
+	struct something : sor< vector, map, sexpr, atom > {};
 	struct anything : sor< nothing, something > {};
 
 	struct grammar : until< tao::pegtl::eof, anything > {};
@@ -113,6 +122,62 @@ namespace lisp_grammar
 
 	template<>
 	struct lisp_action< sexpr_close >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			auto finished = ps.top();
+			ps.pop();
+			finished->cell_locs.push_back(in.position().byte);
+
+			ps.top()->cells.push_back(finished);
+		}
+	};
+
+	template<>
+	struct lisp_action< vector_open >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			auto new_expr = instance<Sexpr>::make();
+			new_expr->cells.push_back(Symbol::makeSymbol("list"));
+			new_expr->cell_locs.push_back(in.position().byte);
+
+			ps.push(new_expr);
+		}
+	};
+
+	template<>
+	struct lisp_action< vector_close >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			auto finished = ps.top();
+			ps.pop();
+			finished->cell_locs.push_back(in.position().byte);
+
+			ps.top()->cells.push_back(finished);
+		}
+	};
+
+	template<>
+	struct lisp_action< map_open >
+	{
+		template<typename Input>
+		static void apply(Input const& in, ParseStack& ps)
+		{
+			auto new_expr = instance<Sexpr>::make();
+			new_expr->cells.push_back(Symbol::makeSymbol("map"));
+			new_expr->cell_locs.push_back(in.position().byte);
+
+			ps.push(new_expr);
+		}
+	};
+
+	template<>
+	struct lisp_action< map_close >
 	{
 		template<typename Input>
 		static void apply(Input const& in, ParseStack& ps)
