@@ -27,6 +27,11 @@ CultSemantics::CultSemantics(instance<lisp::Module> forModule)
 	_module = forModule;
 }
 
+void CultSemantics::rebuildModulesCache()
+{
+	_modules_cache = _modules;
+}
+
 instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance<> syntax)
 {
 	if (syntax.typeId().isType<Symbol>())
@@ -75,6 +80,7 @@ void CultSemantics::readPrepDefaults()
 	// These are implict, and must be made available by these execution engine.
 	importModule(_module->getNamespace()->requireModule("builtin:cult.system"));
 	importModule(_module->getNamespace()->requireModule("builtin:cult.core"));
+	rebuildModulesCache();
 }
 
 void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts)
@@ -114,25 +120,30 @@ instance<SScope> CultSemantics::getParentScope() const
 	return instance<>();
 }
 
-instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
+instance<Binding> CultSemantics::lookup_local(instance<Symbol> symbol) const
 {
 	auto it = _symbolTable.find(symbol->symbolStoreId);
 	if (it == _symbolTable.end())
+		return instance<>();
+	return _bindings[it->second];
+}
+instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
+{
+	auto res = lookup_local(symbol);
+	if (!res)
 	{
-		for (auto m : _modules)
+		for (auto m : _modules_cache)
 		{
 			auto sem = m->get<CultSemantics>();
 			if (sem)
 			{
-				auto res = sem->lookup(symbol);
+				res = sem->lookup_local(symbol);
 				if (res)
-					return res;
+					break;
 			}
 		}
-
-		return instance<>();
 	}
-	return _bindings[it->second];
+	return res;
 }
 instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
@@ -183,6 +194,7 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 void CultSemantics::importModule(instance<Module> m)
 {
 	_modules.insert(_modules.begin(), m);
+	rebuildModulesCache();
 }
 
 size_t CultSemantics::append(instance<CultSemantics> sem)

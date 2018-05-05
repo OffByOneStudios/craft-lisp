@@ -56,7 +56,25 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		if (sexpr->cells.size() != 2 || !sexpr->cells[1].isType<std::string>())
 			throw stdext::exception("malformed: (require \"<uri>\")");
 
-		return instance<Import>::make(*sexpr->cells[1].asType<std::string>());
+		return ScopeManipulation::Require(*sexpr->cells[1].asType<std::string>());
+	});
+	sem->builtin_addSpecialForm("namespace");
+	sem->builtin_specialFormReader("namespace",
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
+	{
+		if (sexpr->cells.size() != 2 || !sexpr->cells[1].isType<std::string>())
+			throw stdext::exception("malformed: (namespace \"<namespace>\")");
+
+		return ScopeManipulation::SetNamespace(*sexpr->cells[1].asType<std::string>());
+	});
+	sem->builtin_addSpecialForm("namespace-using");
+	sem->builtin_specialFormReader("namespace-using",
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
+	{
+		if (sexpr->cells.size() != 2 || !sexpr->cells[1].isType<std::string>())
+			throw stdext::exception("malformed: (namespace-using \"<namespace>\")");
+
+		return ScopeManipulation::UsingNamespace(*sexpr->cells[1].asType<std::string>());
 	});
 
 	sem->builtin_addSpecialForm("define");
@@ -236,7 +254,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return value;
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<Import> ast) -> instance<>
+		[](instance<InterpreterFrame> interp, instance<ScopeManipulation> ast) -> instance<>
 	{
 		// TODO call top-level here
 		// ast

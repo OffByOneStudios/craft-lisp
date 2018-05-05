@@ -55,8 +55,11 @@ namespace lisp
 
 		// List of Required Modules
 		std::vector<instance<lisp::Module>> _modules; // Simple module list
+		std::vector<instance<lisp::Module>> _modules_cache; // module cache
 
 	private:
+
+		CRAFT_LISP_EXPORTED void rebuildModulesCache();
 
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> read_cultLisp(ReadState* rs, instance<> syntax);
 
@@ -112,6 +115,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const override;
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParentScope() const override;
 
+		CRAFT_LISP_EXPORTED instance<Binding> lookup_local(instance<Symbol>) const;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;
 	};

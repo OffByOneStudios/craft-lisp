@@ -85,25 +85,46 @@ namespace lisp
 	};
 
 	/******************************************************************************
-	** Import
+	** ScopeManipulation
 	******************************************************************************/
 
 	/*
-	Represents the edge between a symbol, the scope it was defined in, and the AST inside it.
+	Represents the import of a module.
 	*/
-	class Import
+	class ScopeManipulation
 		: public virtual craft::types::Object
 		, public craft::types::Implements<SCultSemanticNode>
 	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Import);
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::ScopeManipulation);
+	public:
+		enum class Manipulation
+		{
+			None = 0,
+			SetNamespace = 1,
+			UsingNamespace = 2,
+			RequireModule = 1 << 9,
+		};
 
 	private:
-		std::string _importUri;
+
+		Manipulation _mode;
+		std::string _primary;
+		std::string _as;
+
+		// TODO symbol renaming/require/exclude rules
 
 	public:
-		CRAFT_LISP_EXPORTED Import(std::string uri);
+		CRAFT_LISP_EXPORTED ScopeManipulation();
 
-		CRAFT_LISP_EXPORTED std::string getUri() const;
+		static CRAFT_LISP_EXPORTED instance<ScopeManipulation> SetNamespace(std::string const& namespace_name);
+		static CRAFT_LISP_EXPORTED instance<ScopeManipulation> UsingNamespace(std::string const& namespace_name, std::string const& as = "");
+
+		static CRAFT_LISP_EXPORTED instance<ScopeManipulation> Require(std::string const& uri, std::string const& as = "");
+
+		CRAFT_LISP_EXPORTED Manipulation getManipulationKind() const;
+		CRAFT_LISP_EXPORTED std::string getModuleUri() const;
+		CRAFT_LISP_EXPORTED std::string getNamespaceName() const;
+		CRAFT_LISP_EXPORTED std::string getTargetName() const;
 
 		// SCultSemanticNode
 	public:
@@ -115,7 +136,7 @@ namespace lisp
 	******************************************************************************/
 
 	/*
-	Represents a semantic node that provides a scope.
+		Represents a semantic node that is attached to a scope.
 	*/
 	class SBindable
 		: public craft::types::Aspect

@@ -170,15 +170,22 @@ instance<> Binding::getMeta(std::string metaKey, TypeId type) const
 }
 
 
+
 /******************************************************************************
 ** Import
 ******************************************************************************/
 
-CRAFT_DEFINE(Import)
+CRAFT_DEFINE(ScopeManipulation)
 {
-	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<Import> that)
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<ScopeManipulation> that)
 	{
-		return instance<Import>::make(that->getUri());
+		switch (that->getManipulationKind())
+		{
+			case ScopeManipulation::Manipulation::RequireModule: return ScopeManipulation::Require(that->getModuleUri(), that->getTargetName());
+			case ScopeManipulation::Manipulation::SetNamespace: return ScopeManipulation::SetNamespace(that->getNamespaceName());
+			case ScopeManipulation::Manipulation::UsingNamespace: return ScopeManipulation::UsingNamespace(that->getNamespaceName(), that->getTargetName());
+			default: throw stdext::exception("Unknown scope manipulation {0}", (int)that->getManipulationKind());
+		}
 	});
 
 	_.use<SCultSemanticNode>().byCasting();
@@ -186,24 +193,71 @@ CRAFT_DEFINE(Import)
 	_.defaults();
 }
 
-Import::Import(std::string uri)
+ScopeManipulation::ScopeManipulation()
 {
-	_importUri = uri;
+
 }
 
-std::string Import::getUri() const
+instance<ScopeManipulation> ScopeManipulation::SetNamespace(std::string const& namespace_name)
 {
-	return _importUri;
+	auto ret = instance<ScopeManipulation>::make();
+	ret->_mode = Manipulation::SetNamespace;
+	ret->_primary = namespace_name;
+	return ret;
+}
+instance<ScopeManipulation> ScopeManipulation::UsingNamespace(std::string const& namespace_name, std::string const& as)
+{
+	auto ret = instance<ScopeManipulation>::make();
+	ret->_mode = Manipulation::UsingNamespace;
+	ret->_primary = namespace_name;
+	ret->_as = as;
+	return ret;
 }
 
-void Import::bind()
+instance<ScopeManipulation> ScopeManipulation::Require(std::string const& uri, std::string const& as)
+{
+	auto ret = instance<ScopeManipulation>::make();
+	ret->_mode = Manipulation::RequireModule;
+	ret->_primary = uri;
+	ret->_as = as;
+	return ret;
+}
+
+ScopeManipulation::Manipulation ScopeManipulation::getManipulationKind() const
+{
+	return _mode;
+}
+std::string ScopeManipulation::getModuleUri() const
+{
+	assert(_mode == Manipulation::RequireModule);
+	return _primary;
+}
+std::string ScopeManipulation::getNamespaceName() const
+{
+	assert(_mode == Manipulation::SetNamespace || _mode == Manipulation::UsingNamespace);
+	return _primary;
+}
+std::string ScopeManipulation::getTargetName() const
+{
+	return _as;
+}
+
+void ScopeManipulation::bind()
 {
 	auto parent_scope = SScope::findScope(_parent);
 	if (!parent_scope.isType<CultSemantics>())
 		throw stdext::exception("Can only import at module scope.");
 
 	instance<CultSemantics> sem = parent_scope;
-	auto required_module = sem->getModule()->getNamespace()->requireModule(_importUri); // TODO store reference somewhere for this node?
-	sem->importModule(required_module);
-	required_module->initialize();
+
+	switch (_mode)
+	{
+		case Manipulation::RequireModule:
+		{
+			auto required_module = sem->getModule()->getNamespace()->requireModule(_primary); // TODO store reference somewhere for this node?
+			sem->importModule(required_module);
+			required_module->initialize();
+		} break;
+		default: throw stdext::exception("Unsupported scope manipulation {0}", (int)_mode);
+	}
 }

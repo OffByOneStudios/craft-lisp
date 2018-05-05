@@ -14,8 +14,6 @@ using namespace craft::lisp;
 
 
 
-
-
 int main(int argc, char** argv)
 {
 	craft::types::boot();
@@ -51,8 +49,32 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		auto repl = instance<features::LispRepl>::make();
-		while (repl->step()) {}
+		features::LispRepl r;
+
+		while (true)
+		{
+			try
+			{
+				auto eval = r.step();
+				std::cout << eval.toString() << "\n";
+			}
+			catch (features::ReplExitException e)
+			{
+				break;
+			}
+			catch (features::ReplParseException e)
+			{
+				std::cout << "Parse Error: " << e.what() << "\n";
+			}
+			catch (stdext::exception e)
+			{
+				std::cout << e.what() << "\n";
+			}
+			catch (std::exception e)
+			{
+				std::cout << "Unhandled Internal Exception: " << e.what() << "\n";
+			}
+		}
 	}
 
 	return 0;

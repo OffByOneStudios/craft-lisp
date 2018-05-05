@@ -1,2 +1,3 @@
-(define foo 15)
-(define bar "hello")
+(require "file:module_0.cult")
+
+(define v_0 "v_0")

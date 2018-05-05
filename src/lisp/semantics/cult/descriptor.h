@@ -57,7 +57,7 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Resolve);
 	public:
-		enum class Mode // TODO make evaluation results inspectable to issue gets as necessary
+		enum class Mode // TODO make expected evaluation results inspectable to issue gets as necessary
 		{
 			ResolveOnly = 0,
 			ResolveAndGet = 1,
