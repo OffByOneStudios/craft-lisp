@@ -32,20 +32,6 @@ namespace lisp {
 					throw stdext::exception("The given {0} cannot be used as a symbol", s.typeId());
 			}
 
-			/* Throw an exception if a given argument is not of the expected type
-
-			*/
-			template <typename T>
-			inline instance<T> expect(instance<> inst)
-			{
-				if (!inst)
-					return inst;
-
-				if (inst.typeId().isType<T>())
-					return inst;
-
-				throw stdext::exception("Expected {0} got {1}", types::cpptype<T>::typeDesc(), inst.typeId());
-			}
 
 			/* Takes an sexpr represting a function binding, and returns a signature
 

@@ -48,24 +48,22 @@ void core::make_string_globals(instance<Module> ret)
 	});
 
 	semantics->builtin_implementMultiMethod("fmt",
-		[](types::VarArgs<instance<>> args) -> instance<std::string>
+		[](instance<std::string> fmt, types::VarArgs<instance<>> args) -> instance<std::string>
 	{
 		std::regex re("%\\{[^\\}]+\\}");
 		std::ostringstream s;
-		instance<std::string> a(expect<std::string>(args.args[0]));
 
-		auto& tmp = *a;
 		std::sregex_token_iterator
-			begin(tmp.begin(), tmp.end(), re, { -1,0 }),
+			begin(fmt->begin(), fmt->end(), re, { -1, 0 }),
 			end;
 
-		std::for_each(begin, end, [&](std::string const& m) {
-
+		std::for_each(begin, end,
+			[&](std::string const& m)
+		{
 			if (std::regex_match(m, re))
 			{
 				std::string match = m.substr(2, m.size() - 3);
 				instance<> target;
-
 
 				ssize_t i = -1;
 				try

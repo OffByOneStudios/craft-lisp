@@ -14,6 +14,25 @@ void core::make_meta_globals(instance<Module> ret)
 {
 	auto semantics = ret->require<CultSemantics>();
 
+	semantics->builtin_implementMultiMethod("craft-type",
+		[](instance<std::string> s) -> instance<types::Graph::Node>
+	{
+		return instance<types::Graph::Node>::makeFromPointerAndMemoryManager(graph().getByIndex<GraphPropertyTypeName>(s.get()), &graph());
+	});
+
+	semantics->builtin_implementMultiMethod("cpp-type",
+		[](instance<std::string> s) -> instance<types::Graph::Node>
+	{
+		return instance<types::Graph::Node>::makeFromPointerAndMemoryManager(graph().getByIndex<GraphPropertyCppName>(s->c_str()), &graph());
+	});
+
+	semantics->builtin_implementMultiMethod("dump",
+		[](instance<types::Graph::Node> s) -> instance<std::string>
+	{
+		if (!s) return instance<>();
+		return instance<std::string>::make(graph().dumpNode(s.get()));
+	});
+
 	//TODO Macro implementation on cult semantics
 	/*semantics->builtin_addSpecialForm
 	auto getmeta = instance<Macro>::make(

@@ -273,7 +273,7 @@ void BootstrapInterpreter::builtin_validateSpecialForms(instance<lisp::Module> m
 
 	builtin_truth = module->get<CultSemantics>()->lookup(Symbol::makeSymbol("truth"))->getSite()->valueAst();
 	builtin_get = module->get<CultSemantics>()->lookup(Symbol::makeSymbol("get"))->getSite()->valueAst();
-	builtin_set = module->get<CultSemantics>()->lookup(Symbol::makeSymbol("set"))->getSite()->valueAst();
+	//builtin_set = module->get<CultSemantics>()->lookup(Symbol::makeSymbol("set"))->getSite()->valueAst();
 }
 
 /******************************************************************************

@@ -85,6 +85,71 @@ namespace lisp
 		CRAFT_LISP_EXPORTED bool prepSemantics(instance<>);
 	};
 
+	struct GraphPropertyBuiltinModuleUri final
+	{
+		// is a   `char const*`
+		typedef char const* value_type;
+		typedef types::BasicGraphIndex<value_type> index_type;
+	private:
+		GraphPropertyBuiltinModuleUri() = delete;
+	public:
+		static constexpr types::GraphMeta::Kind craftTypes_metaKind = types::GraphMeta::Kind::Prop; // needed?
+		static constexpr char const* craftTypes_metaProp_name = "cult/builtin-uri";
+		inline static types::GraphPropMeta* craftTypes_metaProp_builder(types::Graph::Node* metanode)
+		{
+			types::graph().add<types::GraphPropertyPrinter>(metanode,
+				[](types::Graph::Element* p) -> std::string { return (value_type)p->value; });
+			types::graph().add<types::GraphPropertyMetaIndex>(metanode, new index_type());
+			return types::GraphPropMeta::Singular(craftTypes_metaProp_name);
+		}
+	};
+
+	struct BuiltinModuleDescription
+	{
+	public:
+		typedef void(*fn_module_initer)(instance<Module> ret);
+		typedef instance<Module>(*fn_module_builder)(instance<Namespace> ns, instance<> loader);
+
+	private:
+		types::cpp::static_desc __id;
+
+	private:
+		char const* _uri;
+		fn_module_builder _builder;
+		fn_module_initer _initer;
+
+		inline static void static_initer(types::cpp::DefineHelper<void> _)
+		{
+			types::Graph::Node* n = _;
+			auto m = (BuiltinModuleDescription*)n->value;
+			_.add<GraphPropertyBuiltinModuleUri>(m->uri());
+		}
+
+	public:
+		BuiltinModuleDescription(char const* uri, fn_module_builder module_builder, types::cpp::_fn_register_static_init init = &static_initer)
+			: __id(types::cpp::CppStaticDescKindEnum::UserInfo, this, init)
+			, _uri(uri), _builder(module_builder), _initer(nullptr)
+		{
+			// TODO throw exception if not static time
+		}
+		BuiltinModuleDescription(char const* uri, fn_module_initer module_initer, types::cpp::_fn_register_static_init init = &static_initer)
+			: __id(types::cpp::CppStaticDescKindEnum::UserInfo, this, init)
+			, _uri(uri), _builder(nullptr), _initer(module_initer)
+		{
+			// TODO throw exception if not static time
+		}
+
+	public:
+		inline operator types::Graph::Node*() const { return __id.node; }
+
+		inline char const* uri() const { return _uri; }
+
+		CRAFT_LISP_EXPORTED instance<Module> build(instance<Namespace> ns, instance<> loader);
+	};
+
+	CRAFT_LISP_EXPORTED extern BuiltinModuleDescription BuiltinCultSystem;
+	CRAFT_LISP_EXPORTED extern BuiltinModuleDescription BuiltinCultCore;
+
 	/******************************************************************************
 	** FileLoader
 	******************************************************************************/

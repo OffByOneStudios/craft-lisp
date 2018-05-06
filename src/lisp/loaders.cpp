@@ -29,12 +29,17 @@ instance<Module> BuiltinLoader::load(instance<Namespace> ns, std::string const& 
 	auto ret = instance<BuiltinLoader>::makeThroughLambda([](auto p) { return new (p) BuiltinLoader(); });
 	ret->_builtinName = proto_string;
 
-	if (proto_string == "cult.system")
-		return ret->_module = library::make_module_builtin_cult_system(ns, ret);
-	else if (proto_string == "cult.core")
-		return ret->_module = library::make_module_builtin_cult_core(ns, ret);
-	else
-		throw stdext::exception("Unknown builtin `{0}`", proto_string);
+	auto builtin_descriptor = graph().getByIndex<GraphPropertyBuiltinModuleUri>(proto_string.c_str());
+
+	if (builtin_descriptor != nullptr)
+	{
+		auto sd = (cpp::static_desc*)builtin_descriptor->value;
+		auto bmd = (BuiltinModuleDescription*)sd->repr;
+
+		return bmd->build(ns, ret);
+	}
+	
+	throw stdext::exception("Unknown builtin `{0}`", proto_string);
 }
 
 instance<> BuiltinLoader::getContent()
@@ -50,6 +55,19 @@ bool BuiltinLoader::prepSemantics(instance<>)
 	return false;
 }
 
+instance<Module> BuiltinModuleDescription::build(instance<Namespace> ns, instance<> loader)
+{
+	if (_builder == nullptr)
+	{
+		auto ret = instance<Module>::make(ns, loader);
+		_initer(ret);
+		return ret;
+	}
+	return _builder(ns, loader);
+}
+
+BuiltinModuleDescription craft::lisp::BuiltinCultSystem("cult.system", library::make_module_builtin_cult_system);
+BuiltinModuleDescription craft::lisp::BuiltinCultCore("cult.core", library::make_module_builtin_cult_core);
 
 
 CRAFT_DEFINE(FileLoader)
