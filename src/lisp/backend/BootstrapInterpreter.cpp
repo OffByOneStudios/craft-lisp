@@ -179,6 +179,9 @@ instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, ty
 	if (call.args.size() != 0)
 		throw stdext::exception("Cannot init {0}: expected 0 args.", module);
 
+	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
+		"BootstrapInterpreter::_special_init\t({0})", module);
+
 	auto frame = InterpreterFrame::ensureCurrent(craft_instance());
 	InterpreterFrame::PushSubFrame _hold(frame, sem, module->moduleValue());
 
@@ -200,6 +203,9 @@ instance<> BootstrapInterpreter::_special_append(instance<lisp::Module> module, 
 
 	if (call.args.size() != 1 && !call.args[0].isType<lisp::Module>())
 		throw stdext::exception("Cannot init {0}: expected 1 arg as a lisp::Module.", module);
+
+	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
+		"BootstrapInterpreter::_special_append\t({0}, {1})", module, call.args[0]);
 
 	instance<RuntimeSlots> slots = module->moduleValue();
 
@@ -232,6 +238,9 @@ instance<> BootstrapInterpreter::_special_merge(instance<lisp::Module> module, t
 	if (call.args.size() != 1 && !call.args[0].isType<lisp::Module>())
 		throw stdext::exception("Cannot init {0}: expected 1 arg as a lisp::Module.", module);
 
+	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
+		"BootstrapInterpreter::_special_merge\t({0}, {1})", module, call.args[0]);
+
 	instance<RuntimeSlots> slots = module->moduleValue();
 
 	auto merge_module = call.args[0].asType<lisp::Module>();
@@ -251,6 +260,9 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 {
 	auto semantics = module->require<CultSemantics>();
 	auto binding = semantics->lookup(Symbol::makeSymbol(entry));
+
+	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
+		"BootstrapInterpreter::exec\t({0}, {1}, argc: {2})", module, entry, call.args.size());
 
 	if (!binding)
 	{

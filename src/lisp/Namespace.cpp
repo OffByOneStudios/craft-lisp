@@ -46,6 +46,11 @@ void Namespace::craft_setupInstance()
 	requireModule("builtin:cult.core")->initialize();
 }
 
+instance<Environment> Namespace::getEnvironment() const
+{
+	return _environment;
+}
+
 Namespace::_Backend Namespace::preferedBackend() const
 {
 	return _backends.at(cpptype<BootstrapInterpreter>::typeDesc() /*cpptype<LlvmBackend>::typeDesc()*/);

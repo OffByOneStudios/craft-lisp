@@ -67,8 +67,8 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 		return ScopeManipulation::SetNamespace(*sexpr->cells[1].asType<std::string>());
 	});
-	sem->builtin_addSpecialForm("namespace-using");
-	sem->builtin_specialFormReader("namespace-using",
+	sem->builtin_addSpecialForm("using");
+	sem->builtin_specialFormReader("using",
 		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
 		if (sexpr->cells.size() != 2 || !sexpr->cells[1].isType<std::string>())

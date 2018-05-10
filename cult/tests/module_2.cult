@@ -1,2 +1,4 @@
 
 (require "file:module_0.cult")
+
+(define test-in-module_2 2)

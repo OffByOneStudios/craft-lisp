@@ -46,7 +46,10 @@ CRAFT_DEFINE(LispRepl)
 
 LispRepl::LispRepl(std::function<void(instance<Module>)> init)
 {
-	_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"));
+	auto logger = spdlog::stdout_color_mt("environment");
+	logger->set_level(spdlog::level::trace);
+
+	_env = instance<Environment>::make(logger);
 	_ns = _env->ns_user;
 
 	_live_module = _env->ns_user->requireModule("repl:console");

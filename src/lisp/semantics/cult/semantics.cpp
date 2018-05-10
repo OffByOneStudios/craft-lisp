@@ -29,7 +29,28 @@ CultSemantics::CultSemantics(instance<lisp::Module> forModule)
 
 void CultSemantics::rebuildModulesCache()
 {
-	_modules_cache = _modules;
+	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
+		"CultSemantics::rebuildModulesCache");
+	std::set<instance<Module>> result_set;
+	std::list<instance<Module>> working_list;
+	std::copy(_modules.begin(), _modules.end(), std::inserter(working_list, working_list.end()));
+
+	while (!working_list.empty())
+	{
+		auto cur = working_list.front(); working_list.pop_front();
+		auto sem = cur->get<CultSemantics>();
+
+		if (result_set.find(cur) != result_set.end() || !sem)
+			continue;
+		result_set.insert(cur);
+
+		for (auto module : sem->_modules)
+		{
+			working_list.push_back(module);
+		}
+	}
+
+	std::copy(result_set.begin(), result_set.end(), std::inserter(_modules_cache, _modules_cache.end()));
 }
 
 instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance<> syntax)
@@ -77,10 +98,12 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 
 void CultSemantics::readPrepDefaults()
 {
+	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
+		"CultSemantics::readPrepDefaults\t({0})", _module);
+
 	// These are implict, and must be made available by these execution engine.
 	importModule(_module->getNamespace()->requireModule("builtin:cult.system"));
 	importModule(_module->getNamespace()->requireModule("builtin:cult.core"));
-	rebuildModulesCache();
 }
 
 void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts)
@@ -89,6 +112,9 @@ void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOption
 	//  macros and a different set of special forms
 	// TODO, make this execute on one node at a time (e.g. to prevent blowing the stack) should
 	//  also allow it to be re-entrant
+
+	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
+		"CultSemantics::read\t({0})", _module);
 
 	for (auto syntax : syntax->getRootForms())
 	{
@@ -193,6 +219,9 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 
 void CultSemantics::importModule(instance<Module> m)
 {
+	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
+		"CultSemantics::importModule\t({0}, {1})", _module, m);
+
 	_modules.insert(_modules.begin(), m);
 	rebuildModulesCache();
 }
@@ -204,6 +233,14 @@ size_t CultSemantics::append(instance<CultSemantics> sem)
 	for (auto appending_ast : sem->_ast)
 	{
 		_ast.push_back(_astclonebind(appending_ast));
+	}
+
+	for (auto other_imported_module : sem->_modules)
+	{
+		if (other_imported_module == _module ||
+			std::find(_modules.begin(), _modules.end(), other_imported_module) == _modules.end())
+			continue;
+		importModule(other_imported_module);
 	}
 
 	return start;
