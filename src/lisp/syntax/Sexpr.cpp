@@ -50,9 +50,7 @@ std::string Sexpr::toRepr() const
 			if (cell.isType<Sexpr>())
 				return cell.asType<Sexpr>()->toRepr();
 			if (cell.isType<Symbol>())
-				return cell.asType<Symbol>()->getValue();
-			if (cell.isType<Keyword>())
-				return ":" + cell.asType<Keyword>()->getValue();
+				return cell.asType<Symbol>()->getDisplay();
 			if (cell.isType<std::string>())
 				return fmt::format("\"{0}\"", *cell.asType<std::string>());
 			return cell.toString();

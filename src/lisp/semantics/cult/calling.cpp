@@ -184,25 +184,11 @@ instance<SScope> lisp::Function::getParentScope() const
 
 instance<Binding> lisp::Function::lookup(instance<Symbol> symbol) const
 {
-	auto it = _symbolTable.find(symbol->symbolStoreId);
-	if (it == _symbolTable.end())
-		return instance<>();
-	return _bindings[it->second];
+	return _simple_lookup(_symbols, symbol);
 }
 instance<Binding> lisp::Function::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
-	auto key = symbol->symbolStoreId;
-	auto lb = _symbolTable.lower_bound(key);
-
-	if (lb != _symbolTable.end() && !(_symbolTable.key_comp()(key, lb->first)))
-		throw stdext::exception("Symbol already defined.");
-
-	auto res = instance<Binding>::make(craft_instance(), symbol, ast);
-	_bindings.push_back(res);
-	auto index = _bindings.size() - 1;
-	res->setIndex(index);
-	_symbolTable.insert(lb, { key, index });
-	return res;
+	return _simple_define(craft_instance(), _symbols, symbol, ast);
 }
 
 /******************************************************************************
@@ -276,7 +262,7 @@ void MultiMethod::attach(instance<BindSite> binding)
 		value = value.asType<Constant>()->getValue();
 
 	if (!value.hasFeature<PSubroutine>())
-		throw stdext::exception("Bindsite `{0}` value is not a PSubroutine.", binding->getStaticSymbol()->getValue());
+		throw stdext::exception("Bindsite `{0}` value is not a PSubroutine.", binding->getStaticSymbol()->getDisplay());
 
 	auto psub = value.getFeature<PSubroutine>();
 	

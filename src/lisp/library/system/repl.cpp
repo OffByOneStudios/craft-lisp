@@ -126,11 +126,11 @@ void core::make_repl_globals(instance<Module> ret)
 			{
 				auto sym = s.asType<Symbol>();
 				
-				auto choices = m->require<CultSemantics>()->search(sym->getValue());
+				auto choices = m->require<CultSemantics>()->search(sym->getDisplay());
 				for (auto s : choices)
 				{
 					
-					res->push(instance<std::string>::make(s->getSymbol()->getValue()));
+					res->push(instance<std::string>::make(s->getSymbol()->getDisplay()));
 				}
 			}
 		}
@@ -146,7 +146,7 @@ void core::make_repl_globals(instance<Module> ret)
 				{
 					auto target = m->require<CultSemantics>()->lookup(sym);
 
-					auto query = instance<std::string>::make(a->substr(a->find(sym->getValue()) + sym->getValue().size()));
+					auto query = instance<std::string>::make(a->substr(a->find(sym->getDisplay()) + sym->getDisplay().size()));
 					auto disp = Execution::exec_fromCurrentModule("completion", { m, target, query });
 					if (disp.typeId().isType<List>()) return disp.asType<List>();
 					else return res;

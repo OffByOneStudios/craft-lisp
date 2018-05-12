@@ -59,10 +59,7 @@ namespace lisp
 		instance<Binding> _binding;
 
 		instance<SScope> _parentScope;
-
-		// TODO: Symbol equality
-		std::vector<instance<Binding>> _bindings;
-		std::map<size_t, size_t> _symbolTable; // Internal table
+		_SimpleSymbolTableBindings _symbols;
 
 	private:
 

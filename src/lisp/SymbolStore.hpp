@@ -11,20 +11,9 @@ namespace lisp
 
 		// TODO, use LLVM style tries
 		plf::colony<std::string> _strings;
+		std::map<std::string_view, uint32_t> _map;
 
-		struct _TempStringView
-		{
-			std::string const& s;
-
-			bool operator==(_TempStringView const& that) const { return s == that.s; }
-			bool operator<(_TempStringView const& that) const { return s < that.s; }
-			bool operator>(_TempStringView const& that) const { return s > that.s; }
-		};
-
-		typedef std::map<_TempStringView, size_t> LookupMap;
-		LookupMap _map;
-
-		size_t _anon_count;
+		uint32_t _anon_count;
 
 	public:
 
@@ -33,9 +22,9 @@ namespace lisp
 			_anon_count = 0;
 		}
 
-		inline size_t intern(std::string const& s)
+		inline uint32_t intern(std::string const& s)
 		{
-			auto key = _TempStringView{ s };
+			auto key = std::string_view{ s };
 			auto mlb = _map.lower_bound(key);
 
 			if (mlb != _map.end() && !(_map.key_comp()(key, mlb->first)))
@@ -43,9 +32,9 @@ namespace lisp
 				return mlb->second;
 
 			auto vit = _strings.insert(s);
-			size_t index = std::distance(_strings.begin(), vit);
+			uint32_t index = (uint32_t)std::distance(_strings.begin(), vit);
 
-			_map.insert(mlb, { _TempStringView{ *vit }, index });    // Use lb as a hint to insert,
+			_map.insert(mlb, { std::string_view{ *vit }, index });    // Use lb as a hint to insert,
 
 			return index;
 		}
@@ -55,7 +44,7 @@ namespace lisp
 			return intern(fmt::format("$SYM-{0}-{1}", s_prefix, ++_anon_count));
 		}
 
-		std::string const& getValue(size_t value) const
+		std::string const& getValue(uint32_t value) const
 		{
 			return *_strings.get_iterator_from_index(value);
 		}

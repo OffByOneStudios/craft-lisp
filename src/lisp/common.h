@@ -32,13 +32,13 @@
 #endif
 
 // Temporary...
-#define SPDLOG_TRACE_ON
+//#define SPDLOG_TRACE_ON
 
 // Vendor
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
-#define SPDLOG_TRACE(logger, ...) logger->trace(__VA_ARGS__)
+//#define SPDLOG_TRACE(logger, ...) logger->trace(__VA_ARGS__)
 
 // Deps
 #include "util/all.h"

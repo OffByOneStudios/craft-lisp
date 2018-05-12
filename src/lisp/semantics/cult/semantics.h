@@ -49,9 +49,8 @@ namespace lisp
 	private:
 		// TODO: Need to refactor this into a better symbol-binding and module require system
 
-		// TODO: Symbol equality
-		std::vector<instance<Binding>> _bindings;
-		std::map<size_t, size_t> _symbolTable; // Internal table
+		// TODO: Replace with namespace and namelayer aware solution.
+		_SimpleSymbolTableBindings _bindings;
 
 		// List of Required Modules
 		std::vector<instance<lisp::Module>> _modules; // Simple module list
@@ -77,8 +76,8 @@ namespace lisp
 		inline size_t countStatements() const { return _ast.size(); }
 		inline instance<SCultSemanticNode> getStatement(size_t index) const { return _ast[index]; }
 
-		inline size_t countBindings() const { return _bindings.size(); }
-		inline instance<Binding> lookup(size_t index) const { return _bindings[index]; }
+		inline size_t countBindings() const { return _bindings.bindings.size(); }
+		inline instance<Binding> lookup(size_t index) const { return _bindings.bindings[index]; }
 
 		// Requirements:
 	public:

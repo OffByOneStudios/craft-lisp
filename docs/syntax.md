@@ -22,6 +22,10 @@ Simple syntax sugar ideas for the lisp:
   - Some motivations include:
     - Type expressions.
 
+- Allow some or all of `/` `@` `:` `.` as pathing operators... or maybe allow for arbitrary pathing operators. Limitation on usage, there must be an alpha character before each one.
+
+  * Example of alpha limitation: `/` is the symbol `/`, `foo/bar` is the symbol sequence `(/ foo bar)` and `\|/` is the symbol `\|/`. So `foo:/bar` is `(: foo /bar)` and `foo/:bar` is `(/ foo :bar)` (bar is a keyword here).
+
 - `,` to group forms in forms. For example the following would be equivalent:
 
   ```

@@ -14,6 +14,10 @@ Don't use `!` or `?` as suffixes for names, leave that to the syntax layer.
 
 `(:foo thing)` will interfere with the keyword extension features I have planned.
 
+## Namelayers
+
+Namespaces and namelayers, layers apply to differentiating things like special forms, types, macros and functions into different layers, namespaces differentiate the locations of those names between various files.
+
 ## Compiler Optimization in Multimethods
 
 For a function signature (e.g. `+`) `((a Int64) (b Int64) Int64)` the compiler function could be listed beside it as say `((state CodeGenState) (a (CodeGenVariable Int64)) (b (CodeGenVariable Int64)) (CodeGenVariable Int64))`

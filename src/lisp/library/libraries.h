@@ -24,8 +24,6 @@ namespace lisp {
 			{
 				if (s.typeId().isType<Symbol>())
 					return s;
-				else if (s.typeId().isType<Keyword>())
-					return Symbol::makeSymbol(s.asType<Keyword>());
 				else if (s.typeId().isType<std::string>())
 					return Symbol::makeSymbol(*s.asType<std::string>());
 				else

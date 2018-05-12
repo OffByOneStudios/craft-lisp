@@ -46,7 +46,6 @@ namespace lisp_grammar
 	struct lisp_ident : plus < lisp_ident_char > {};
 
 	struct symbol : lisp_ident {};
-	struct keyword : seq< one< ':' >, lisp_ident > {};
 
 	struct floatsize : seq <one<'f'>, sor<
 		string<'3', '2'>,
@@ -85,7 +84,7 @@ namespace lisp_grammar
 	struct singlestring : if_must< one< '"' >, until< one< '"' > > > {};
 	struct strings : sor<triplestring, singlestring>{};
 
-	struct atom : sor<null, true_, false_, strings, number, keyword, symbol > {};
+	struct atom : sor<null, true_, false_, strings, number, symbol > {};
 
 	// List type
 	struct sexpr : if_must< sexpr_open, until< sexpr_close, anything > >{};
@@ -187,16 +186,6 @@ namespace lisp_grammar
 			finished->cell_locs.push_back(in.position().byte);
 
 			ps.top()->cells.push_back(finished);
-		}
-	};
-
-	template<>
-	struct lisp_action< keyword >
-	{
-		template<typename Input>
-		static void apply(Input const& in, ParseStack& ps)
-		{
-			ps.top()->cells.push_back(Keyword::makeKeyword(in.string()));
 		}
 	};
 

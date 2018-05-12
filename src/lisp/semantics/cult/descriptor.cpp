@@ -94,7 +94,7 @@ void Resolve::bind()
 {
 	_binding = SScope::findScope(_parent)->lookup_recurse(_symbol);
 	if (!_binding)
-		throw stdext::exception("Resolve {0} bad symbol {1}.", craft_instance(), _symbol->getValue());
+		throw stdext::exception("Resolve {0} bad symbol {1}.", craft_instance(), _symbol->getDisplay());
 }
 
 /******************************************************************************
@@ -210,23 +210,9 @@ instance<SScope> Block::getParentScope() const
 
 instance<Binding> Block::lookup(instance<Symbol> symbol) const
 {
-	auto it = _symbolTable.find(symbol->symbolStoreId);
-	if (it == _symbolTable.end())
-		return instance<>();
-	return _bindings[it->second];
+	return _simple_lookup(_symbols, symbol);
 }
 instance<Binding> Block::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
-	auto key = symbol->symbolStoreId;
-	auto lb = _symbolTable.lower_bound(key);
-
-	if (lb != _symbolTable.end() && !(_symbolTable.key_comp()(key, lb->first)))
-		throw stdext::exception("Symbol already defined.");
-
-	auto res = instance<Binding>::make(craft_instance(), symbol, ast);
-	_bindings.push_back(res);
-	auto index = _bindings.size() - 1;
-	res->setIndex(index);
-	_symbolTable.insert(lb, { key, index });
-	return res;
+	return _simple_define(craft_instance(), _symbols, symbol, ast);
 }

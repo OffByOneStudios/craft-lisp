@@ -148,10 +148,7 @@ instance<SScope> CultSemantics::getParentScope() const
 
 instance<Binding> CultSemantics::lookup_local(instance<Symbol> symbol) const
 {
-	auto it = _symbolTable.find(symbol->symbolStoreId);
-	if (it == _symbolTable.end())
-		return instance<>();
-	return _bindings[it->second];
+	return _simple_lookup(_bindings, symbol);
 }
 instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
 {
@@ -173,35 +170,24 @@ instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
 }
 instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
-	auto key = symbol->symbolStoreId;
-	auto lb = _symbolTable.lower_bound(key);
-
-	if (lb != _symbolTable.end() && !(_symbolTable.key_comp()(key, lb->first)))
-		throw stdext::exception("Symbol already defined.");
-
-	auto res = instance<Binding>::make(craft_instance(), symbol, ast);
-	_bindings.push_back(res);
-	//auto index = _bindings.size() - 1; 
-	auto index = _ast.size(); // hack untill we improve the runtime features
-	res->setIndex(index);
-	_symbolTable.insert(lb, { key, _bindings.size() - 1 });
-	return res;
+	return _simple_define(craft_instance(), _bindings, symbol, ast);
 }
 
 std::vector<instance<Binding>> CultSemantics::search(std::string const & search) const
 {
 	// TODO search symbols using a trie, and then look for those symbols in modules.
+	// TODO search for namespace prefix
 
 	auto const size = search.size();
 	auto const& symbols = _module->getNamespace()->symbolStore;
 
 	std::vector<instance<Binding>> res;
-	for (auto& it : _symbolTable)
+	for (auto& it : _bindings.table)
 	{
 		auto const& sym = symbols.getValue(it.first);
 
 		if (size <= sym.size() && search == sym.substr(0, size))
-			res.push_back(_bindings[it.second]);
+			res.push_back(_bindings.bindings[it.second]);
 	}
 
 	for (auto module : _modules)
