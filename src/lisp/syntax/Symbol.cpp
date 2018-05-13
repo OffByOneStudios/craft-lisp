@@ -24,7 +24,7 @@ uint32_t Symbol::at(size_t p) const
 bool Symbol::isKeyword() const
 {
 	auto size = _symbolseq.size();
-	if (size == 1) return !isPath(_symbolseq[0]);
+	if (size == 1) return false;
 	else if (size == 2) return _symbolseq[0] == (uint32_t)Path::Colon && !isPath(_symbolseq[1]);
 	else return isPath(_symbolseq[size - 3]) && _symbolseq[size - 2] == (uint32_t)Path::Colon && !isPath(_symbolseq[size - 1]);
 }
@@ -77,6 +77,7 @@ instance<Symbol> Symbol::makeSymbol(std::string const& s)
 
 		auto pathsep = c_lookup_path[l - c_lookup_str];
 		nsym->_symbolseq.push_back((uint32_t)pathsep);
+		last_i = i + 1;
 	}
 
 	nsym->_symbolseq.push_back(symbol_store.intern(s.substr(last_i)));

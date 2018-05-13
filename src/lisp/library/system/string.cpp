@@ -47,7 +47,7 @@ void core::make_string_globals(instance<Module> ret)
 		std::cout << "\n";
 	});
 
-	semantics->builtin_implementMultiMethod("fmt",
+	semantics->builtin_implementMultiMethod("format",
 		[](instance<std::string> fmt, types::VarArgs<instance<>> args) -> instance<std::string>
 	{
 		std::regex re("%\\{[^\\}]+\\}");
@@ -68,7 +68,7 @@ void core::make_string_globals(instance<Module> ret)
 				ssize_t i = -1;
 				try
 				{
-					i = std::stoi(match) + 1;
+					i = std::stoi(match);
 				}
 				catch (...)
 				{
@@ -78,7 +78,7 @@ void core::make_string_globals(instance<Module> ret)
 				{
 					if (size_t(i) >= args.args.size())
 					{
-						throw stdext::exception("Argument Reference {0} Out of Bounds", i - 1);
+						throw stdext::exception("Argument Reference {0} Out of Bounds", i);
 					}
 					target = args.args[i];
 				}
@@ -87,7 +87,7 @@ void core::make_string_globals(instance<Module> ret)
 					target = Execution::exec_fromCurrentModule(match, {});
 				}
 
-				instance<std::string> c = Execution::exec_fromCurrentModule("str", { target });
+				instance<std::string> c = Execution::exec_fromCurrentModule("string", { target });
 				s << *c;
 			}
 			else
@@ -97,6 +97,38 @@ void core::make_string_globals(instance<Module> ret)
 		});
 
 		return instance<std::string>::make(s.str());
+	});
+
+	semantics->builtin_implementMultiMethod("log",
+		[](instance<Symbol> sym, instance<std::string> str, types::VarArgs<instance<>> args)
+	{
+		GenericInvoke invoke(args.args.size() + 1);
+		invoke.args.push_back(str); std::copy(args.args.begin(), args.args.end(), std::back_inserter(invoke.args));
+		auto out = Execution::exec_fromCurrentModule("format", invoke).asType<std::string>();
+
+		auto ns = Execution::getCurrent()->getNamespace();
+
+		spdlog::level::level_enum level = spdlog::level::level_enum::off;
+		if (sym->isKeyword())
+		{
+			auto critical = ns->symbolStore.intern("critical");
+			if (critical == sym->at(1)) level = spdlog::level::level_enum::critical;
+			auto error = ns->symbolStore.intern("error");
+			if (error == sym->at(1)) level = spdlog::level::level_enum::err;
+			auto warning = ns->symbolStore.intern("warning");
+			if (warning == sym->at(1)) level = spdlog::level::level_enum::warn;
+			auto info = ns->symbolStore.intern("info");
+			if (info == sym->at(1)) level = spdlog::level::level_enum::info;
+			auto debug = ns->symbolStore.intern("debug");
+			if (debug == sym->at(1)) level = spdlog::level::level_enum::debug;
+			auto trace = ns->symbolStore.intern("trace");
+			if (trace == sym->at(1)) level = spdlog::level::level_enum::trace;
+		}
+
+		if (level == spdlog::level::level_enum::off)
+			throw stdext::exception("Unknown level {0}", sym->getDisplay());
+
+		ns->getEnvironment()->log()->log(level, out->c_str());
 	});
 
 	semantics->builtin_implementMultiMethod("string/concat",

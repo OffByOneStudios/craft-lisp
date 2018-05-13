@@ -55,7 +55,7 @@ void CultSemantics::rebuildModulesCache()
 
 instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance<> syntax)
 {
-	if (syntax.typeId().isType<Symbol>())
+	if (syntax.typeId().isType<Symbol>() && !syntax.asType<Symbol>()->isKeyword())
 		return instance<Resolve>::make(syntax.asType<Symbol>(), Resolve::Mode::ResolveAndGet);
 	else if (syntax.typeId().isType<Sexpr>())
 	{
