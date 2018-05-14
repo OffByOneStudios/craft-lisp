@@ -131,13 +131,13 @@ vendor-dependencies:
     - "LLVMX86CodeGen"
     - "LLVMX86Desc"
     - "LLVMX86Disassembler"
-  debian_x64_gcc:
+  x86_64-pc-linux-gnu:
     - "zmq"
 
 platform-dependencies:
   x86_64-pc-windows-msvccoff: []
   osx_x64_clang: []
-  debian_x64_gcc: []
+  x86_64-pc-linux-gnu: []
 
 platform-compile-flags:
   x86_64-pc-windows-msvccoff:
@@ -146,7 +146,7 @@ platform-compile-flags:
     - "-std=c++1z"
     - "-stdlib=libc++"
     - "-Wc++11-extensions"
-  debian_x64_gcc:
+  x86_64-pc-linux-gnu:
     - "-std=gnu++1z"
     - "-pthread"
     - "-fpermissive"
@@ -159,7 +159,7 @@ platform-defines:
   x86_64-pc-windows-msvccoff:
     _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS: yes
   osx_x64_clang: {}
-  debian_x64_gcc: {}
+  x86_64-pc-linux-gnu: {}
 
 artifacts:
   library:
