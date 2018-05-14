@@ -33,7 +33,7 @@ void core::make_string_globals(instance<Module> ret)
 		[](instance<> a) -> instance<std::string>
 	{
 		if (a.isNull()) return instance<std::string>::make("null");
-		return instance<std::string>::make(a.typeId().toString());
+		return instance<std::string>::make(a.toString());
 	});
 
 	semantics->builtin_implementMultiMethod("print",
@@ -102,9 +102,13 @@ void core::make_string_globals(instance<Module> ret)
 	semantics->builtin_implementMultiMethod("log",
 		[](instance<Symbol> sym, instance<std::string> str, types::VarArgs<instance<>> args)
 	{
-		GenericInvoke invoke(args.args.size() + 1);
-		invoke.args.push_back(str); std::copy(args.args.begin(), args.args.end(), std::back_inserter(invoke.args));
-		auto out = Execution::exec_fromCurrentModule("format", invoke).asType<std::string>();
+		auto size = args.args.size() + 1;
+		if (size != 1)
+		{
+			GenericInvoke invoke(size);
+			invoke.args.push_back(str); std::copy(args.args.begin(), args.args.end(), std::back_inserter(invoke.args));
+			str = Execution::exec_fromCurrentModule("format", invoke).asType<std::string>();
+		}
 
 		auto ns = Execution::getCurrent()->getNamespace();
 
@@ -128,7 +132,14 @@ void core::make_string_globals(instance<Module> ret)
 		if (level == spdlog::level::level_enum::off)
 			throw stdext::exception("Unknown level {0}", sym->getDisplay());
 
-		ns->getEnvironment()->log()->log(level, out->c_str());
+		ns->getEnvironment()->log()->log(level, str->c_str());
+	});
+
+	semantics->builtin_implementMultiMethod("log",
+		[](instance<Symbol> sym, instance<> thing)
+	{
+		auto str = Execution::exec_fromCurrentModule("string", { thing }).asType<std::string>();
+		Execution::exec_fromCurrentModule("format", { sym, str }).asType<std::string>();
 	});
 
 	semantics->builtin_implementMultiMethod("string/concat",

@@ -60,7 +60,14 @@ instance<Module> BuiltinModuleDescription::build(instance<Namespace> ns, instanc
 	if (_builder == nullptr)
 	{
 		auto ret = instance<Module>::make(ns, loader);
+
+		auto sem = instance<CultSemantics>::make(ret);
+		ret->builtin_setSemantics(sem);
+
 		_initer(ret);
+
+		ret->builtin_setSemantics(ret->require<CultSemantics>());
+
 		return ret;
 	}
 	return _builder(ns, loader);

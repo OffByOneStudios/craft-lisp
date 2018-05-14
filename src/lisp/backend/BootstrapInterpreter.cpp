@@ -271,7 +271,7 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 		if (entry == "::merge") return _special_merge(module, call);
 
 
-		throw stdext::exception("Execution entry point `{0}` not found in `{1}`.", entry, module);
+		throw bad_call_error(module, entry);
 	}
 
 	auto potFunc = binding->getSite()->valueAst();

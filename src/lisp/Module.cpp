@@ -137,7 +137,7 @@ instance<> Module::require(types::TypeId type, bool force_read)
 
 			// Report error
 			if (!target && force_read)
-				throw bad_projection_error("Cannot require a projection to `{1}` from {0}: no valid path to transform/read semantics from.", craft_instance(), type.toString(false));
+				throw bad_projection_error("Cannot require a projection to `{1}` from {0}:\nno valid path to transform/read semantics from.", craft_instance(), type.toString(false));
 
 			// Perform
 			if (target)
@@ -158,7 +158,7 @@ instance<> Module::require(types::TypeId type, bool force_read)
 			}
 		}
 
-		throw bad_projection_error("Cannot require a projection to `{1}` from {0}: type does not implement PSemantics.", craft_instance(), type.toString(false));
+		throw bad_projection_error("Cannot require a projection to `{1}` from {0}:\ntype does not implement PSemantics.", craft_instance(), type.toString(false));
 	}
 
 	return ret;

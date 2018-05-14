@@ -32,4 +32,24 @@ namespace lisp
 	public:
 		using usage_error::usage_error;
 	};
+
+	// An error executing the language
+	class execution_error : public lang_error
+	{
+	public:
+		using lang_error::lang_error;
+	};
+
+	// An error executing the language
+	class bad_call_error : public execution_error
+	{
+	public:
+		instance<Module> module;
+		std::string entry;
+
+		bad_call_error(instance<Module> module, std::string entry)
+			: execution_error("Execution entry point `{0}` not found in `{1}`.", entry, module)
+			, module(module), entry(entry)
+		{ }
+	};
 }}
