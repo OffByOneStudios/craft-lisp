@@ -297,7 +297,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<Block> ast) -> instance<>
 	{
-		InterpreterFrame::PushSubFrame _hold(interp, ast, instance<RuntimeSlots>::make(ast, 2), interp->top());
+		InterpreterFrame::PushSubFrame _hold(interp, ast, instance<RuntimeSlots>::make(ast, std::max<size_t>(ast->statementCount(), 2)), interp->top());
 
 		auto count = ast->statementCount();
 		instance<> last_res;
