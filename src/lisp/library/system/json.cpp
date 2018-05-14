@@ -79,7 +79,12 @@ namespace json
 
 		Node* slotValue()
 		{
-			return collect[0];
+			//TODO is this a real fix?
+			if (collect.size())
+			{
+				return collect[0];
+			}
+			return this;
 		}
 	};
 
@@ -391,7 +396,7 @@ namespace json
 
 		void success(result_state& in_result)
 		{
-			if (this->result->type != Node::JsonType::None)
+			if (this->result && this->result->type != Node::JsonType::None)
 			{
 				insert();
 			}
@@ -623,7 +628,7 @@ void core::make_json_globals(instance<Module> ret)
 		json::result_state result;
 		json::string_input<> s(*a, "");
 
-		json::parse< json::grammar, json::nothing, json::control >(s, result);
+		auto success = json::parse< json::grammar, json::nothing, json::control >(s, result);
 
 		if (result.result->type == json::Node::JsonType::Object)
 		{

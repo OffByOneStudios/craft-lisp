@@ -48,6 +48,18 @@ namespace lisp
 		{
 			return *_strings.get_iterator_from_index(value);
 		}
+
+		// TODO Mason remove this
+		inline std::vector<instance<>> expensivedump()
+		{
+			std::vector<instance<>> res;
+			for (auto& s : _strings)
+			{
+				res.push_back(instance<std::string>::make(s));
+			}
+
+			return res;
+		}
 	};
 
 }}

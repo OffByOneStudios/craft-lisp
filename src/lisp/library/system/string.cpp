@@ -228,4 +228,9 @@ void core::make_string_globals(instance<Module> ret)
 		return instance<bool>::make(res);
 	});
 
+	semantics->builtin_implementMultiMethod("string/length",
+		[](instance<std::string> a) -> instance<uint64_t>
+	{
+		return instance<uint64_t>::make(a->size());
+	});
 }

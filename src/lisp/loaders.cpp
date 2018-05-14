@@ -187,7 +187,7 @@ bool AnonLoader::prepSemantics(instance<> semantics)
 		auto sem = semantics.asType<CultSemantics>();
 
 		sem->readPrepDefaults();
-		sem->importModule(_asModule);
+		if(_asModule) sem->importModule(_asModule);
 
 		return true;
 	}
