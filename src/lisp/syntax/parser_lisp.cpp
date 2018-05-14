@@ -208,7 +208,7 @@ namespace lisp_grammar
 		{
 			ps.top()->cell_locs.push_back(in.position().byte);
 			std::string s = in.string();
-			auto ind = s.find('i');
+			auto ind = s.find('u');
 			if (ind == s.npos)
 			{
 				ps.top()->cells.push_back(craft::types::cpptype<uint64_t>::typeDesc().getFeature<PParse>()->parse(s));
@@ -217,10 +217,10 @@ namespace lisp_grammar
 			{
 				auto suf = s.substr(ind);
 				if (suf == "") ps.top()->cells.push_back(craft::types::cpptype<uint64_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
-				else if (suf == "i8") ps.top()->cells.push_back(craft::types::cpptype<uint8_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
-				else if (suf == "i16") ps.top()->cells.push_back(craft::types::cpptype<uint16_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
-				else if (suf == "i32") ps.top()->cells.push_back(craft::types::cpptype<uint32_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
-				else if (suf == "i64") ps.top()->cells.push_back(craft::types::cpptype<uint64_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "u8") ps.top()->cells.push_back(craft::types::cpptype<uint8_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "u16") ps.top()->cells.push_back(craft::types::cpptype<uint16_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "u32") ps.top()->cells.push_back(craft::types::cpptype<uint32_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "u64") ps.top()->cells.push_back(craft::types::cpptype<uint64_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else throw stdext::exception("No Such Integer Literal Suffix: {0}", suf);
 			}
 
