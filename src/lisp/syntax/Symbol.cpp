@@ -26,7 +26,11 @@ bool Symbol::isKeyword() const
 	auto size = _symbolseq.size();
 	if (size == 1) return false;
 	else if (size == 2) return _symbolseq[0] == (uint32_t)Path::Colon && !isPath(_symbolseq[1]);
-	else return isPath(_symbolseq[size - 3]) && _symbolseq[size - 2] == (uint32_t)Path::Colon && !isPath(_symbolseq[size - 1]);
+	else return false
+		// :some.arbitrary/keyword
+		|| _symbolseq[0] == (uint32_t)Path::Colon
+		// some/arbitrary/:keyword
+		|| (isPath(_symbolseq[size - 3]) && _symbolseq[size - 2] == (uint32_t)Path::Colon && !isPath(_symbolseq[size - 1]));
 }
 bool Symbol::isSimple() const
 {
