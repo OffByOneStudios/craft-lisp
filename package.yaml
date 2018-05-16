@@ -11,8 +11,6 @@ dependencies:
 vendor-dependencies:
   x86_64-pc-windows-msvccoff:
     - "replxx"
-    - "zmq"
-    - "libsodium"
     - "LLVMX86Info"
     - "LLVMX86Utils"
     - "LLVMXRay"
@@ -73,7 +71,6 @@ vendor-dependencies:
   osx_x64_clang:
     - "z"
     - "zmq"
-    - "sodium"
     - "LLVMX86Info"
     - "LLVMX86Utils"
     - "LLVMXRay"
@@ -131,8 +128,7 @@ vendor-dependencies:
     - "LLVMX86CodeGen"
     - "LLVMX86Desc"
     - "LLVMX86Disassembler"
-  x86_64-pc-linux-gnu:
-    - "zmq"
+  x86_64-pc-linux-gnu: []
 
 platform-dependencies:
   x86_64-pc-windows-msvccoff: []

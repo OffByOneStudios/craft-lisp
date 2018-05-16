@@ -81,18 +81,6 @@ namespace library
 		CRAFT_LISP_EXPORTED std::vector<instance<>> values();
 	};
 
-	class HttpServer
-		: public craft::net::HttpServer
-		, public virtual types::Object
-
-	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::HttpServer);
-
-	public:
-		CRAFT_LISP_EXPORTED HttpServer(std::shared_ptr<spdlog::logger> logger, int port);
-
-		inline virtual ~HttpServer() {};
-	};
 }}}
 
 namespace json {

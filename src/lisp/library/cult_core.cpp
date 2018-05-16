@@ -31,16 +31,12 @@ instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns, 
 	library::core::make_shim_globals(ret);
 	library::core::make_fs_globals(ret);
 	library::core::make_env_globals(ret);
-	library::core::make_llvm_globals(ret);
-	library::core::make_zmq_globals(ret);
 	library::core::make_regex_globals(ret);
 	library::core::make_meta_globals(ret);
-	library::core::make_http_globals(ret);
 	library::core::make_subprocess_globals(ret);
 	library::core::make_list_globals(ret);
 	library::core::make_map_globals(ret);
 	library::core::make_platform_globals(ret);
-	library::core::make_security_globals(ret);
 	library::core::make_repl_globals(ret);
 	library::core::make_json_globals(ret);
 

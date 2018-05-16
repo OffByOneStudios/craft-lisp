@@ -47,18 +47,14 @@ namespace lisp {
 			void make_cast_globals(instance<Module> m);
 			void make_logic_globals(instance<Module> m);
 			void make_fs_globals(instance<Module> m);
-			void make_llvm_globals(instance<Module> m);
-			void make_zmq_globals(instance<Module> m);
 			void make_env_globals(instance<Module> m);
 			void make_regex_globals(instance<Module> m);
-			void make_http_globals(instance<Module> m);
 			void make_meta_globals(instance<Module> m);
 			void make_subprocess_globals(instance<Module> m);
 			void make_list_globals(instance<Module> m);
 			void make_map_globals(instance<Module> m);
 			void make_platform_globals(instance<Module> m);
 			void make_buffer_globals(instance<Module> m);
-			void make_security_globals(instance<Module> m);
 			void make_repl_globals(instance<Module> m);
 			void make_json_globals(instance<Module> m);
 		}
