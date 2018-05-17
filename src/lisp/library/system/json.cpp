@@ -310,9 +310,9 @@ namespace json
 		{
 			result.result->type = Node::JsonType::Value;
 			if (result.result->value.tag == TaggedValue::Type::Float)
-				result.result->value = TaggedValue(std::stod(in.string()));
+				result.result->value = TaggedValue(float(std::stod(in.string())));
 			else
-				result.result->value = TaggedValue(std::stoll(in.string()));
+				result.result->value = TaggedValue(int64_t(std::stoll(in.string())));
 		}
 	};
 

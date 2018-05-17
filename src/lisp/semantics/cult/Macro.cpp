@@ -1,7 +1,7 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
 #include "lisp/semantics/cult/cult.h"
-#include "lisp/semantics/cult/macro.h"
+#include "lisp/semantics/cult/Macro.h"
 
 using namespace craft;
 using namespace craft::types;

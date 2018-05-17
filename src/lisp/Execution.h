@@ -41,7 +41,7 @@ namespace lisp
 			if (s.size() == 0) return instance<>();
 			auto t = s.front();
 			if (!t.isType<T>()) return instance<>();
-			return t;
+			return t.asType<T>();
 		}
 
 		inline instance<SFrame> top() const

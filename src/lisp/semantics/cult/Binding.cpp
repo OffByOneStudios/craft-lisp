@@ -1,7 +1,7 @@
 #include "lisp/common.h"
 #include "lisp/lisp.h"
 #include "lisp/semantics/cult/cult.h"
-#include "lisp/semantics/cult/binding.h"
+#include "lisp/semantics/cult/Binding.h"
 
 using namespace craft;
 using namespace craft::types;
@@ -20,7 +20,7 @@ instance<CultSemantics> SScope::getSemantics() const
 	instance<SScope> scope = getParentScope();
 	while (scope && !scope.isType<CultSemantics>())
 		scope = scope->getParentScope();
-	return scope;
+	return (instance<CultSemantics>)scope;
 }
 
 /******************************************************************************
@@ -248,7 +248,7 @@ void ScopeManipulation::bind()
 	if (!parent_scope.isType<CultSemantics>())
 		throw stdext::exception("Can only import at module scope.");
 
-	instance<CultSemantics> sem = parent_scope;
+	instance<CultSemantics> sem = (instance<CultSemantics>)parent_scope;
 
 	switch (_mode)
 	{

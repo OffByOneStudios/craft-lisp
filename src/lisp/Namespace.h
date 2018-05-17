@@ -17,7 +17,7 @@ namespace lisp
 
 		struct _Backend
 		{
-			instance<> instance;
+			instance<> inst;
 			PBackend* backend;
 			PExecutor* executor;
 			PCompiler* compiler;
@@ -66,18 +66,18 @@ namespace lisp
 		
 		template<typename T> // TODO, implements PBackend
 		inline instance<T> get()
-		{ return get(cpptype<T>::typeDesc()); }
+		{ return get(types::cpptype<T>::typeDesc()); }
 
 		template<typename T>
 		inline instance<T> parse(std::string contents, PSyntax::ParseOptions const* opts = nullptr)
-		{ return parse(contents, cpptype<T>::typeDesc(), opts); }
+		{ return parse(contents, types::cpptype<T>::typeDesc(), opts); }
 
 		template<typename T>
 		inline instance<T> read(std::string contents, PSemantics::ReadOptions const* opts = nullptr)
-		{ return read(contents, cpptype<T>::typeDesc(), opts); }
+		{ return read(contents, types::cpptype<T>::typeDesc(), opts); }
 		template<typename T>
 		inline instance<T> read(instance<> source, PSemantics::ReadOptions const* opts = nullptr)
-		{ return read(source, cpptype<T>::typeDesc(), opts); }
+		{ return read(source, types::cpptype<T>::typeDesc(), opts); }
 	};
 
 }}

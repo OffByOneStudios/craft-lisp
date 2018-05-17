@@ -193,8 +193,8 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 			throw stdext::exception("malformed: (variable <value> [<type>])");
 
 		auto ret = instance<Variable>::make(
-			(size > 1 ? rs->read(sexpr, 1) : instance<>()),
-			(size > 2 ? rs->read(sexpr, 2) : instance<>())
+			(size > 1 ? rs->read(sexpr, 1) : instance<SCultSemanticNode>()),
+			(size > 2 ? rs->read(sexpr, 2) : instance<SCultSemanticNode>())
 		);
 
 		return ret;

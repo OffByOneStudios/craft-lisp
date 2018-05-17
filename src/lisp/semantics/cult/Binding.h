@@ -232,7 +232,7 @@ namespace lisp
 				cur = cur->getParent();
 			}
 
-			return cur;
+			return (instance<SScope>)cur;
 		}
 	};
 }}

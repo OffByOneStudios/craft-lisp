@@ -75,36 +75,39 @@ void CallSite::bind()
 /******************************************************************************
 ** Function
 ******************************************************************************/
-
-class craft::lisp::FunctionSubroutineProvider
-	: public Implements<PSubroutine>::For<Function>
-{
-	static ExpressionStore MultiMethodAny;
-
-	virtual types::Function function(instance<> _) const override
+namespace craft {
+namespace lisp {
+	class FunctionSubroutineProvider
+		: public types::Implements<PSubroutine>::For<Function>
 	{
-		throw stdext::exception("Needs to support closures....");
-	}
-	virtual types::ExpressionStore expression(instance<> _) const override
-	{
-		instance<Function> fn = _;
+		static ExpressionStore MultiMethodAny;
 
-		return ExpressionStore();
-	}
+		virtual types::Function function(instance<> _) const override
+		{
+			throw stdext::exception("Needs to support closures....");
+		}
+		virtual types::ExpressionStore expression(instance<> _) const override
+		{
+			instance<Function> fn = _;
 
-	//
-	// Performs a full call on the subroutine, including pushing to the current execution
-	//
-	virtual instance<> execute(instance<> _, types::GenericInvoke const& call) const override
-	{
-		instance<Function> fn = _;
+			return ExpressionStore();
+		}
 
-		// TODO make this generic
-		auto frame = InterpreterFrame::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
+		//
+		// Performs a full call on the subroutine, including pushing to the current execution
+		//
+		virtual instance<> execute(instance<> _, types::GenericInvoke const& call) const override
+		{
+			instance<Function> fn = _;
 
-		return frame->interp_call(fn, call);
-	}
-};
+			// TODO make this generic
+			auto frame = InterpreterFrame::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
+
+			return frame->interp_call(fn, call);
+		}
+	};
+}}
+
 
 CRAFT_DEFINE(lisp::Function)
 {
@@ -194,51 +197,54 @@ instance<Binding> lisp::Function::define(instance<Symbol> symbol, instance<BindS
 /******************************************************************************
 ** MultiMethod
 ******************************************************************************/
-
-class craft::lisp::MultiMethodSubroutineProvider
-	: public Implements<PSubroutine>::For<MultiMethod>
-{
-	static ExpressionStore MultiMethodAny;
-
-	virtual types::Function function(instance<> _) const override
+namespace craft {
+namespace lisp {
+	class MultiMethodSubroutineProvider
+		: public Implements<PSubroutine>::For<MultiMethod>
 	{
-		throw stdext::exception("Needs to support closures....");
-	}
-	virtual types::ExpressionStore expression(instance<> _) const override
-	{
-		ExpressionStore any = (new ExpressionArrow(new ExpressionTuple({}, &ExpressionAny::Value), &ExpressionAny::Value));
+		static ExpressionStore MultiMethodAny;
 
-		return any;
-	}
-
-	//
-	// Performs a full call on the subroutine, including pushing to the current execution
-	//
-	virtual instance<> execute(instance<> _, types::GenericInvoke const& call) const override
-	{
-		instance<MultiMethod> mm = _;
-
-		// TODO push a multimethod dispatch frame...
-
-		std::vector<TypeId> exprs;
-		exprs.reserve(call.args.size());
-		std::transform(call.args.begin(), call.args.end(), std::back_inserter(exprs),
-			[](instance<> const& inst) { return inst.typeId(); });
-
-		auto res = mm->_dispatcher.dispatchWithRecord(exprs);
-		auto entry = (MultiMethod::_Entry*)std::get<0>(res);
-
-		if (entry == nullptr)
+		virtual types::Function function(instance<> _) const override
 		{
-			std::string dispatchList = stdext::join<char, std::vector<TypeId>::iterator>(
-				std::string(", "), exprs.begin(), exprs.end(),
-				[](auto it) { return it->toString(); });
-			throw stdext::exception("Dispatch failed for [{0}].", dispatchList);
+			throw stdext::exception("Needs to support closures....");
+		}
+		virtual types::ExpressionStore expression(instance<> _) const override
+		{
+			ExpressionStore any = (new ExpressionArrow(new ExpressionTuple({}, &ExpressionAny::Value), &ExpressionAny::Value));
+
+			return any;
 		}
 
-		return types::invoke(*std::get<1>(res), entry->function, call);
-	}
-};
+		//
+		// Performs a full call on the subroutine, including pushing to the current execution
+		//
+		virtual instance<> execute(instance<> _, types::GenericInvoke const& call) const override
+		{
+			instance<MultiMethod> mm = _;
+
+			// TODO push a multimethod dispatch frame...
+
+			std::vector<TypeId> exprs;
+			exprs.reserve(call.args.size());
+			std::transform(call.args.begin(), call.args.end(), std::back_inserter(exprs),
+				[](instance<> const& inst) { return inst.typeId(); });
+
+			auto res = mm->_dispatcher.dispatchWithRecord(exprs);
+			auto entry = (MultiMethod::_Entry*)std::get<0>(res);
+
+			if (entry == nullptr)
+			{
+				std::string dispatchList = stdext::join<char, std::vector<TypeId>::iterator>(
+					std::string(", "), exprs.begin(), exprs.end(),
+					[](auto it) { return it->toString(); });
+				throw stdext::exception("Dispatch failed for [{0}].", dispatchList);
+			}
+
+			return types::invoke(*std::get<1>(res), entry->function, call);
+		}
+	};
+}}
+
 
 CRAFT_DEFINE(MultiMethod)
 {

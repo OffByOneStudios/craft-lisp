@@ -24,7 +24,7 @@ namespace lisp
 
 		struct _Semantic
 		{
-			instance<> instance;
+			instance<> inst;
 			PSemantics* semantics;
 		};
 		std::map<types::TypeId, _Semantic> _semantics;

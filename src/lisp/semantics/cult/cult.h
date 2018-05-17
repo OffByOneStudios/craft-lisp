@@ -9,11 +9,11 @@ namespace lisp
 }}
 
 #include "ast.h"
-#include "binding.h"
+#include "Binding.h"
 #include "typing.h"
 #include "descriptor.h"
 #include "control.h"
 #include "calling.h"
-#include "macro.h"
+#include "Macro.h"
 
 #include "semantics.h"

@@ -93,7 +93,7 @@ instance<> Module::get(types::TypeId type)
 
 	auto it = _semantics.find(type);
 	if (it != _semantics.end())
-		return it->second.instance;
+		return it->second.inst;
 
 	return instance<>();
 }

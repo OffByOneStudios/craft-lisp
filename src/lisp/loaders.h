@@ -35,7 +35,7 @@ namespace lisp
 	public:
 		inline virtual instance<Module> loadModule(instance<Namespace> ns, std::string const& proto_string, instance<> extra) const override
 		{
-			return typename T::load(ns, proto_string, extra);
+			return T::load(ns, proto_string, extra);
 		}
 
 		inline virtual instance<> getContent(instance<> loader) const override

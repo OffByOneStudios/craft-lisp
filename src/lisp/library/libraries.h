@@ -50,7 +50,6 @@ namespace lisp {
 			void make_env_globals(instance<Module> m);
 			void make_regex_globals(instance<Module> m);
 			void make_meta_globals(instance<Module> m);
-			void make_subprocess_globals(instance<Module> m);
 			void make_list_globals(instance<Module> m);
 			void make_map_globals(instance<Module> m);
 			void make_platform_globals(instance<Module> m);

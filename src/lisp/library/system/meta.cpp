@@ -33,6 +33,12 @@ void core::make_meta_globals(instance<Module> ret)
 		return instance<std::string>::make(graph().dumpNode(s.get()));
 	});
 
+	semantics->builtin_implementMultiMethod("load-dll",
+		[](instance<std::string> s)
+	{
+		types::load_dll(*s);
+	});
+
 	//TODO Macro implementation on cult semantics
 	/*semantics->builtin_addSpecialForm
 	auto getmeta = instance<Macro>::make(

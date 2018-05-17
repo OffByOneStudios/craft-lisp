@@ -126,7 +126,8 @@ instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke con
 	{
 		auto fnast = fn.asType<Function>();
 		auto rtv = instance<RuntimeSlots>::make(fnast, fnast->argCount());
-		InterpreterFrame::PushSubFrame _hold(craft_instance(), fnast, rtv);
+		auto _this = craft_instance();
+		InterpreterFrame::PushSubFrame _hold(_this, fnast, rtv);
 
 		if (call.args.size() != fnast->argCount())
 			throw stdext::exception("Interpreter asked to execute function with mismatched arguments ({0} calling {1}).", call.args.size(), fnast->argCount());

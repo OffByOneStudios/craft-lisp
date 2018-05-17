@@ -67,7 +67,7 @@ Namespace::_Backend Namespace::fallbackBackend() const
 	 if (it == _backends.end())
 		 throw bad_projection_error("Cannot get a projection to `{1}` from {0}", craft_instance(), type.toString(false));
 
-	 return it->second.instance;
+	 return it->second.inst;
  }
 
 instance<> Namespace::parse(std::string contents, TypeId type, PSyntax::ParseOptions const* opts)
@@ -95,7 +95,7 @@ instance<> Namespace::exec(instance<Module> module, std::string method, types::G
 {
 	auto backend = preferedBackend();
 
-	return backend.executor->exec(backend.instance, module, method, call);
+	return backend.executor->exec(backend.inst, module, method, call);
 }
 
 void Namespace::compile(std::string path, instance<> compiler_options)
