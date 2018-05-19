@@ -39,6 +39,9 @@ namespace lisp
 #include "Environment.h"
 
 #include "lisp/syntax/syntax.h"
+#include "lisp/library/system/prelude.h"
+
+#include "lisp/semantics/cult/calling.h"
 
 #include "backend/backend.h"
 
