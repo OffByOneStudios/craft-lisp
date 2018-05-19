@@ -59,7 +59,7 @@ namespace lisp
 
 		// Core features
 	public:
-		CRAFT_LISP_EXPORTED instance<Module> requireModule(std::string const& s, instance<> resolver_specific_extra = instance<>());
+		CRAFT_LISP_EXPORTED instance<Module> requireModule(instance<Module> requestingModule, std::string const& s, instance<> resolver_specific_extra = instance<>());
 
 		// Templated helpers
 	public:

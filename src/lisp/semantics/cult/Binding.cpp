@@ -254,7 +254,7 @@ void ScopeManipulation::bind()
 	{
 		case Manipulation::RequireModule:
 		{
-			auto required_module = sem->getModule()->getNamespace()->requireModule(_primary); // TODO store reference somewhere for this node?
+			auto required_module = sem->getModule()->getNamespace()->requireModule(sem->getModule(), _primary); // TODO store reference somewhere for this node?
 			sem->importModule(required_module);
 			required_module->initialize();
 		} break;

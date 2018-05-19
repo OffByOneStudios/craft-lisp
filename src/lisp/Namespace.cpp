@@ -42,8 +42,8 @@ void Namespace::craft_setupInstance()
 	instance<Execution> exec = instance<Execution>::make(craft_instance());
 	exec->makeCurrent();
 
-	requireModule("builtin:cult.system")->initialize();
-	requireModule("builtin:cult.core")->initialize();
+	requireModule(instance<>(), "builtin:cult.system")->initialize();
+	requireModule(instance<>(), "builtin:cult.core")->initialize();
 }
 
 instance<Environment> Namespace::getEnvironment() const
@@ -73,7 +73,7 @@ Namespace::_Backend Namespace::fallbackBackend() const
 instance<> Namespace::parse(std::string contents, TypeId type, PSyntax::ParseOptions const* opts)
 {
 	// context variable with: ParseOptions
-	instance<Module> module = requireModule("anon:", instance<std::string>::make(contents));
+	instance<Module> module = requireModule(instance<>(), "anon:", instance<std::string>::make(contents));
 
 	return module->get(type);
 }
@@ -108,11 +108,11 @@ void Namespace::compile(instance<Module> module, std::string path, instance<> co
 }
 
 
-instance<Module> Namespace::requireModule(std::string const& uri_, instance<> resolver_specific_extra)
+instance<Module> Namespace::requireModule(instance<Module> requestingModule, std::string const& uri_, instance<> resolver_specific_extra)
 {
-	auto mlb = _module_cache.lower_bound(uri_);
-	if (mlb != _module_cache.end() && !(_module_cache.key_comp()(uri_, mlb->first)))
-		return _module_load_list[mlb->second]; // key already exists
+	auto mclb = _module_cache.lower_bound(uri_);
+	if (mclb != _module_cache.end() && !(_module_cache.key_comp()(uri_, mclb->first)))
+		return _module_load_list[mclb->second]; // key already exists
 
 	auto uri = uri_;
 	auto protopos = uri.find(':');
@@ -131,11 +131,19 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 			rest = fmt::format("{0}--{1}", rest, std::to_string(++_loaderVar_anonCount));
 		}
 
-		auto ml = types::system().getManager<PModuleLoader>()->index(protocol);
-		if (ml == nullptr)
+		auto mlt = types::system().getManager<PModuleLoader>()->index(protocol);
+		if (mlt == nullptr)
 			throw stdext::exception("Unknown module loader protocol `{0}`", protocol);
+		auto ml = mlt.getFeature<PModuleLoader>();
 
-		ret = ml.getFeature<PModuleLoader>()->loadModule(craft_instance(), rest, resolver_specific_extra);
+		rest = ml->resolveProtoString(craft_instance(), requestingModule, rest, resolver_specific_extra);
+		uri = fmt::format("{0}:{1}", protocol, rest);
+
+		mclb = _module_cache.lower_bound(uri);
+		if (mclb != _module_cache.end() && !(_module_cache.key_comp()(uri, mclb->first)))
+			return _module_load_list[mclb->second]; // key already exists
+
+		ret = ml->loadModule(craft_instance(), rest, resolver_specific_extra);
 	}
 	catch (std::exception const& ex)
 	{
@@ -144,6 +152,8 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 	
 	if (ret)
 	{
+		assert(uri == ret->uri()); // `mclb is only valid to insert with later if this is true
+
 		uri = ret->uri();
 		ret->load();
 	}
@@ -153,7 +163,7 @@ instance<Module> Namespace::requireModule(std::string const& uri_, instance<> re
 	// TODO: Lock when we do this (and the init above probably)
 	auto i = _module_load_list.size();
 	_module_load_list.push_back(ret);
-	_module_cache.insert(mlb, { uri, i });
+	_module_cache.insert(mclb, { uri, i });
 	on_moduleInit.emit(ret);
 
 	return ret;

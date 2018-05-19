@@ -24,6 +24,11 @@ CRAFT_DEFINE(BuiltinLoader)
 	_.defaults();
 }
 
+std::string BuiltinLoader::resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra)
+{
+	return proto_string;
+}
+
 instance<Module> BuiltinLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
 {
 	auto ret = instance<BuiltinLoader>::makeThroughLambda([](auto p) { return new (p) BuiltinLoader(); });
@@ -84,6 +89,26 @@ CRAFT_DEFINE(FileLoader)
 	_.defaults();
 }
 
+std::string FileLoader::resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra)
+{
+	if (requester)
+	{
+		auto reqLoader = requester->getLoader();
+		if (reqLoader.isType<FileLoader>())
+		{
+			instance<FileLoader> reqFileLoader = reqLoader;
+			auto relativePath = path::normalize(path::join(path::dir(reqFileLoader->_filePath), proto_string));
+
+			if (path::exists(relativePath))
+				return relativePath;
+
+			SPDLOG_TRACE(ns->getEnvironment()->log(), "Relative path `{0}` not found using absolute path.", relativePath);
+		}
+	}
+
+	return path::absolute(proto_string);
+}
+
 instance<Module> FileLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
 {
 	auto ret = instance<FileLoader>::makeThroughLambda([](auto p) { return new (p) FileLoader(); });
@@ -118,6 +143,11 @@ CRAFT_DEFINE(ReplLoader)
 	_.defaults();
 }
 
+std::string ReplLoader::resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra)
+{
+	return proto_string;
+}
+
 instance<Module> ReplLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
 {
 	auto ret = instance<ReplLoader>::makeThroughLambda([](auto p) { return new (p) ReplLoader(); });
@@ -147,6 +177,12 @@ CRAFT_DEFINE(AnonLoader)
 	_.use<PModuleLoader>().singleton<AutoModuleLoader>();
 
 	_.defaults();
+}
+
+std::string AnonLoader::resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra)
+{
+	// TODO move anon counting here
+	return proto_string;
 }
 
 instance<Module> AnonLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)

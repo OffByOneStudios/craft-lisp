@@ -15,6 +15,9 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::PModuleLoader, "lisp.module-loader", types::NamedSingletonProviderManager);
 
 	public:
+		// The requester should only be used to assist in resolution of the proto_string
+		CRAFT_LISP_EXPORTED virtual std::string resolveProtoString(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra = instance<>()) const = 0;
+
 		// Creates a new backend for the given namespace
 		CRAFT_LISP_EXPORTED virtual instance<Module> loadModule(instance<Namespace> ns, std::string const& proto_string, instance<> extra = instance<>()) const = 0;
 
@@ -33,9 +36,14 @@ namespace lisp
 		: public types::Implements<PModuleLoader>::For<T>
 	{
 	public:
-		inline virtual instance<Module> loadModule(instance<Namespace> ns, std::string const& proto_string, instance<> extra) const override
+
+		inline virtual std::string resolveProtoString(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra) const override
 		{
-			return T::load(ns, proto_string, extra);
+			return T::resolve(ns, requester, proto_string, extra);
+		}
+		inline virtual instance<Module> loadModule(instance<Namespace> ns, std::string const& resolved_string, instance<> extra) const override
+		{
+			return T::load(ns, resolved_string, extra);
 		}
 
 		inline virtual instance<> getContent(instance<> loader) const override
@@ -78,7 +86,8 @@ namespace lisp
 		BuiltinLoader() = default;
 
 	public:
-		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& proto_string, instance<> extra);
+		CRAFT_LISP_EXPORTED static std::string resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra);
+		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& resolve_string, instance<> extra);
 
 		CRAFT_LISP_EXPORTED instance<> getContent();
 		CRAFT_LISP_EXPORTED std::string getUri();
@@ -170,7 +179,8 @@ namespace lisp
 		FileLoader() = default;
 
 	public:
-		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& proto_string, instance<> extra);
+		CRAFT_LISP_EXPORTED static std::string resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra);
+		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& resolve_string, instance<> extra);
 
 		CRAFT_LISP_EXPORTED instance<> getContent();
 		CRAFT_LISP_EXPORTED std::string getUri();
@@ -197,7 +207,8 @@ namespace lisp
 		ReplLoader() = default;
 
 	public:
-		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& proto_string, instance<> extra);
+		CRAFT_LISP_EXPORTED static std::string resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra);
+		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& resolve_string, instance<> extra);
 
 		CRAFT_LISP_EXPORTED instance<> getContent();
 		CRAFT_LISP_EXPORTED std::string getUri();
@@ -224,7 +235,8 @@ namespace lisp
 		instance<> _content;
 
 	public:
-		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& proto_string, instance<> extra);
+		CRAFT_LISP_EXPORTED static std::string resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra);
+		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& resolve_string, instance<> extra);
 
 	public:
 		CRAFT_LISP_EXPORTED void setModule(instance<Module> module);

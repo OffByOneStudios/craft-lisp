@@ -101,8 +101,8 @@ void CultSemantics::readPrepDefaults()
 		"CultSemantics::readPrepDefaults\t({0})", _module);
 
 	// These are implict, and must be made available by these execution engine.
-	importModule(_module->getNamespace()->requireModule("builtin:cult.system"));
-	importModule(_module->getNamespace()->requireModule("builtin:cult.core"));
+	importModule(_module->getNamespace()->requireModule(_module, "builtin:cult.system"));
+	importModule(_module->getNamespace()->requireModule(_module, "builtin:cult.core"));
 }
 
 void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts)
