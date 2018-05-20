@@ -12,6 +12,7 @@ namespace lisp
 	private:
 		instance<Environment> _environment;
 
+		std::mutex _module_load_mutex;
 		std::map<std::string, size_t> _module_cache;
 		std::vector<instance<Module>> _module_load_list;
 
@@ -49,7 +50,7 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED instance<> parse(std::string contents, types::TypeId type, PSyntax::ParseOptions const* opts = nullptr);
 		
-		CRAFT_LISP_EXPORTED instance<> read(std::string contents, types::TypeId type, PSyntax::ParseOptions const* popts = nullptr, PSemantics::ReadOptions const* ropts = nullptr);
+		CRAFT_LISP_EXPORTED instance<> read(std::string contents, types::TypeId parseType, types::TypeId readType, PSyntax::ParseOptions const* popts = nullptr, PSemantics::ReadOptions const* ropts = nullptr);
 		CRAFT_LISP_EXPORTED instance<> read(instance<> source, types::TypeId type, PSemantics::ReadOptions const* opts = nullptr);
 
 		CRAFT_LISP_EXPORTED instance<> exec(instance<Module> module, std::string method, types::GenericInvoke const& call = {});

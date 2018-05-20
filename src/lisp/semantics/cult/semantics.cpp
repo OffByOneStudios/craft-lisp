@@ -244,11 +244,7 @@ instance<lisp::Module> CultSemanticsProvider::getModule(instance<> semantics) co
 	return semantics.asType<CultSemantics>()->getModule();
 }
 
-std::vector<TypeId> CultSemanticsProvider::readsFrom() const
-{
-	return{ cpptype<CultLispSyntax>::typeDesc() };
-}
-instance<> CultSemanticsProvider::read(instance<> syntax_, instance<lisp::Module> into, ReadOptions const* opts) const
+instance<> CultSemanticsProvider::read(instance<lisp::Module> into, ReadOptions const* opts) const
 {
 	auto building = instance<CultSemantics>::make(into);
 	
@@ -256,25 +252,17 @@ instance<> CultSemanticsProvider::read(instance<> syntax_, instance<lisp::Module
 	auto prepReplacedDefault = loader.getFeature<PModuleLoader>()->prepSemantics(loader, building);
 	if (!prepReplacedDefault) building->readPrepDefaults();
 
-	if (syntax_.typeId().isType<CultLispSyntax>())
+	auto syntax = into->get<CultLispSyntax>();
+	if (syntax)
 	{
-		building->read(syntax_.asType<CultLispSyntax>(), opts);
+		building->read(syntax, opts);
 	}
 	else
 	{
-		assert(false && "Unknown syntax.");
+		throw stdext::exception("No known syntax to build semantics from.");
 	}
 
 	return building;
-}
-
-std::vector<TypeId> CultSemanticsProvider::transformsFrom() const
-{
-	return{};
-}
-instance<> CultSemanticsProvider::transform(instance<> semantics, instance<lisp::Module> into, instance<> transformationOptions) const
-{
-	return instance<>();
 }
 
 instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string const& s) const

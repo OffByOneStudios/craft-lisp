@@ -30,11 +30,7 @@ namespace lisp
 	class CppSemanticsProvider
 		: public types::Implements<PSemantics>::For<CppSemantics>
 	{
-		virtual std::vector<craft::types::TypeId> readsFrom() const override;
-		virtual instance<> read(instance<> syntax, instance<lisp::Module> into, ReadOptions const* opts) const override;
-
-		virtual std::vector<craft::types::TypeId> transformsFrom() const override;
-		virtual instance<> transform(instance<> semantics, instance<lisp::Module> into, instance<> transformationOptions = instance<>()) const override;
+		virtual instance<> read(instance<lisp::Module> module, ReadOptions const* opts) const override;
 
 		virtual instance<> lookup(instance<> semantics, std::string const&) const override;
 	};

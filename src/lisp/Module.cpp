@@ -20,6 +20,8 @@ Module::Module(instance<Namespace> ns, instance<> loader)
 	_ns = ns;
 	_loader = loader;
 	_uri = _loader.getFeature<PModuleLoader>()->getUri(_loader);
+
+	_state = State::HasLoader;
 }
 
 void Module::craft_setupInstance()
@@ -44,27 +46,98 @@ instance<> Module::getLoader() const
 	return _loader;
 }
 
+
+Module::State Module::getState() const
+{
+	return _state;
+}
+
+bool Module::hasLoader() const
+{
+	assert((_state & State::FLAG_HasLoader) == _loader);
+
+	return _state & State::FLAG_HasLoader;
+}
 bool Module::isLoaded() const
 {
-	return _syntax_instance;
+	assert((_state & State::FLAG_IsLoaded) == _syntax_instance);
+
+	return _state & State::FLAG_IsLoaded;
+}
+bool Module::isInitializing() const
+{
+	return _state & State::FLAG_IsInitializing;
+}
+bool Module::wasInitialized() const
+{
+	assert((_state & State::FLAG_WasInitialized) == _value);
+
+	return _state & State::FLAG_WasInitialized;
+}
+bool Module::isReady() const
+{
+	assert((_state == State::Ready) == _value);
+
+	return _state == State::Ready;
 }
 
-void Module::load()
-{
-	_syntax_instance = _loader.getFeature<PModuleLoader>()->getContent(_loader);
-	_syntax_syntax = _syntax_instance.getFeature<PSyntax>();
-}
 
-bool Module::isInitialized() const
+bool Module::load()
 {
-	return _value;
-}
-void Module::initialize()
-{
-	if (isInitialized())
-		return;
+	if (isLoaded()) return true;
 
-	_value = exec("::init", { });
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+
+		_syntax_instance = _loader.getFeature<PModuleLoader>()->getContent(_loader);
+		_syntax_syntax = _syntax_instance.getFeature<PSyntax>();
+
+		_state = State::Loaded;
+	}
+
+	return true;
+}
+bool Module::initialize()
+{
+	if (isReady()) return true;
+	if (isInitializing()) return false;
+
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		_state = State::Initializing;
+
+		_value = exec("::init", {});
+
+		_state = State::Ready;
+	}
+
+	return true;
+}
+bool Module::update(bool force)
+{
+	bool needsUpdate = force;
+
+	if (!force)
+	{
+		getNamespace()->getEnvironment()->log()->warn("Detecting updates isn't implemented yet; detect yourself and call with force.");
+	}
+
+	if (needsUpdate)
+	{
+		if (isInitializing()) return false;
+
+		std::unique_lock<std::mutex> lock(_mutex);
+		_state = State::ReInitializing;
+
+		_syntax_instance = _loader.getFeature<PModuleLoader>()->getContent(_loader);
+		_syntax_syntax = _syntax_instance.getFeature<PSyntax>();
+
+		_value = exec("::init", {});
+
+		_state = State::Ready;
+	}
+
+	return true;
 }
 
 instance<> Module::moduleValue() const
@@ -97,68 +170,29 @@ instance<> Module::get(types::TypeId type)
 
 	return instance<>();
 }
-instance<> Module::require(types::TypeId type, bool force_read)
+instance<> Module::require(types::TypeId type)
 {
 	auto ret = get(type);
 
 	if (!ret)
 	{
-		if (type.hasFeature<PSemantics>())
+		if (!type.hasFeature<PSemantics>())
+			throw bad_projection_error("Cannot require a projection to `{1}` from {0}:\ntype does not implement PSemantics.", craft_instance(), type.toString(false));
+
+		PSemantics* semantics = type.getFeature<PSemantics>();
+
+		instance<> semantics_instance;
+		try
 		{
-			PSemantics* semantics = type.getFeature<PSemantics>();
-
-			// Search for read sources
-			auto read_targets = semantics->readsFrom();
-			std::vector<instance<>> valid_read_targets;
-
-			for (auto target : read_targets)
-			{
-				instance<> read_target;
-				try
-				{
-					read_target = get(target);
-				}
-				catch (bad_projection_error const&)
-				{
-					continue;
-				}
-
-				valid_read_targets.push_back(read_target);
-			}
-
-			// Search for transform targets
-			// TODO
-
-			// Choose
-			instance<> target;
-			bool isRead = true;
-
-			if (valid_read_targets.size() == 1) target = valid_read_targets[0];
-
-			// Report error
-			if (!target && force_read)
-				throw bad_projection_error("Cannot require a projection to `{1}` from {0}:\nno valid path to transform/read semantics from.", craft_instance(), type.toString(false));
-
-			// Perform
-			if (target)
-			{
-				instance<> semantics_instance;
-				try
-				{
-					semantics_instance = semantics->read(target, craft_instance(), nullptr);
-				}
-				catch (std::exception const& ex)
-				{
-					throw bad_projection_error(ex, "Cannot require a projection to `{1}` from {0}, failed reading", craft_instance(), type.toString(false));
-				}
-
-				_semantics[type] = { semantics_instance, semantics };
-
-				return semantics_instance;
-			}
+			semantics_instance = semantics->read(craft_instance(), nullptr);
 		}
+		catch (std::exception const& ex)
+		{
+			throw bad_projection_error(ex, "Cannot require a projection to `{1}` from {0}, failed reading", craft_instance(), type.toString(false));
+		}
+		_semantics[type] = { semantics_instance, semantics };
 
-		throw bad_projection_error("Cannot require a projection to `{1}` from {0}:\ntype does not implement PSemantics.", craft_instance(), type.toString(false));
+		return semantics_instance;
 	}
 
 	return ret;

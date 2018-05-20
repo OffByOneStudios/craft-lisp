@@ -25,15 +25,7 @@ namespace lisp
 			bool no_macros;
 		};
 
-		CRAFT_LISP_EXPORTED virtual std::vector<craft::types::TypeId> readsFrom() const = 0;
-		CRAFT_LISP_EXPORTED virtual instance<> read(instance<> syntax, instance<lisp::Module> into, ReadOptions const* opts) const = 0;
-
-		//
-		// Transform
-		//
-	public:
-		CRAFT_LISP_EXPORTED virtual std::vector<craft::types::TypeId> transformsFrom() const = 0;
-		CRAFT_LISP_EXPORTED virtual instance<> transform(instance<> semantics, instance<lisp::Module> into, instance<> transformationOptions = instance<>()) const = 0;
+		CRAFT_LISP_EXPORTED virtual instance<> read(instance<lisp::Module> module, ReadOptions const* opts) const = 0;
 
 		//
 		// Common semantic features

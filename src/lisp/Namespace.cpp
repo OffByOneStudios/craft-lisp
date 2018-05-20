@@ -86,9 +86,9 @@ instance<> Namespace::read(instance<> source, TypeId type, PSemantics::ReadOptio
 	return module->require(type);
 }
 
-instance<> Namespace::read(std::string contents, TypeId type, PSyntax::ParseOptions const* popts, PSemantics::ReadOptions const* ropts)
+instance<> Namespace::read(std::string contents, TypeId parseType, types::TypeId readType, PSyntax::ParseOptions const* popts, PSemantics::ReadOptions const* ropts)
 {
-	return read(parse(contents, type.getFeature<PSemantics>()->readsFrom()[0], popts), type, ropts);
+	return read(parse(contents, parseType, popts), readType, ropts);
 }
 
 instance<> Namespace::exec(instance<Module> module, std::string method, types::GenericInvoke const& call)
@@ -110,6 +110,8 @@ void Namespace::compile(instance<Module> module, std::string path, instance<> co
 
 instance<Module> Namespace::requireModule(instance<Module> requestingModule, std::string const& uri_, instance<> resolver_specific_extra)
 {
+	std::unique_lock<std::mutex> lock(_module_load_mutex);
+
 	auto mclb = _module_cache.lower_bound(uri_);
 	if (mclb != _module_cache.end() && !(_module_cache.key_comp()(uri_, mclb->first)))
 		return _module_load_list[mclb->second]; // key already exists
