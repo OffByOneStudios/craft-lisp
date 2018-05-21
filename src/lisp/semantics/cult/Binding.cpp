@@ -255,8 +255,8 @@ void ScopeManipulation::bind()
 		case Manipulation::RequireModule:
 		{
 			auto required_module = sem->getModule()->getNamespace()->requireModule(sem->getModule(), _primary); // TODO store reference somewhere for this node?
-			sem->importModule(required_module);
-			required_module->initialize();
+			required_module->initialize(); // TODO wait for initalization to complete
+			sem->importModule(required_module); // TODO move to runtime of this module
 		} break;
 		default: throw stdext::exception("Unsupported scope manipulation {0}", (int)_mode);
 	}
