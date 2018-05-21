@@ -339,7 +339,11 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<Function> ast) -> instance<>
 	{
-		return ast;
+		auto curSubframe = interp->top();
+		if (curSubframe->chain == nullptr)
+			return ast;
+
+		return instance<SubroutineClosure>::make(curSubframe, ast);
 	});
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrame> interp, instance<> ast) -> instance<>

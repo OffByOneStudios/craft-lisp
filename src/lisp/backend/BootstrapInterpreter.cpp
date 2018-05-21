@@ -120,14 +120,14 @@ instance<> InterpreterFrame::interp_exec(instance<SCultSemanticNode> node)
 	return _backend->_fn_system_exec->call_internal({ craft_instance() , node });
 }
 
-instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke const& call)
+instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke const& call, SubFrame* chain)
 {
 	if (fn.isType<Function>())
 	{
 		auto fnast = fn.asType<Function>();
 		auto rtv = instance<RuntimeSlots>::make(fnast, fnast->argCount());
 		auto _this = craft_instance();
-		InterpreterFrame::PushSubFrame _hold(_this, fnast, rtv);
+		InterpreterFrame::PushSubFrame _hold(_this, fnast, rtv, chain);
 
 		if (call.args.size() != fnast->argCount())
 			throw stdext::exception("Interpreter asked to execute function with mismatched arguments ({0} calling {1}).", call.args.size(), fnast->argCount());

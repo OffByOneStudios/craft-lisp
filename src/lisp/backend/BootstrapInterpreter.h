@@ -96,7 +96,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> interp_exec(instance<SCultSemanticNode>);
 
 		// Performs a full call
-		CRAFT_LISP_EXPORTED instance<> interp_call(instance<>, types::GenericInvoke const& call);
+		CRAFT_LISP_EXPORTED instance<> interp_call(instance<>, types::GenericInvoke const& call, SubFrame* chain = nullptr);
 	};
 
 	class BootstrapInterpreter
