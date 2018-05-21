@@ -248,7 +248,6 @@ namespace lisp_grammar
 				else if (suf == "i16") ps.top()->cells.push_back(craft::types::cpptype<int16_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else if (suf == "i32") ps.top()->cells.push_back(craft::types::cpptype<int32_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else if (suf == "i64") ps.top()->cells.push_back(craft::types::cpptype<int64_t>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
-				else if (suf == "ii") ps.top()->cells.push_back(craft::types::cpptype<mpz_class>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else throw stdext::exception("No Such Integer Literal Suffix: {0}", suf);
 			}
 		}
@@ -273,7 +272,6 @@ namespace lisp_grammar
 				if (suf == "") ps.top()->cells.push_back(craft::types::cpptype<double>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else if (suf == "f32") ps.top()->cells.push_back(craft::types::cpptype<float>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else if (suf == "f64") ps.top()->cells.push_back(craft::types::cpptype<double>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
-				else if (suf == "fi") ps.top()->cells.push_back(craft::types::cpptype<mpf_class>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else throw stdext::exception("No Such Float Literal Suffix: {0}", suf);
 			}
 		}
