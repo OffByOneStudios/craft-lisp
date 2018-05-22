@@ -66,6 +66,9 @@ namespace lisp
 		std::vector<instance<SCultSemanticNode>> _args;
 		instance<SCultSemanticNode> _body;
 
+		std::vector<instance<Binding>> _freeBindings; // Does not include module bindings
+		size_t _variableCount;
+
 	public:
 		CRAFT_LISP_EXPORTED Function();
 
@@ -75,6 +78,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED size_t argCount() const;
 		CRAFT_LISP_EXPORTED void pushArg(instance<SCultSemanticNode>);
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> argAst(size_t index) const;
+
+		CRAFT_LISP_EXPORTED bool hasFreeBindings() const;
 
 		// SCultSemanticNode
 	public:

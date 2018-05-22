@@ -132,6 +132,8 @@ bool Module::update(bool force)
 		_syntax_instance = _loader.getFeature<PModuleLoader>()->getContent(_loader);
 		_syntax_syntax = _syntax_instance.getFeature<PSyntax>();
 
+		require<CultSemantics>()->read(_syntax_instance, nullptr);
+
 		_value = exec("::init", {});
 
 		_state = State::Ready;

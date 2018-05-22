@@ -183,18 +183,23 @@ instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, ty
 	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
 		"BootstrapInterpreter::_special_init\t({0})", module);
 
+	instance<RuntimeSlots> slots = module->moduleValue();
+
 	auto frame = InterpreterFrame::ensureCurrent(craft_instance());
 	InterpreterFrame::PushSubFrame _hold(frame, sem, module->moduleValue());
 
 	auto statement_count = sem->countStatements();
-	instance<RuntimeSlots> res = instance<RuntimeSlots>::make(module, statement_count);
-	module->_value = res;
+	if (!slots)
+	{
+		slots = instance<RuntimeSlots>::make(module, statement_count);
+		module->_value = slots;
+	}
 	for (auto stmt_i = 0; stmt_i < statement_count; ++stmt_i)
 	{
-		*RuntimeSlots::getSlot((instance<>*)&res, stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
+		*RuntimeSlots::getSlot((instance<>*)&slots, stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
 	}
 
-	return res;
+	return slots;
 }
 instance<> BootstrapInterpreter::_special_append(instance<lisp::Module> module, types::GenericInvoke const& call) const
 {

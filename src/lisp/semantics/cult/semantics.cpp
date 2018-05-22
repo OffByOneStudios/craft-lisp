@@ -111,6 +111,11 @@ void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOption
 	//  macros and a different set of special forms
 	// TODO, make this execute on one node at a time (e.g. to prevent blowing the stack) should
 	//  also allow it to be re-entrant
+	// TODO, make this handle reloading better.
+
+	_ast.clear();
+	_bindings.bindings.clear();
+	_bindings.table.clear();
 
 	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
 		"CultSemantics::read\t({0})", _module);

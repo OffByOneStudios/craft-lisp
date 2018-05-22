@@ -340,7 +340,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		[](instance<InterpreterFrame> interp, instance<Function> ast) -> instance<>
 	{
 		auto curSubframe = interp->top();
-		if (curSubframe->chain == nullptr)
+		if (!ast->hasFreeBindings() || curSubframe->chain == nullptr)
 			return ast;
 
 		return instance<SubroutineClosure>::make(curSubframe, ast);

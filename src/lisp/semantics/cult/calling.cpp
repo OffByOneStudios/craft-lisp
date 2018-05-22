@@ -159,6 +159,11 @@ instance<SCultSemanticNode> lisp::Function::argAst(size_t index) const
 	return _args[index];
 }
 
+bool lisp::Function::hasFreeBindings() const
+{
+	return _freeBindings.size() != 0;
+}
+
 void lisp::Function::bind()
 {
 	_parentScope = SScope::findScope(_parent);
@@ -169,6 +174,68 @@ void lisp::Function::bind()
 	}
 
 	_body->bind();
+
+	// TODO build a visitor helper:
+	std::deque<std::tuple<instance<SCultSemanticNode>, size_t>> _visitStack;
+	_visitStack.push_front({ _body, 0 });
+	
+	while (!_visitStack.empty())
+	{
+		auto const top = _visitStack.front();
+		auto const inst = std::get<0>(top);
+		auto const count = std::get<1>(top);
+		_visitStack.pop_front();
+
+		if (inst.isNull())
+			continue;
+		else if (inst.isType<Resolve>())
+		{
+			auto i = inst.asType<Resolve>();
+			auto bind = i->getBinding();
+			auto scope = bind->getScope();
+
+			if (scope.isType<CultSemantics>())
+				continue;
+
+			auto it = std::find_if(_visitStack.begin(), _visitStack.end(),
+				[scope](auto a) -> bool
+				{
+					auto ai = std::get<0>(a);
+					return ai.hasFeature<SScope>() && (instance<>)(ai) == (instance<>)(scope);
+				});
+
+			if (it == _visitStack.end())
+			{
+				this->_freeBindings.push_back(bind);
+			}
+
+			continue;
+		}
+		else if (inst.isType<Block>())
+		{
+			auto i = inst.asType<Block>();
+			if (count == i->statementCount())
+				continue;
+
+			auto v = i->statementAst(count);
+
+			_visitStack.push_front({ inst, count + 1 });
+			_visitStack.push_front({ v, 0 });
+			continue;
+		}
+		else if (inst.isType<CallSite>())
+		{
+			auto i = inst.asType<CallSite>();
+			if (count == i->argCount())
+				continue;
+
+			auto v = i->argAst(count);
+
+			_visitStack.push_front({ inst, count + 1 });
+			_visitStack.push_front({ v, 0 });
+			continue;
+		}
+	}
 }
 
 instance<Binding> lisp::Function::getBinding() const
