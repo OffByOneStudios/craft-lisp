@@ -10,46 +10,33 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
+#define bMM semantics->builtin_implementMultiMethod
+#define st "string"
+
+typedef instance<std::string> t_str;
+
 void core::make_string_globals(instance<Module> ret)
 {
 	auto semantics = ret->require<CultSemantics>();
 
-	semantics->builtin_implementMultiMethod("string",
-		[](instance<std::string> a) -> instance<std::string>
-	{
-		return instance<std::string>::make(*a);
-	});
-	semantics->builtin_implementMultiMethod("string",
-		[](instance<PStringer> a) -> instance<std::string>
-	{
-		return instance<std::string>::make(a.getFeature<PStringer>()->toString(a));
-	});
-	semantics->builtin_implementMultiMethod("string",
-		[](instance<PRepr> a) -> instance<std::string>
-	{
-		return instance<std::string>::make(a.getFeature<PRepr>()->toRepr(a));
-	});
-	semantics->builtin_implementMultiMethod("string",
-		[](instance<> a) -> instance<std::string>
-	{
-		if (a.isNull()) return instance<std::string>::make("null");
-		return instance<std::string>::make(a.toString());
+	bMM(st, [](t_str a) -> t_str { return t_str::make(*a);});
+	bMM(st, [](instance<PStringer> a) -> t_str { return t_str::make(a.getFeature<PStringer>()->toString(a)); });
+	bMM(st, [](instance<PRepr> a) -> t_str { return t_str::make(a.getFeature<PRepr>()->toRepr(a)); });
+	bMM(st, [](instance<> a) -> t_str { 
+		if (a.isNull()) return t_str::make("null");
+		return t_str::make(a.toString());
 	});
 
-	semantics->builtin_implementMultiMethod("print",
-		[](types::VarArgs<instance<>> args)
-	{
+	bMM("print", [](types::VarArgs<instance<>> args) {
 		for (auto& it : args.args)
 		{
-			std::cout << *Execution::exec_fromCurrentModule("string", { it }).asType<std::string>();
+			std::cout << *Execution::exec_fromCurrentModule(st, { it }).asType<std::string>();
 			std::cout << " ";
 		}
 		std::cout << "\n";
 	});
 
-	semantics->builtin_implementMultiMethod("format",
-		[](instance<std::string> fmt, types::VarArgs<instance<>> args) -> instance<std::string>
-	{
+	bMM("format", [](t_str fmt, types::VarArgs<instance<>> args) -> t_str {
 		std::regex re("%\\{[^\\}]+\\}");
 		std::ostringstream s;
 
@@ -84,10 +71,11 @@ void core::make_string_globals(instance<Module> ret)
 				}
 				else
 				{
+					throw stdext::exception("TODO string formatter literate execution is disabled");
 					target = Execution::exec_fromCurrentModule(match, {});
 				}
 
-				instance<std::string> c = Execution::exec_fromCurrentModule("string", { target });
+				t_str c = Execution::exec_fromCurrentModule(st, { target });
 				s << *c;
 			}
 			else
@@ -96,11 +84,10 @@ void core::make_string_globals(instance<Module> ret)
 			}
 		});
 
-		return instance<std::string>::make(s.str());
+		return t_str::make(s.str());
 	});
 
-	semantics->builtin_implementMultiMethod("log",
-		[](instance<Symbol> sym, instance<std::string> str, types::VarArgs<instance<>> args)
+	bMM("log", [](instance<Symbol> sym, t_str str, types::VarArgs<instance<>> args)
 	{
 		auto size = args.args.size() + 1;
 		if (size != 1)
@@ -135,22 +122,16 @@ void core::make_string_globals(instance<Module> ret)
 		ns->getEnvironment()->log()->log(level, str->c_str());
 	});
 
-	semantics->builtin_implementMultiMethod("log",
-		[](instance<Symbol> sym, instance<> thing)
+	bMM("log", [](instance<Symbol> sym, instance<> thing)
 	{
-		auto str = Execution::exec_fromCurrentModule("string", { thing }).asType<std::string>();
+		auto str = Execution::exec_fromCurrentModule(st, { thing }).asType<std::string>();
 		Execution::exec_fromCurrentModule("format", { sym, str }).asType<std::string>();
 	});
 
-	semantics->builtin_implementMultiMethod("string/concat",
-		[](instance<std::string> a, instance<std::string> b) -> instance<std::string>
-	{
-		std::string res = fmt::format("{0}{1}", *a, *b);
-		return instance<std::string>::make(res);
-	});
+	bMM(st"/concat", [](t_str a, t_str b) -> t_str { return t_str::make(fmt::format("{0}{1}", *a, *b)); });
 
-	semantics->builtin_implementMultiMethod("string/split",
-		[](instance<std::string> a, instance<std::string> b) -> instance<List>
+	bMM(st"/split",
+		[](t_str a, t_str b) -> instance<List>
 	{
 		std::vector<std::string> sm;
 		stdext::split(*a, *b, std::back_inserter(sm));
@@ -158,65 +139,65 @@ void core::make_string_globals(instance<Module> ret)
 		std::vector<instance<>> res;
 		for (auto i : sm)
 		{
-			res.push_back(instance<std::string>::make(i));
+			res.push_back(t_str::make(i));
 		}
 
 		return instance<List>::make(res);
 	});
 
-	semantics->builtin_implementMultiMethod("string/join",
-		[](instance<List> a, instance<std::string> b) -> instance<std::string>
+	bMM(st"/join",
+		[](instance<List> a, t_str b) -> t_str
 	{
-		std::cout << *Execution::exec_fromCurrentModule("string", { a }).asType<std::string>();
+		std::cout << *Execution::exec_fromCurrentModule(st, { a }).asType<std::string>();
 
 		std::ostringstream res;
 
 		auto count = 0;
 		for (auto& i : a->data())
 		{
-			std::cout << *Execution::exec_fromCurrentModule("string", { i }).asType<std::string>();
+			std::cout << *Execution::exec_fromCurrentModule(st, { i }).asType<std::string>();
 			if (count != (*a->size()) - 1) res << *b;
 			count++;
 		}
 
-		return instance<std::string>::make(res.str());
+		return t_str::make(res.str());
 	});
 
-	semantics->builtin_implementMultiMethod("string/join",
-		[](instance<List> a) -> instance<std::string>
+	bMM(st"/join",
+		[](instance<List> a) -> t_str
 	{
-		return Execution::exec_fromCurrentModule("string/join", { a, instance<std::string>::make("\n") }).asType<std::string>();
+		return Execution::exec_fromCurrentModule(st"/join", { a, t_str::make("\n") }).asType<std::string>();
 	});
 
 
-	semantics->builtin_implementMultiMethod("string/slice",
-		[](instance<std::string> a, instance<int64_t> b, instance<int64_t> c) -> instance<std::string>
+	bMM(st"/slice",
+		[](t_str a, instance<int64_t> b, instance<int64_t> c) -> t_str
 	{
-		return instance<std::string>::make(a->substr(*b, *c));
+		return t_str::make(a->substr(*b, *c));
 	});
 
-	semantics->builtin_implementMultiMethod("string/reverse",
-		[](instance<std::string> a) -> instance<std::string>
+	bMM(st"/reverse",
+		[](t_str a) -> t_str
 	{
-		auto res = instance<std::string>::make(*a);
+		auto res = t_str::make(*a);
 		std::reverse(res->begin(), res->end());
 		return res;
 	});
 
-	semantics->builtin_implementMultiMethod("string/includes",
-		[](instance<std::string> a, instance<std::string> b) -> instance<bool>
+	bMM("string/includes",
+		[](t_str a, t_str b) -> instance<bool>
 	{
 		return instance<bool>::make(a->find(*b) != a->npos);
 	});
 
-	semantics->builtin_implementMultiMethod("string/compare",
-		[](instance<std::string> a, instance<std::string> b) -> instance<int64_t>
+	bMM("string/compare",
+		[](t_str a, t_str b) -> instance<int64_t>
 	{
 		return instance<int64_t>::make(std::strcmp(a->c_str(), b->c_str()));
 	});
 
-	semantics->builtin_implementMultiMethod("string/isprefix",
-		[](instance<std::string> a, instance<std::string> b) -> instance<bool>
+	bMM("string/isprefix",
+		[](t_str a, t_str b) -> instance<bool>
 	{
 		bool res;
 		if (a->size() > b->size()) res = false;
@@ -228,9 +209,42 @@ void core::make_string_globals(instance<Module> ret)
 		return instance<bool>::make(res);
 	});
 
-	semantics->builtin_implementMultiMethod("string/length",
-		[](instance<std::string> a) -> instance<uint64_t>
-	{
-		return instance<uint64_t>::make(a->size());
+	bMM("string/length", [](t_str a) { return instance<uint64_t>::make(a->size());});
+
+
+	bMM("string/upper", [](t_str a) { 
+		auto res = t_str::make(*a);
+		std::transform(res->begin(), res->end(), res->begin(), ::toupper);
+		return res;
+	});
+
+	bMM("string/lower", [](t_str a) {
+		auto res = t_str::make(*a);
+		std::transform(res->begin(), res->end(), res->begin(), ::tolower);
+		return res;
+	});
+
+	bMM("string/capital", [](t_str a) {
+		auto res = t_str::make(*a);
+		std::transform(res->begin(), res->begin() + 1, res->begin(), ::toupper);
+		return res;
+	});
+
+	bMM("string/snake", [](t_str a) { return t_str::make(std::regex_replace(*a, std::regex(" "), "_")); });
+
+	bMM("string/kebab", [](t_str a) { return t_str::make(std::regex_replace(*a, std::regex(" "), "-")); });
+
+	bMM("string/camel", [](t_str a) {
+		std::ostringstream res;
+		std::vector<std::string> sm;
+		stdext::split(*a, " ", std::back_inserter(sm));
+		sm[0][0] = ::tolower(sm[0][0]);;
+		res << sm[0];
+		for (auto i = 1; i < sm.size(); i++)
+		{
+			sm[i][0] = ::toupper(sm[i][0]);
+			res << sm[i];
+		}
+		return t_str::make(res.str());
 	});
 }
