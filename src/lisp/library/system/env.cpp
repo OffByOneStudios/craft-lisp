@@ -51,13 +51,11 @@ namespace _impl {
 	}
 	instance<Map> listEnv()
 	{
+		auto res = instance<Map>::make();
 #ifdef _WIN32
 		wchar_t* strings = (wchar_t*)GetEnvironmentStrings();
 		wchar_t* b = strings;
-#else
-		char* b = (char*) environ;
-#endif
-		auto res = instance<Map>::make();
+		
 
 		bool found = false;
 		while (*b)
@@ -67,9 +65,16 @@ namespace _impl {
 			auto i = kv.find('=');
 			res->insert(instance<std::string>::make(kv.substr(0, i)), instance<std::string>::make(kv.substr(i + 1)));
 		}
-			
-#ifdef _WIN32
 		FreeEnvironmentStringsW((LPWCH)strings);
+#else
+		char* b = (char*) environ;
+		while (*b)
+		{
+			auto kv = std::string(b);
+			b += kv.size() + 1;
+			auto i = kv.find('=');
+			res->insert(instance<std::string>::make(kv.substr(0, i)), instance<std::string>::make(kv.substr(i + 1)));
+		}		
 #endif
 		return res;
 	}
@@ -97,5 +102,19 @@ void core::make_env_globals(instance<Module> ret)
 		[]() -> instance<Map>
 	{
 		return _impl::listEnv();
+	});
+
+	semantics->builtin_implementMultiMethod("env/argv",
+		[]() -> instance<List>
+	{
+		auto res = instance<List>::make();
+		auto argv = Execution::getCurrent()->getNamespace()->getEnvironment()->argv();
+
+		for (auto i : argv)
+		{
+			res->push(i);
+		}
+
+		return res;
 	});
 }
