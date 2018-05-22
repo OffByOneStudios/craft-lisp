@@ -3,6 +3,7 @@
 #include "lisp/library/libraries.h"
 #include "prelude.h"
 
+#include <direct.h>  
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
@@ -71,8 +72,15 @@ void core::make_fs_globals(instance<Module> ret)
 		path::set_cwd(*a);
 	});
 
+	semantics->builtin_implementMultiMethod("fs/mkdir", [](instance<std::string> s) {
+#ifdef _WIN32
+		_mkdir(s->c_str());
+#else
+		mkdir(s->c_str());
+#endif
+	});
 
-	semantics->builtin_implementMultiMethod("read",
+	semantics->builtin_implementMultiMethod("fs/read",
 		[](instance<std::string> _0) -> instance<std::string>
 	{
 		auto text = craft::fs::read<std::string>(*_0, &craft::fs::string_read).get();
@@ -80,15 +88,16 @@ void core::make_fs_globals(instance<Module> ret)
 		return instance<std::string>::make(text);
 	});
 
-	semantics->builtin_implementMultiMethod("write",
+	semantics->builtin_implementMultiMethod("fs/write",
 		[](instance<std::string> _0, instance<std::string> _1)
 	{
+		auto res = std::regex_replace(*_1, std::regex("\r\n"), "\n");
 		std::ofstream outfile;
 		outfile.open(*_0);
-		outfile.write(_1->c_str(), _1->size());
+		outfile.write(res.c_str(), res.size());
 		outfile.close();
 	});
-	semantics->builtin_implementMultiMethod("write",
+	semantics->builtin_implementMultiMethod("fs/write",
 		[](instance<std::string> _0, instance<std::string> _1, instance<std::string> _2)
 	{
 		std::ofstream::openmode op;
@@ -104,16 +113,24 @@ void core::make_fs_globals(instance<Module> ret)
 	});
 
 
-	semantics->builtin_implementMultiMethod("mv",
+	semantics->builtin_implementMultiMethod("fs/mv",
 		[](instance<std::string> a, instance<std::string> b)
 	{
 		auto f = path::normalize(*a);
 		auto t = path::normalize(*b);
 		if (rename(f.c_str(), t.c_str())) throw stdext::exception("{0}", "TODO Rename Failure");
-		return instance<>();
 	});
 
+	semantics->builtin_implementMultiMethod("fs/mv",
+		[](instance<std::string> a, instance<std::string> b)
+	{
+		auto f = path::normalize(*a);
+		auto t = path::normalize(*b);
+		if (rename(f.c_str(), t.c_str())) throw stdext::exception("{0}", "TODO Rename Failure");
+	});
 
+	semantics->builtin_implementMultiMethod("fs/rm", [](instance<std::string> a) { remove(a->c_str());});
+	semantics->builtin_implementMultiMethod("fs/exists", [](instance<std::string> a) { return instance<bool>::make(access(a->c_str(), 00) == 0); });
 	semantics->builtin_implementMultiMethod("glob",
 		[](instance<std::string> a, instance<std::string> b) -> instance<List>
 	{
