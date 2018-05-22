@@ -127,6 +127,12 @@ void core::make_list_globals(instance<Module> ret)
 		return instance<List>::make(args.args);
 	});
 
+	semantics->builtin_implementMultiMethod("list/size",
+		[](instance<List> a)
+	{
+		return a->size();
+	});
+
 	semantics->builtin_implementMultiMethod("list/get",
 		[](instance<List> a, instance<int64_t> b) -> instance<>
 	{
