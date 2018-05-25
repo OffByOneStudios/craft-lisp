@@ -126,7 +126,7 @@ namespace lisp
         };
         
 		plf::colony<_Entry> _entries;
-		types::ExpressionDispatcher _dispatcher;
+		types::WithCache<types::ExpressionDispatcher> _dispatcher;
         
 	public:
 		CRAFT_LISP_EXPORTED MultiMethod();

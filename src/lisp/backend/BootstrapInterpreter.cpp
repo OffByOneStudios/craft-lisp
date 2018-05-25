@@ -194,6 +194,11 @@ instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, ty
 		slots = instance<RuntimeSlots>::make(module, statement_count);
 		module->_value = slots;
 	}
+	else if (RuntimeSlots::getSize((instance<>*)&slots) != statement_count)
+	{
+		RuntimeSlots::extend((instance<>*)&slots, statement_count);
+	}
+
 	for (auto stmt_i = 0; stmt_i < statement_count; ++stmt_i)
 	{
 		*RuntimeSlots::getSlot((instance<>*)&slots, stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
