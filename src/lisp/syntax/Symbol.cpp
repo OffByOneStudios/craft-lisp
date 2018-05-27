@@ -88,3 +88,13 @@ instance<Symbol> Symbol::makeSymbol(std::string const& s)
 
 	return nsym;
 }
+
+instance<Symbol> Symbol::trimKeyword() const
+{
+	if (!isKeyword()) throw stdext::exception("Not a keyword");
+	auto nsym = instance<Symbol>::makeThroughLambda([](auto p) { return new (p) Symbol(); });
+
+	nsym->_symbolseq.reserve(this->_symbolseq.size() - 1);
+	std::copy(this->_symbolseq.begin() + 1, this->_symbolseq.end(), std::back_inserter(nsym->_symbolseq));
+	return nsym;
+}

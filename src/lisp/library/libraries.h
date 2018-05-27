@@ -47,6 +47,7 @@ namespace lisp {
 			void make_cast_globals(instance<Module> m);
 			void make_logic_globals(instance<Module> m);
 			void make_fs_globals(instance<Module> m);
+			void make_doc_globals(instance<Module> m);
 			void make_env_globals(instance<Module> m);
 			void make_regex_globals(instance<Module> m);
 			void make_meta_globals(instance<Module> m);

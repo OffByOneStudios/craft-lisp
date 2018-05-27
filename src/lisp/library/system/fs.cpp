@@ -3,7 +3,9 @@
 #include "lisp/library/libraries.h"
 #include "prelude.h"
 
+#ifdef _WIN32
 #include <direct.h>  
+#endif 
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
@@ -76,7 +78,7 @@ void core::make_fs_globals(instance<Module> ret)
 #ifdef _WIN32
 		_mkdir(s->c_str());
 #else
-		mkdir(s->c_str());
+		mkdir(s->c_str(), S_IRWXU);
 #endif
 	});
 

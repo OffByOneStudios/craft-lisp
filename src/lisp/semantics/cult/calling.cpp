@@ -176,7 +176,8 @@ void lisp::Function::bind()
 	_body->bind();
 
 	// TODO build a visitor helper:
-	std::deque<std::tuple<instance<SCultSemanticNode>, size_t>> _visitStack;
+	typedef std::tuple<instance<SCultSemanticNode>, size_t> t_VistEntry;
+	std::deque<t_VistEntry> _visitStack;
 	_visitStack.push_front({ _body, 0 });
 	
 	while (!_visitStack.empty())
@@ -198,9 +199,9 @@ void lisp::Function::bind()
 				continue;
 
 			auto it = std::find_if(_visitStack.begin(), _visitStack.end(),
-				[scope](auto a) -> bool
+				[scope](t_VistEntry a) -> bool
 				{
-					auto ai = std::get<0>(a);
+					instance<SCultSemanticNode> ai = std::get<0>(a);
 					return ai.hasFeature<SScope>() && (instance<>)(ai) == (instance<>)(scope);
 				});
 

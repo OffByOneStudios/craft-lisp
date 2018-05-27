@@ -30,6 +30,7 @@ instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns, 
 	library::core::make_string_globals(ret);
 	library::core::make_shim_globals(ret);
 	library::core::make_fs_globals(ret);
+	library::core::make_doc_globals(ret);
 	library::core::make_env_globals(ret);
 	library::core::make_regex_globals(ret);
 	library::core::make_meta_globals(ret);
