@@ -126,7 +126,6 @@ instance<> LispRepl::invoke(instance<std::string> input, bool record)
 		_rx.history_save(_history_file);
 	}
 
-
 	instance<Module> statement;
 	try
 	{
@@ -145,6 +144,8 @@ instance<> LispRepl::invoke(instance<std::string> input, bool record)
 		_live_module->appendModule(statement);
 		return _live_module->lastExecutedResult();
 	}
+
+	return instance<>();
 }
 instance<> LispRepl::step()
 {
