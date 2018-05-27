@@ -41,10 +41,9 @@ namespace lisp {
 			instance<SubroutineClosure> cl = _;
 
 			// TODO make this generic
-			auto frame = InterpreterFrame::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
+			auto frame = InterpreterFrameSection::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
 
-			frame->getExecution()->getNamespace()->getEnvironment()->log()->warn("Subroutine executed with poor frame state, crash incomming...");
-			return frame->interp_call(cl->subroutine, call /*, (InterpreterFrame::SubFrame*)cl->scope_frame */);
+			return frame->interp_call(cl->subroutine, call, cl->scope_frame.asType<InterpreterFrame>());
 		}
 	};
 }}
@@ -56,7 +55,7 @@ CRAFT_DEFINE(SubroutineClosure)
 	_.defaults();
 };
 
-SubroutineClosure::SubroutineClosure(void* frame, instance<PSubroutine> subroutine)
+SubroutineClosure::SubroutineClosure(instance<> frame, instance<PSubroutine> subroutine)
 	: scope_frame(frame), subroutine(subroutine)
 {
 

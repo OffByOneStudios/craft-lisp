@@ -5,10 +5,10 @@
 namespace craft {
 namespace lisp
 {
-	class SFrame
+	class SFrameSection
 		: public craft::types::Aspect
 	{
-		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SFrame, "lisp.frame", types::FactoryAspectManager);
+		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SFrameSection, "lisp.frame-section", types::FactoryAspectManager);
 
 	public:
 		CRAFT_LISP_EXPORTED virtual void setExecution(instance<Execution>) = 0;

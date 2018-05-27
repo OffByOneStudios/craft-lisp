@@ -6,7 +6,7 @@ namespace lisp
 {
 	class BootstrapInterpreter;
 
-	class SFrame;
+	class SFrameSection;
 
 	class Namespace;
 	class Module;

@@ -202,6 +202,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const;
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParentScope() const = 0;
 
+		CRAFT_LISP_EXPORTED virtual size_t getSlotCount() const = 0;
+
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const = 0;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) = 0;
 

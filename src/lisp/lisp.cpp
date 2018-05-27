@@ -9,7 +9,7 @@ CRAFT_DEFINE(PSemantics) { _.defaults(); }
 CRAFT_DEFINE(PBackend) { _.defaults(); }
 CRAFT_DEFINE(PExecutor) { _.defaults(); }
 CRAFT_DEFINE(PCompiler) { _.defaults(); }
-CRAFT_DEFINE(SFrame) { _.defaults(); }
+CRAFT_DEFINE(SFrameSection) { _.defaults(); }
 
 /******************************************************************************
 ** DLL ENTRY

@@ -113,6 +113,7 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<CultSemantics> getSemantics() const override;
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParentScope() const override;
+		CRAFT_LISP_EXPORTED virtual size_t getSlotCount() const override;
 
 		CRAFT_LISP_EXPORTED instance<Binding> lookup_local(instance<Symbol>) const;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;

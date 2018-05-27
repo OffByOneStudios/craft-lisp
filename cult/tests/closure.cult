@@ -1,0 +1,2 @@
+
+(define test-closure-0 (function (bar) (function () bar)))

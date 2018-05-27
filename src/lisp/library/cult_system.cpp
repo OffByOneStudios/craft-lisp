@@ -222,12 +222,12 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	//
 	sem->builtin_addMultiMethod("exec");
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<Constant> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<Constant> ast) -> instance<>
 	{
 		return ast->getValue();
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<Resolve> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<Resolve> ast) -> instance<>
 	{
 		auto slot = interp->slot(ast->getBinding());
 
@@ -240,7 +240,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return slot;
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<Assign> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<Assign> ast) -> instance<>
 	{
 		auto destination = interp->interp_exec(ast->slotAst());
 
@@ -254,7 +254,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return value;
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<ScopeManipulation> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<ScopeManipulation> ast) -> instance<>
 	{
 		// TODO call top-level here
 		// ast
@@ -262,12 +262,12 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return instance<>(); // return module value?
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<Variable> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<Variable> ast) -> instance<>
 	{
 		return interp->interp_exec(ast->initalizerAst());
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<BindSite> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<BindSite> ast) -> instance<>
 	{
 		auto symbol = ast->getStaticSymbol(); // TODO execute dynamic binding
 		auto binding = SScope::findScope(ast)->lookup_recurse(symbol);
@@ -279,7 +279,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return value;
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<CallSite> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<CallSite> ast) -> instance<>
 	{
 		auto callee = interp->interp_exec(ast->calleeAst());
 
@@ -295,9 +295,9 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return value;
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<Block> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<Block> ast) -> instance<>
 	{
-		InterpreterFrame::PushSubFrame _hold(interp, ast, instance<RuntimeSlots>::make(ast, std::max<size_t>(ast->statementCount(), 2)), interp->top());
+		InterpreterFrameSection::Push _hold(interp, ast, interp->top());
 
 		auto count = ast->statementCount();
 		instance<> last_res;
@@ -309,7 +309,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return last_res;
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<Condition> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<Condition> ast) -> instance<>
 	{
 		auto truth = interp->getBackend().asType<BootstrapInterpreter>()->builtin_truth;
 		auto count = ast->branchCount();
@@ -325,7 +325,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return interp->interp_exec(ast->branchDefaultAst());
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<Loop> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<Loop> ast) -> instance<>
 	{
 		auto truth = interp->getBackend().asType<BootstrapInterpreter>()->builtin_truth;
 		
@@ -337,16 +337,16 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return last;
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<Function> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<Function> ast) -> instance<>
 	{
 		auto curSubframe = interp->top();
-		if (!ast->hasFreeBindings() || curSubframe->chain == nullptr)
+		if (!ast->hasFreeBindings() || curSubframe->getScope().isNull())
 			return ast;
 
 		return instance<SubroutineClosure>::make(curSubframe, ast);
 	});
 	sem->builtin_implementMultiMethod("exec",
-		[](instance<InterpreterFrame> interp, instance<> ast) -> instance<>
+		[](instance<InterpreterFrameSection> interp, instance<> ast) -> instance<>
 	{
 		return ast;
 	});

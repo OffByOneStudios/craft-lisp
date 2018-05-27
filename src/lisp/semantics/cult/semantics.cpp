@@ -149,6 +149,10 @@ instance<SScope> CultSemantics::getParentScope() const
 {
 	return instance<>();
 }
+size_t CultSemantics::getSlotCount() const
+{
+	return countStatements();
+}
 
 instance<Binding> CultSemantics::lookup_local(instance<Symbol> symbol) const
 {

@@ -28,10 +28,10 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::SubroutineClosure);
 	public:
 		// TODO make this an instance + offset when we clean up the shadow stack
-		void* scope_frame;
+		instance<> scope_frame;
 		instance<PSubroutine> subroutine;
 	
 	public:
-		CRAFT_LISP_EXPORTED SubroutineClosure(void* frame, instance<PSubroutine> subroutine);
+		CRAFT_LISP_EXPORTED SubroutineClosure(instance<> frame, instance<PSubroutine> subroutine);
 	};
 }}

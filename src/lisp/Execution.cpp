@@ -39,11 +39,11 @@ instance<Namespace> Execution::getNamespace() const
 	return _namespace;
 }
 
-std::list<instance<SFrame>> const& Execution::stack() const
+std::list<instance<SFrameSection>> const& Execution::stack() const
 {
 	return _stack;
 }
-void Execution::push_frame(instance<SFrame> _push)
+void Execution::push_frame(instance<SFrameSection> _push)
 {
 	_push->setExecution(craft_instance());
 	_stack.push_front(_push);

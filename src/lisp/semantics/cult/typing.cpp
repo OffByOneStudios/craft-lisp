@@ -116,6 +116,10 @@ instance<SScope> TypeDescription::getParentScope() const
 {
 	return _parentScope;
 }
+size_t TypeDescription::getSlotCount() const
+{
+	return statementCount(); // 0? count of variables?
+}
 
 instance<Binding> TypeDescription::lookup(instance<Symbol> symbol) const
 {

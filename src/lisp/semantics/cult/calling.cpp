@@ -101,7 +101,7 @@ namespace lisp {
 			instance<Function> fn = _;
 
 			// TODO make this generic
-			auto frame = InterpreterFrame::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
+			auto frame = InterpreterFrameSection::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
 
 			return frame->interp_call(fn, call);
 		}
@@ -250,6 +250,10 @@ void lisp::Function::setBinding(instance<Binding> binding)
 instance<SScope> lisp::Function::getParentScope() const
 {
 	return _parentScope;
+}
+size_t lisp::Function::getSlotCount() const
+{
+	return argCount();
 }
 
 instance<Binding> lisp::Function::lookup(instance<Symbol> symbol) const

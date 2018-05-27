@@ -27,11 +27,14 @@ namespace lisp
 		CRAFT_LISP_EXPORTED RuntimeSlots(instance<> representing, size_t size);
 		CRAFT_LISP_EXPORTED ~RuntimeSlots();
 
+		CRAFT_LISP_EXPORTED size_t getSize();
+		CRAFT_LISP_EXPORTED instance<>* getSlot(size_t index);
+		CRAFT_LISP_EXPORTED instance<> getLastSlot();
+		CRAFT_LISP_EXPORTED void extend(size_t size);
+
 		static CRAFT_LISP_EXPORTED size_t getSize(instance<>*);
 		static CRAFT_LISP_EXPORTED instance<>* getSlot(instance<>*, size_t index);
-
 		static CRAFT_LISP_EXPORTED instance<> getLastSlot(instance<>*);
-
 		static CRAFT_LISP_EXPORTED void extend(instance<>*, size_t size);
 	};
 

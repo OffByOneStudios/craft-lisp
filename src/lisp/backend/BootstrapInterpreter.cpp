@@ -9,135 +9,164 @@ using namespace craft::types;
 using namespace craft::lisp;
 
 /******************************************************************************
-** InterpreterFrame::SubFrame
-******************************************************************************/
-
-InterpreterFrame::SubFrame::SubFrame(instance<SScope> scope, instance<RuntimeSlots> value)
-	: scope(scope), value(value), chain(nullptr)
-{ }
-InterpreterFrame::SubFrame::SubFrame(instance<SScope> scope, instance<RuntimeSlots> value, SubFrame* chain)
-	: scope(scope), value(value), chain(chain)
-{ }
-
-/******************************************************************************
 ** InterpreterFrame
 ******************************************************************************/
 
 CRAFT_DEFINE(InterpreterFrame)
 {
-	_.use<SFrame>().byCasting();
+	_.defaults();
+}
+
+InterpreterFrame::InterpreterFrame(instance<SScope> scope, instance<InterpreterFrame> chain)
+	: _scope(scope)
+	, _value(instance<RuntimeSlots>::make(scope, scope->getSlotCount()))
+	, _chain(chain)
+{
+}
+InterpreterFrame::InterpreterFrame(instance<SScope> scope, instance<RuntimeSlots> slots, instance<InterpreterFrame> chain)
+	: _scope(scope)
+	, _value(slots ? slots : instance<RuntimeSlots>::make(scope, scope->getSlotCount()))
+	, _chain(chain)
+{
+	assert(_value->getSize() >= scope->getSlotCount());
+}
+
+instance<SScope> InterpreterFrame::getScope() const
+{
+	return _scope;
+}
+instance<InterpreterFrame> InterpreterFrame::getLexicalParent() const
+{
+	return _chain;
+}
+
+instance<RuntimeSlots> InterpreterFrame::getValue()
+{
+	return _value;
+}
+
+/******************************************************************************
+** InterpreterFrameSection
+******************************************************************************/
+
+CRAFT_DEFINE(InterpreterFrameSection)
+{
+	_.use<SFrameSection>().byCasting();
 
 	_.defaults();
 }
 
-InterpreterFrame::InterpreterFrame(instance<> backend)
+InterpreterFrameSection::InterpreterFrameSection(instance<BootstrapInterpreter> backend)
 {
 	_backend = backend;
 }
 
-instance<InterpreterFrame> InterpreterFrame::ensureCurrent(instance<BootstrapInterpreter> const& bi)
+instance<InterpreterFrameSection> InterpreterFrameSection::ensureCurrent(instance<BootstrapInterpreter> const& bi)
 {
 	auto exec = Execution::getCurrent();
-	auto top = exec->topIfOfType<InterpreterFrame>();
+	auto top = exec->topIfOfType<InterpreterFrameSection>();
 	if (top) return top;
 
-	auto frame = instance<InterpreterFrame>::make(bi);
+	auto frame = instance<InterpreterFrameSection>::make(bi);
 	exec->push_frame(frame);
 	return frame;
 }
 
-void InterpreterFrame::setExecution(instance<Execution> exec)
+void InterpreterFrameSection::setExecution(instance<Execution> exec)
 {
 	_execution = exec;
 }
 
-instance<Execution> InterpreterFrame::getExecution() const
+instance<Execution> InterpreterFrameSection::getExecution() const
 {
 	return _execution;
 }
 
-instance<> InterpreterFrame::getBackend() const
+instance<> InterpreterFrameSection::getBackend() const
 {
 	return _backend;
 }
 
-size_t InterpreterFrame::entries() const
+size_t InterpreterFrameSection::entries() const
 {
-	return _entries.size();
+	return _frames.size();
 }
-std::string InterpreterFrame::getEntryName(size_t index) const
+std::string InterpreterFrameSection::getEntryName(size_t index) const
 {
 	return "";
 }
-instance<> InterpreterFrame::getEntryValue(size_t index) const
+instance<> InterpreterFrameSection::getEntryRepresentative(size_t index) const
 {
-	return _entries.get_iterator_from_index(index)->value;
+	return _frames[index]->_scope;
 }
-instance<> InterpreterFrame::getEntryRepresentative(size_t index) const
+instance<Module> InterpreterFrameSection::getEntryModule(size_t index) const
 {
-	return _entries.get_iterator_from_index(index)->scope;
+	return _frames[index]->_scope->getSemantics()->getModule();
 }
-instance<Module> InterpreterFrame::getEntryModule(size_t index) const
+instance<RuntimeSlots> InterpreterFrameSection::getEntryValue(size_t index) const
 {
-	return _entries.get_iterator_from_index(index)->scope->getSemantics()->getModule();
+	return _frames[index]->_value;
 }
 
-size_t InterpreterFrame::getScopeEntryIndex(instance<SScope> scope) const
+instance<InterpreterFrame> InterpreterFrameSection::findScopeInLexicalChain(instance<SScope> scope) const
 {
-	auto cur = top();
+	auto cur = _frames.back();
 
-	while (cur != nullptr)
+	while (cur)
 	{
-		if (cur->scope == scope)
-			return _entries.get_index_from_iterator(_entries.get_iterator_from_pointer(const_cast<SubFrame*>(cur)));
+		if (cur->_scope == scope)
+			return cur;
 
-		cur = cur->chain;
+		cur = cur->_chain;
 	}
 
 	throw stdext::exception("Could not find scope {0} on stack.", scope);
 }
 
-InterpreterFrame::SubFrame* InterpreterFrame::top()
+instance<InterpreterFrame> InterpreterFrameSection::top() const
 {
-	return &*_entries.rbegin();
-}
-InterpreterFrame::SubFrame const* InterpreterFrame::top() const
-{
-	return &*_entries.rbegin();
+	return _frames.back();
 }
 
-void InterpreterFrame::push(instance<SScope> scope, instance<RuntimeSlots> value, SubFrame* chain)
+instance<InterpreterFrame> InterpreterFrameSection::push(instance<SScope> scope, instance<InterpreterFrame> chain)
 {
-	_entries.insert(SubFrame(scope, value, chain));
+	auto ret = instance<InterpreterFrame>::make(scope, chain);
+	_frames.push_back(ret);
+	return ret;
 }
-void InterpreterFrame::pop()
+instance<InterpreterFrame> InterpreterFrameSection::push(instance<SScope> scope, instance<RuntimeSlots> value, instance<InterpreterFrame> chain)
 {
-	_entries.erase(--_entries.end());
+	auto ret = instance<InterpreterFrame>::make(scope, value, chain);
+	_frames.push_back(ret);
+	return ret;
+}
+void InterpreterFrameSection::pop()
+{
+	_frames.pop_back();
 }
 
-instance<> InterpreterFrame::interp_exec(instance<SCultSemanticNode> node)
+instance<> InterpreterFrameSection::interp_exec(instance<SCultSemanticNode> node)
 {
 	return _backend->_fn_system_exec->call_internal({ craft_instance() , node });
 }
 
-instance<> InterpreterFrame::interp_call(instance<> fn, types::GenericInvoke const& call, SubFrame* chain)
+instance<> InterpreterFrameSection::interp_call(instance<> fn, types::GenericInvoke const& call, instance<InterpreterFrame> chain)
 {
 	if (fn.isType<Function>())
 	{
 		auto fnast = fn.asType<Function>();
-		auto rtv = instance<RuntimeSlots>::make(fnast, fnast->argCount());
-		auto _this = craft_instance();
-		InterpreterFrame::PushSubFrame _hold(_this, fnast, rtv, chain);
+		InterpreterFrameSection::Push _hold(craft_instance(), fnast, chain);
 
 		if (call.args.size() != fnast->argCount())
 			throw stdext::exception("Interpreter asked to execute function with mismatched arguments ({0} calling {1}).", call.args.size(), fnast->argCount());
 
+		auto rtv = _hold.frame()->getValue();
 		auto count = fnast->argCount();
 		for (auto i = 0; i < count; ++i)
 		{
 			// TODO bindsites manip here instead maybe?
 			// TODO argument AST node?
-			*rtv->getSlot((instance<>*)(&rtv), i) = call.args[i];
+			*(rtv->getSlot(i)) = call.args[i];
 		}
 
 		return interp_exec(fnast->bodyAst());
@@ -183,25 +212,20 @@ instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, ty
 	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
 		"BootstrapInterpreter::_special_init\t({0})", module);
 
-	instance<RuntimeSlots> slots = module->moduleValue();
-
-	auto frame = InterpreterFrame::ensureCurrent(craft_instance());
-	InterpreterFrame::PushSubFrame _hold(frame, sem, module->moduleValue());
-
 	auto statement_count = sem->countStatements();
-	if (!slots)
-	{
-		slots = instance<RuntimeSlots>::make(module, statement_count);
-		module->_value = slots;
-	}
-	else if (RuntimeSlots::getSize((instance<>*)&slots) != statement_count)
-	{
-		RuntimeSlots::extend((instance<>*)&slots, statement_count);
-	}
+
+	instance<RuntimeSlots> slots = module->moduleValue();
+	if (slots && slots->getSize() != statement_count)
+		slots->extend(statement_count);
+
+	auto frame = InterpreterFrameSection::ensureCurrent(craft_instance());
+	InterpreterFrameSection::Push _hold(frame, sem, slots);
+
+	module->_value = slots = _hold.frame()->getValue();
 
 	for (auto stmt_i = 0; stmt_i < statement_count; ++stmt_i)
 	{
-		*RuntimeSlots::getSlot((instance<>*)&slots, stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
+		*slots->getSlot(stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
 	}
 
 	return slots;
@@ -227,18 +251,18 @@ instance<> BootstrapInterpreter::_special_append(instance<lisp::Module> module, 
 		return instance<>(); // no op
 
 	auto start = sem->append(append_sem);
-
-	auto frame = InterpreterFrame::ensureCurrent(craft_instance());
-	InterpreterFrame::PushSubFrame _hold(frame, sem, module->moduleValue());
-
 	auto statement_count = sem->countStatements();
-	RuntimeSlots::extend((instance<>*)&slots, statement_count);
+	slots->extend(statement_count);
+
+	auto frame = InterpreterFrameSection::ensureCurrent(craft_instance());
+	InterpreterFrameSection::Push _hold(frame, sem, slots);
+
 	for (auto stmt_i = start; stmt_i < statement_count; ++stmt_i)
 	{
-		*RuntimeSlots::getSlot((instance<>*)&slots, stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
+		*slots->getSlot(stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
 	}
 
-	return RuntimeSlots::getLastSlot((instance<>*)&slots);
+	return slots->getLastSlot();
 }
 instance<> BootstrapInterpreter::_special_merge(instance<lisp::Module> module, types::GenericInvoke const& call) const
 {
@@ -259,12 +283,12 @@ instance<> BootstrapInterpreter::_special_merge(instance<lisp::Module> module, t
 
 	auto merge_list = sem->append(merge_sem);
 
-	auto frame = InterpreterFrame::ensureCurrent(craft_instance());
-	InterpreterFrame::PushSubFrame _hold(frame, sem, module->moduleValue());
+	auto frame = InterpreterFrameSection::ensureCurrent(craft_instance());
+	InterpreterFrameSection::Push _hold(frame, sem, slots);
 
 	throw stdext::exception("Merge not implemented!.");
 
-	return RuntimeSlots::getLastSlot((instance<>*)&slots);
+	return slots->getLastSlot();
 }
 
 instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const& call)
@@ -287,7 +311,7 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 
 	auto potFunc = binding->getSite()->valueAst();
 
-	return InterpreterFrame::ensureCurrent(craft_instance())->interp_call(potFunc, call);
+	return InterpreterFrameSection::ensureCurrent(craft_instance())->interp_call(potFunc, call);
 }
 
 void BootstrapInterpreter::builtin_validateSpecialForms(instance<lisp::Module> module)

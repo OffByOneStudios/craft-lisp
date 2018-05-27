@@ -27,38 +27,51 @@ RuntimeSlots::~RuntimeSlots()
 	delete[] this->slots;
 }
 
+size_t RuntimeSlots::getSize()
+{
+	return size;
+}
+instance<>* RuntimeSlots::getSlot(size_t index)
+{
+	assert(index < size);
+	return slots + index;
+}
+instance<> RuntimeSlots::getLastSlot()
+{
+	return slots[size - 1];
+}
+void RuntimeSlots::extend(size_t resize)
+{
+	assert(resize >= size);
+
+	auto new_slots = new instance<>[resize];
+
+	for (auto i = 0; i < size; ++i)
+		new_slots[i] = slots[i];
+
+	size = resize;
+	std::swap(slots, new_slots);
+
+	delete[] new_slots;
+}
+
 size_t RuntimeSlots::getSize(instance<>* inst)
 {
-	return inst->asType<RuntimeSlots>()->size;
+	return inst->asType<RuntimeSlots>()->getSize();
 }
 instance<>* RuntimeSlots::getSlot(instance<>* inst, size_t index)
 {
-	assert(index < inst->asType<RuntimeSlots>()->size);
-	return &(inst->asType<RuntimeSlots>()->slots[index]);
+	return inst->asType<RuntimeSlots>()->getSlot(index);
 }
 
 instance<> RuntimeSlots::getLastSlot(instance<>* inst)
 {
-	auto slots = inst->asType<RuntimeSlots>();
-
-	return slots->slots[slots->size - 1];
+	return inst->asType<RuntimeSlots>()->getLastSlot();
 }
 
 void RuntimeSlots::extend(instance<>* inst, size_t size)
 {
-	auto slots = inst->asType<RuntimeSlots>();
-
-	assert(size >= slots->size);
-
-	auto new_slots = new instance<>[size];
-
-	for (auto i = 0; i < slots->size; ++i)
-		new_slots[i] = slots->slots[i];
-
-	slots->size = size;
-	std::swap(slots->slots, new_slots);
-
-	delete[] new_slots;
+	inst->asType<RuntimeSlots>()->extend(size);
 }
 
 /******************************************************************************
