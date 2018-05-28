@@ -54,8 +54,12 @@ namespace library
 			inline bool operator()(const instance<>& a, const instance<>& b) const {
 				if (a.typeId() != b.typeId()) return a.typeId() < b.typeId();
 
+
 				if (a.typeId().isType<std::string>())
 					return *a.asType<std::string>() < *b.asType<std::string>();
+
+				else if (a.typeId().isType<Symbol>())
+					return *a.asType<Symbol>() < *b.asType<Symbol>();
 				else if (a.typeId().isType<int64_t>())
 					return *a.asType<int64_t>() < *b.asType<int64_t>();
 				else return a.get() < b.get();

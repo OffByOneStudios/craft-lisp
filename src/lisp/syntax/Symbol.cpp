@@ -58,6 +58,7 @@ std::string Symbol::getDisplay() const
 	return res;
 }
 
+
 instance<Symbol> Symbol::makeSymbol(std::string const& s)
 {
 	auto& symbol_store = Execution::getCurrent()->getNamespace()->symbolStore;

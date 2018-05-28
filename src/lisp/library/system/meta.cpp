@@ -36,7 +36,14 @@ void core::make_meta_globals(instance<Module> ret)
 	semantics->builtin_implementMultiMethod("load-dll",
 		[](instance<std::string> s)
 	{
-		types::load_dll(*s);
+#ifdef  _WIN32
+		auto clean = *s + ".dll";
+#elif	__APPLE__
+		auto clean = "lib + *s + ".dylib";
+#else
+		auto clean = "lib + *s + ".so";
+#endif
+		types::load_dll(clean);
 	});
 
 	//TODO Macro implementation on cult semantics

@@ -57,5 +57,44 @@ namespace lisp
 		static CRAFT_LISP_EXPORTED instance<Symbol> makeSymbol(std::string const&);
 
 		CRAFT_LISP_EXPORTED instance<Symbol> trimKeyword() const;
+
+
+		inline bool operator==(Symbol const& other) const {
+			if (_symbolseq.size() != other._symbolseq.size()) return false;
+			for (auto i = 0; i < _symbolseq.size(); i++)
+			{
+				if (_symbolseq[i] != other._symbolseq[i]) return false;
+			}
+
+			return true;
+		}
+
+		inline bool operator<(Symbol const& other) const {
+			if (other._symbolseq.size() > _symbolseq.size()) return false;
+			else if (other._symbolseq.size() < _symbolseq.size()) return true;
+			for (auto i = 0; i < _symbolseq.size(); i++)
+			{
+				if (_symbolseq[i] < other._symbolseq[i]) return true;
+			}
+
+			return false;
+
+		}
+
+		inline bool operator>(Symbol const& other) const {
+			if (other._symbolseq.size() > _symbolseq.size()) return true;
+			else if (other._symbolseq.size() < _symbolseq.size()) return false;
+			for (auto i = 0; i < _symbolseq.size(); i++)
+			{
+				if (_symbolseq[i] > other._symbolseq[i]) return true;
+			}
+
+			return false;
+
+		}
+
+		bool operator <=(Symbol const& other) { return this->operator<(other) || this->operator==(other); }
+		bool operator !=(Symbol const& other) { return !this->operator==(other); }
+		bool operator >=(Symbol const& other) { return !this->operator<(other) || this->operator==(other); }
 	};
 }}

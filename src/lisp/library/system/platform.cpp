@@ -19,10 +19,4 @@ void core::make_platform_globals(instance<Module> ret)
 		return instance<std::string>::make(CRAFT_TRIPLE_CROSS);
 	});
 
-	semantics->builtin_implementMultiMethod("platform/loaddll",
-		[](instance<std::string> a)
-	{
-
-		
-	});
 }
