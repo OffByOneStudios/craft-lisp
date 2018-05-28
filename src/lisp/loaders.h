@@ -70,30 +70,6 @@ namespace lisp
 	** BuiltinLoader
 	******************************************************************************/
 
-	class BuiltinLoader
-		: public virtual craft::types::Object
-	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::BuiltinLoader);
-
-	public:
-		static constexpr char c_provider_index[] = "builtin";
-
-	private:
-		instance<Module> _module;
-		std::string _builtinName;
-
-	private:
-		BuiltinLoader() = default;
-
-	public:
-		CRAFT_LISP_EXPORTED static std::string resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra);
-		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& resolve_string, instance<> extra);
-
-		CRAFT_LISP_EXPORTED instance<> getContent();
-		CRAFT_LISP_EXPORTED std::string getUri();
-		CRAFT_LISP_EXPORTED bool prepSemantics(instance<>);
-	};
-
 	struct GraphPropertyBuiltinModuleUri final
 	{
 		// is a   `char const*`
@@ -158,6 +134,31 @@ namespace lisp
 
 	CRAFT_LISP_EXPORTED extern BuiltinModuleDescription BuiltinCultSystem;
 	CRAFT_LISP_EXPORTED extern BuiltinModuleDescription BuiltinCultCore;
+
+	class BuiltinLoader
+		: public virtual craft::types::Object
+	{
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::BuiltinLoader);
+
+	public:
+		static constexpr char c_provider_index[] = "builtin";
+
+	private:
+		instance<Module> _module;
+		std::string _builtinName;
+		BuiltinModuleDescription* _desc;
+
+	private:
+		BuiltinLoader() = default;
+
+	public:
+		CRAFT_LISP_EXPORTED static std::string resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra);
+		CRAFT_LISP_EXPORTED static instance<Module> load(instance<Namespace> ns, std::string const& resolve_string, instance<> extra);
+
+		CRAFT_LISP_EXPORTED instance<> getContent();
+		CRAFT_LISP_EXPORTED std::string getUri();
+		CRAFT_LISP_EXPORTED bool prepSemantics(instance<>);
+	};
 
 	/******************************************************************************
 	** FileLoader

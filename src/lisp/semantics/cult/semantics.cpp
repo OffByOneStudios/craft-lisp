@@ -216,6 +216,9 @@ void CultSemantics::importModule(instance<Module> m)
 	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
 		"CultSemantics::importModule\t({0}, {1})", _module, m);
 
+	if (std::find(_modules.begin(), _modules.end(), m) != _modules.end())
+		return;
+
 	_modules.insert(_modules.begin(), m);
 	rebuildModulesCache();
 }

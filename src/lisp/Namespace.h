@@ -12,7 +12,7 @@ namespace lisp
 	private:
 		instance<Environment> _environment;
 
-		std::mutex _module_load_mutex;
+		std::recursive_mutex _module_load_mutex;
 		std::map<std::string, size_t> _module_cache;
 		std::vector<instance<Module>> _module_load_list;
 

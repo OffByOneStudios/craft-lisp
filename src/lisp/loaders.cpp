@@ -39,9 +39,10 @@ instance<Module> BuiltinLoader::load(instance<Namespace> ns, std::string const& 
 	if (builtin_descriptor != nullptr)
 	{
 		auto sd = (cpp::static_desc*)builtin_descriptor->value;
-		auto bmd = (BuiltinModuleDescription*)sd->repr;
+		ret->_desc = (BuiltinModuleDescription*)sd->repr;
+		ret->_module = ret->_desc->build(ns, ret);
 
-		return bmd->build(ns, ret);
+		return ret->_module;
 	}
 	
 	throw stdext::exception("Unknown builtin `{0}`", proto_string);
@@ -55,7 +56,7 @@ std::string BuiltinLoader::getUri()
 {
 	return fmt::format("{0}:{1}", c_provider_index, _builtinName);
 }
-bool BuiltinLoader::prepSemantics(instance<>)
+bool BuiltinLoader::prepSemantics(instance<> semantics)
 {
 	return false;
 }
@@ -64,14 +65,16 @@ instance<Module> BuiltinModuleDescription::build(instance<Namespace> ns, instanc
 {
 	if (_builder == nullptr)
 	{
+		if (_initer == nullptr)
+			throw stdext::exception("Builtin does not have builder or initer.");
+
 		auto ret = instance<Module>::make(ns, loader);
 
 		auto sem = instance<CultSemantics>::make(ret);
+		sem->readPrepDefaults();
 		ret->builtin_setSemantics(sem);
 
 		_initer(ret);
-
-		ret->builtin_setSemantics(ret->require<CultSemantics>());
 
 		return ret;
 	}

@@ -110,7 +110,7 @@ void Namespace::compile(instance<Module> module, std::string path, instance<> co
 
 instance<Module> Namespace::requireModule(instance<Module> requestingModule, std::string const& uri_, instance<> resolver_specific_extra)
 {
-	std::unique_lock<std::mutex> lock(_module_load_mutex);
+	std::unique_lock<std::recursive_mutex> lock(_module_load_mutex);
 
 	auto mclb = _module_cache.lower_bound(uri_);
 	if (mclb != _module_cache.end() && !(_module_cache.key_comp()(uri_, mclb->first)))
