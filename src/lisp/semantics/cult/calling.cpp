@@ -309,7 +309,7 @@ namespace lisp {
 				std::string dispatchList = stdext::join<char, std::vector<TypeId>::iterator>(
 					std::string(", "), exprs.begin(), exprs.end(),
 					[](auto it) { return it->toString(); });
-				throw stdext::exception("Dispatch failed for [{0}].", dispatchList);
+				throw stdext::exception("Dispatch of `{0}` failed for [{1}].", mm->_binding->getSymbol()->getDisplay(), dispatchList);
 			}
 
 			return types::invoke(*std::get<1>(res), entry->function, call);
@@ -363,7 +363,7 @@ instance<> MultiMethod::call_internal(types::GenericInvoke const& invoke) const
 		std::string dispatchList = stdext::join<char, std::vector<TypeId>::iterator>(
 			std::string(", "), exprs.begin(), exprs.end(),
 			[](auto it) { return it->toString(); });
-		throw stdext::exception("Dispatch failed for [{0}].", dispatchList);
+		throw stdext::exception("Dispatch of `{0}` failed for [{1}].", _binding->getSymbol()->getDisplay(), dispatchList);
 	}
 
 	return types::invoke(*std::get<1>(res), entry->function, invoke);
