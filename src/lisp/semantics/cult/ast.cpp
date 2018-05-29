@@ -48,7 +48,7 @@ std::string SCultSemanticNode::sourceLocationToString() const
 	if (res.empty())
 		res = "???";
 
-	return fmt::format("{0}/{1}", sem->getModule()->uri(), res);
+	return fmt::format("{0}:{1}", sem->getModule()->uri(), res);
 }
 
 /******************************************************************************
