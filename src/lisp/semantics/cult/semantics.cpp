@@ -54,8 +54,10 @@ void CultSemantics::rebuildModulesCache()
 
 instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance<> syntax)
 {
+	instance<SCultSemanticNode> node;
+
 	if (syntax.typeId().isType<Symbol>() && !syntax.asType<Symbol>()->isKeyword())
-		return instance<Resolve>::make(syntax.asType<Symbol>(), Resolve::Mode::ResolveAndGet);
+		node = instance<Resolve>::make(syntax.asType<Symbol>(), Resolve::Mode::ResolveAndGet);
 	else if (syntax.typeId().isType<Sexpr>())
 	{
 		instance<Sexpr> expr = syntax;
@@ -66,7 +68,6 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 
 		// -- Read Time Dispatch --
 		instance<> head = expr->cells[0];
-
 		if (head.typeId().isType<Symbol>())
 		{
 			instance<Binding> binding = lookup_recurse(head.asType<Symbol>()); // TODO: read state lookup of macros?
@@ -76,23 +77,33 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 
 				// Special Form
 				if (siteValue.isType<SpecialForm>())
-					return siteValue.asType<SpecialForm>()->_read(rs, expr);
-
+				{
+					node = siteValue.asType<SpecialForm>()->_read(rs, expr);
+				}
 				// Macro Form
-				if (siteValue.isType<Macro>())
+				else if (siteValue.isType<Macro>())
 				{
 					throw stdext::exception("Macros not finished.");
-				//	ast = inspect_head.asType<Macro>()->expand(scope, expr->cells);
-				//	return read(scope, ast);
+					//	ast = inspect_head.asType<Macro>()->expand(scope, expr->cells);
+					//	return read(scope, ast);
 				}
 			}
 		}
 
 		// -- Call Site --
-		return instance<CallSite>::make(read_cultLisp(rs, head), rs->readAll(expr));
+		if (!node)
+			node = instance<CallSite>::make(read_cultLisp(rs, head), rs->readAll(expr));
+
+		if (expr->cell_locs.size() != 0)
+		{
+			node->_source_start = expr->cell_locs[0];
+			node->_source_end = expr->cell_locs[expr->cell_locs.size() - 1];
+		}
 	}
 	else // Raw Value
-		return instance<Constant>::make(syntax);
+		node = instance<Constant>::make(syntax);
+
+	return node;
 }
 
 void CultSemantics::readPrepDefaults()
@@ -116,6 +127,7 @@ void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOption
 	_ast.clear();
 	_bindings.bindings.clear();
 	_bindings.table.clear();
+	_source = syntax;
 
 	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
 		"CultSemantics::read\t({0})", _module);

@@ -41,15 +41,43 @@ void CultLispSyntax::parse(std::string const& s, PSyntax::ParseOptions const* op
 	_rootForms = parse_lisp(s, !opts->no_source_locations);
 }
 
-// TODO string_view
-std::string CultLispSyntax::getSource(PSyntax::SourceLocation const& sl) const
+std::string_view CultLispSyntax::getSource(PSyntax::SourceLocation const& sl) const
 {
-	return _source.substr(sl.pos, sl.length);
+	return std::string_view(_source.c_str() + sl.pos, sl.length);
 }
 
-PSyntax::SourceLocation CultLispSyntax::getSourceLocation(size_t const& pos) const
+PSyntax::SourceLocation CultLispSyntax::getSourceLocation(size_t const& start_pos, size_t const& end_pos) const
 {
-	return { (uint32_t)pos, 1, 0, 0, 0, 0 };
+	if (_source.empty())
+		return { 0, 0, 0, 0, 0, 0 };
+
+	size_t start_line_count = 0;
+	size_t start_col_offset = 0;
+	for (auto i = 0; i < start_pos; ++i)
+	{
+		if (_source[i] == '\n')
+		{
+			start_line_count += 1;
+			start_col_offset = i;
+		}
+	}
+
+	size_t end_line_count = start_line_count;
+	size_t end_col_offset = start_col_offset;
+	for (auto i = start_pos; i < end_pos; ++i)
+	{
+		if (_source[i] == '\n')
+		{
+			end_line_count += 1;
+			end_col_offset = i;
+		}
+	}
+
+	return {
+		(uint32_t)start_pos, (uint32_t)(end_pos == 0 ? 1 : end_pos - start_pos),
+		(uint32_t)start_line_count, (uint32_t)(start_pos - start_col_offset),
+		(uint32_t)end_line_count, (uint32_t)(end_pos - end_col_offset)
+	};
 }
 
 /******************************************************************************
@@ -69,7 +97,7 @@ instance<> CultLispSyntaxProvider::parse(std::string const& s, instance<lisp::Mo
 	return building;
 }
 
-std::string CultLispSyntaxProvider::source_toString(instance<> syntax, SourceLocation const& sl) const
+std::string_view CultLispSyntaxProvider::source_toString(instance<> syntax, SourceLocation const& sl) const
 {
 	return syntax.asType<CultLispSyntax>()->getSource(sl);
 }
@@ -83,7 +111,7 @@ std::vector<instance<>> CultLispSyntaxProvider::node_children(instance<> syntax_
 	else
 		return{};
 }
-std::string CultLispSyntaxProvider::node_toString(instance<> syntax_node) const
+std::string_view CultLispSyntaxProvider::node_toString(instance<> syntax_node) const
 {
 	return "";
 }

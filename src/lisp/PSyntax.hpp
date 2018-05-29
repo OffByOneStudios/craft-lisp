@@ -43,12 +43,12 @@ namespace lisp
 			uint32_t end_col;
 		};
 
-		CRAFT_LISP_EXPORTED virtual std::string source_toString(instance<> syntax, SourceLocation const&) const = 0;
+		CRAFT_LISP_EXPORTED virtual std::string_view source_toString(instance<> syntax, SourceLocation const&) const = 0;
 
 		CRAFT_LISP_EXPORTED virtual std::vector<instance<>> node_children(instance<> syntax_node) const = 0;
 
 		// Tries to render usable syntax
-		CRAFT_LISP_EXPORTED virtual std::string node_toString(instance<> syntax_node) const = 0;
+		CRAFT_LISP_EXPORTED virtual std::string_view node_toString(instance<> syntax_node) const = 0;
 		// Renders the AST
 		CRAFT_LISP_EXPORTED virtual std::string node_toVerboseString(instance<> syntax_node) const = 0;
 

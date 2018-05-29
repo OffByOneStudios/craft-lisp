@@ -29,6 +29,28 @@ void SCultSemanticNode::validate(ValidationState* vs) const
 	vs->warning(const_cast<SCultSemanticNode*>(this)->craft_featuredInstance().asFeature<SCultSemanticNode>(), "validate-not-implemented");
 }
 
+std::string SCultSemanticNode::sourceLocationToString() const
+{
+	auto sem = SScope::findScope(_parent)->getSemantics();
+	auto source = sem->getSource();
+	std::string res;
+
+	if (source && source.isType<CultLispSyntax>())
+	{
+		auto syntax = source.asType<CultLispSyntax>();
+		auto sourceLoc = syntax->getSourceLocation(_source_start, _source_end);
+
+		if (sourceLoc.length == 1)
+			res = fmt::format("{0}:{1}", sourceLoc.start_line, sourceLoc.start_col);
+		else if (sourceLoc.length > 1)
+			res = fmt::format("{0}:{1} {2}", sourceLoc.start_line, sourceLoc.start_col, sourceLoc.length);
+	}
+	if (res.empty())
+		res = "???";
+
+	return fmt::format("{0}/{1}", sem->getModule()->uri(), res);
+}
+
 /******************************************************************************
 ** Constant
 ******************************************************************************/

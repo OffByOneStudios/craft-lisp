@@ -25,10 +25,9 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED void parse(std::string const& s, PSyntax::ParseOptions const* opts = nullptr);
 
-		// TODO string_view
-		CRAFT_LISP_EXPORTED std::string getSource(PSyntax::SourceLocation const&) const;
+		CRAFT_LISP_EXPORTED std::string_view getSource(PSyntax::SourceLocation const&) const;
 
-		CRAFT_LISP_EXPORTED PSyntax::SourceLocation getSourceLocation(size_t const&) const;
+		CRAFT_LISP_EXPORTED PSyntax::SourceLocation getSourceLocation(size_t const& start_pos, size_t const& end_pos = 0) const;
 	};
 
 
@@ -43,10 +42,10 @@ namespace lisp
 
 		virtual instance<> parse(std::string const& s, instance<lisp::Module> into, ParseOptions const* opts) const override;
 
-		virtual std::string source_toString(instance<> syntax, SourceLocation const&) const override;
+		virtual std::string_view source_toString(instance<> syntax, SourceLocation const&) const override;
 
 		virtual std::vector<instance<>> node_children(instance<> syntax_node) const override;
-		virtual std::string node_toString(instance<> syntax_node) const override;
+		virtual std::string_view node_toString(instance<> syntax_node) const override;
 		virtual std::string node_toVerboseString(instance<> syntax_node) const override;
 
 		virtual SourceLocation node_source(instance<> syntax_node) const override;

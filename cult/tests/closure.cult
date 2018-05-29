@@ -1,2 +1,2 @@
 
-(define test-closure-0 (function (bar) (function () bar)))
+(define test-closure (function (bar) (function () (+ bar bar))))

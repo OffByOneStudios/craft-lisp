@@ -94,7 +94,7 @@ void Resolve::bind()
 {
 	_binding = SScope::findScope(_parent)->lookup_recurse(_symbol);
 	if (!_binding)
-		throw stdext::exception("Resolve {0} bad symbol {1}.", craft_instance(), _symbol->getDisplay());
+		throw stdext::exception("{2}> Resolve {0} bad symbol {1}.", craft_instance(), _symbol->getDisplay(), sourceLocationToString());
 }
 
 /******************************************************************************
@@ -143,7 +143,7 @@ void Assign::bind()
 
 	auto binding = _slot.asType<Resolve>()->getBinding();
 	if (!binding->getSite()->valueAst().isType<Variable>())
-		throw stdext::exception("Error, can only assign slots.");
+		throw stdext::exception("{0}> Error, can only assign slots.", sourceLocationToString());
 }
 
 /******************************************************************************

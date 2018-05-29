@@ -98,7 +98,7 @@ void BindSite::bind()
 			if (binded.hasFeature<SBindable>())
 				binded.getFeature<SBindable>()->attach(craft_instance());
 			else
-				throw stdext::exception("Symbol already defined (target AST {0} does not support attach).", binded);
+				throw stdext::exception("{1}> Symbol already defined (target AST {0} does not support attach).", binded, sourceLocationToString());
 		}
 
 		_boundTo = binding;
@@ -246,7 +246,7 @@ void ScopeManipulation::bind()
 {
 	auto parent_scope = SScope::findScope(_parent);
 	if (!parent_scope.isType<CultSemantics>())
-		throw stdext::exception("Can only import at module scope.");
+		throw stdext::exception("{0}> Can only import at module scope.", sourceLocationToString());
 
 	instance<CultSemantics> sem = (instance<CultSemantics>)parent_scope;
 

@@ -22,7 +22,10 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SCultSemanticNode, "lisp.cult.semantic", types::FactoryAspectManager);
 
 	protected:
+		friend class CultSemantics;
+
 		instance<SCultSemanticNode> _parent;
+		size_t _source_start, _source_end;
 
 	public:
 		struct ast_error : stdext::exception
@@ -84,7 +87,10 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED virtual void validate(ValidationState*) const;
 
+		CRAFT_LISP_EXPORTED std::string sourceLocationToString() const;
+
 	protected:
+
 		inline instance<SCultSemanticNode> _ast(instance<SCultSemanticNode> child)
 		{
 			child->setParent(craft_featuredInstance());
@@ -93,7 +99,11 @@ namespace lisp
 
 		inline static instance<SCultSemanticNode> _clone(instance<SCultSemanticNode> to_clone)
 		{
-			return to_clone.getFeature<types::PClone>()->clone(to_clone);
+			instance<SCultSemanticNode> res = to_clone.getFeature<types::PClone>()->clone(to_clone);
+			res->_source_start = to_clone->_source_start;
+			res->_source_end = to_clone->_source_end;
+
+			return res;
 		}
 
 		inline instance<SCultSemanticNode> _astclone(instance<SCultSemanticNode> to_clone)

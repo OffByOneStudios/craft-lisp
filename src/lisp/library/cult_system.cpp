@@ -290,7 +290,22 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 			invoke.args.push_back(interp->interp_exec(ast->argAst(i)));
 		}
 
-		auto value = interp->interp_call(callee, invoke);
+		instance<> value;
+		try
+		{
+			value = interp->interp_call(callee, invoke);
+		}
+		catch (std::exception const& ex)
+		{
+			// TODO
+			// Poor mans stack trace, theorhetically this should be inside interp call and be sent along with it, and the stack trace should come through stack introspection!
+			std::string callee_name;
+			if (callee.hasFeature<SBindable>())
+			{
+				callee_name = callee.asFeature<SBindable>()->getBinding()->getSymbol()->getDisplay();
+			}
+			throw stdext::exception(ex, "{0} {1}", ast->sourceLocationToString(), callee_name);
+		}
 
 		return value;
 	});
