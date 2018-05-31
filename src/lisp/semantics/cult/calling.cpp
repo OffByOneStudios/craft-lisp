@@ -89,8 +89,33 @@ namespace lisp {
 		virtual types::ExpressionStore expression(instance<> _) const override
 		{
 			instance<Function> fn = _;
+			auto rc = fn->argCount();
+			std::vector<IExpression*> args;
+			for (auto i = 0; i < rc; ++i)
+			{
+				auto a = fn->argAst(i);
+				if (!(a && a.isType<BindSite>())) throw stdext::exception("Malformed Argument");
+				auto val = a.asType<BindSite>()->valueAst();
+				if (!(val && val.isType<Variable>())) throw stdext::exception("Malformed Argument");
 
-			return ExpressionStore();
+				auto var = val.asType<Variable>();
+
+				auto type = var->typeAst();
+				if (!type)
+				{
+					args.push_back(&ExpressionAny::Value);
+				}
+				else
+				{
+					args.push_back(&ExpressionAny::Value);
+				}
+				//a->
+			}
+
+			// TODO Infer or extract return type
+			auto retType = &ExpressionAny::Value;
+
+			return ExpressionStore(new ExpressionArrow(new ExpressionTuple(args), retType));
 		}
 
 		//

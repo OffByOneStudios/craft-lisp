@@ -166,6 +166,22 @@ instance<> InterpreterFrameSection::interp_call(instance<> fn, types::GenericInv
 		{
 			// TODO bindsites manip here instead maybe?
 			// TODO argument AST node?
+			auto a = fnast->argAst(i);
+			if (!(a && a.isType<BindSite>())) throw stdext::exception("Malformed Argument");
+			auto val = a.asType<BindSite>()->valueAst();
+			if (!(val && val.isType<Variable>())) throw stdext::exception("Malformed Argument");
+
+			auto var = val.asType<Variable>();
+
+			auto type = var->typeAst();
+			if (type)
+			{
+				auto lHs = ExpressionConcrete(type.asType<Resolve>()->getConstantValue().asType<Graph::Node>().get());
+				
+				auto rHs = ExpressionConcrete(call.args[i].typeId());
+				if (!types::isSubtype(&lHs, &rHs)) throw stdext::exception("Interpreter asked to execute function with mismatched argument: {0}", i);
+			}
+			
 			*(rtv->getSlot(i)) = call.args[i];
 		}
 

@@ -103,6 +103,17 @@ instance<Binding> Resolve::getBinding() const
 	return _binding;
 }
 
+instance<> Resolve::getConstantValue() const
+{
+	//_binding
+	if (!_binding) throw stdext::exception("Binding is Not Set");
+	//valueAst isType
+	auto s = _binding->getSite()->valueAst();
+
+	if(!s.isType<Constant>()) throw stdext::exception("Binding is Not Constant");
+	return s.asType<Constant>()->getValue();
+}
+
 void Resolve::bind()
 {
 	_binding = SScope::findScope(_parent)->lookup_recurse(_symbol);

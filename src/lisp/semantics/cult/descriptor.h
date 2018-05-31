@@ -78,6 +78,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 		CRAFT_LISP_EXPORTED instance<Binding> getBinding() const;
 
+		CRAFT_LISP_EXPORTED instance<> getConstantValue() const;
+
 		// SCultSemanticNode
 	public:
 		CRAFT_LISP_EXPORTED virtual void bind() override;

@@ -212,7 +212,17 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 			{
 				if (arg_cell.isType<Sexpr>())
 				{
+					auto cells = arg_cell.asType<Sexpr>();
+					if (cells->cells.size() != 2
+						|| !cells->cells[0].isType<Symbol>()
+						|| !cells->cells[1].isType<Symbol>())
+						throw stdext::exception("Malformed Function Arg Definition");
 
+
+					auto symname = library::helper::symbol(cells->cells[0]);
+					if (symname->isKeyword()) throw stdext::exception("Function Extensions not implemented");
+
+					ret->pushArg(instance<BindSite>::make(symname, instance<Variable>::make(instance<>(), rs->read(cells, 1))));
 				}
 				else
 				{
