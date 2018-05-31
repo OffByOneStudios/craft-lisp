@@ -15,7 +15,12 @@ CRAFT_DEFINE(Variable)
 {
 	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<lisp::Variable> that)
 	{
-		return instance<Variable>::make(that->initalizerAst(), that->typeAst());
+		auto initAst = that->initalizerAst();
+		if (initAst) initAst = _clone(initAst);
+		auto typeAst = that->typeAst();
+		if (typeAst) typeAst = _clone(typeAst);
+
+		return instance<Variable>::make(initAst, typeAst);
 	});
 
 	_.use<SCultSemanticNode>().byCasting();
@@ -26,8 +31,16 @@ CRAFT_DEFINE(Variable)
 
 Variable::Variable(instance<SCultSemanticNode> initalizer, instance<SCultSemanticNode> type)
 {
-	if (initalizer) _initalizer = _ast(initalizer);
-	if (type) _type = _ast(type);
+	_initalizer = initalizer;
+	_type = type;
+}
+
+void Variable::craft_setupInstance()
+{
+	Object::craft_setupInstance();
+
+	if (_initalizer) _ast(_initalizer);
+	if (_type) _ast(_type);
 }
 
 instance<SCultSemanticNode> Variable::initalizerAst() const

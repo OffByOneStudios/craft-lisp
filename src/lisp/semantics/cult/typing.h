@@ -106,4 +106,20 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;
 	};
 
+
+	struct GraphNodeLispType final
+	{
+		// is a  `Internal instance TypeDescription*`
+		typedef void* value_type;
+	private:
+		GraphNodeLispType() = delete;
+	public:
+		static constexpr types::GraphMeta::Kind craftTypes_metaKind = types::GraphMeta::Kind::Node; // needed?
+		static constexpr char const* craftTypes_metaNode_name = "cult.type";
+		inline static types::GraphNodeMeta* craftTypes_metaNode_builder(types::Graph::Node* metanode)
+		{
+			return types::GraphNodeMeta::Named(craftTypes_metaNode_name);
+		}
+	};
+
 }}

@@ -29,6 +29,7 @@ namespace lisp
 
 	public:
 		CRAFT_LISP_EXPORTED Variable(instance<SCultSemanticNode> initalizer = instance<>(), instance<SCultSemanticNode> type = instance<>());
+		CRAFT_LISP_EXPORTED void craft_setupInstance();
 
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> initalizerAst() const;
 		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> typeAst() const;

@@ -96,10 +96,18 @@ namespace lisp
 		CRAFT_LISP_EXPORTED void builtin_addMultiMethod(std::string const& symbol_name, types::cpp::Multimethod<types::ExpressionDispatcher>* existing = nullptr);
 		CRAFT_LISP_EXPORTED void builtin_attachMultiMethod(std::string const& symbol_name, std::tuple<types::ExpressionStore, types::Function> impl);
 
+		CRAFT_LISP_EXPORTED void builtin_defineConstant(std::string const& symbol_name, instance<>);
+
 		template<typename T>
 		inline void builtin_implementMultiMethod(std::string const& symbol_name, T fn)
 		{
 			builtin_attachMultiMethod(symbol_name, to_expression_and_function(+fn));
+		}
+
+		template<typename T>
+		inline void builtin_defineType(std::string const& symbol_name)
+		{
+			builtin_defineConstant(symbol_name, instance<types::Graph::Node>::makeFromPointerAndMemoryManager(types::cpptype<T>::typeDesc().asId(), &graph()));
 		}
 
 		CRAFT_LISP_EXPORTED void builtin_eval(std::string const& contents);

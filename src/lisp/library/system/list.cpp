@@ -121,6 +121,8 @@ void core::make_list_globals(instance<Module> ret)
 {
 	auto semantics = ret->require<CultSemantics>();
 
+	semantics->builtin_defineType<List>("List");
+
 	semantics->builtin_implementMultiMethod("list",
 		[](types::VarArgs<instance<>> args) -> instance<List>
 	{

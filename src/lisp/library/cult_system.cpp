@@ -24,6 +24,25 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	ret->builtin_setSemantics(sem);
 
 	//
+	// Core Types
+	//
+	sem->builtin_defineType<int8_t>("Int8");
+	sem->builtin_defineType<int16_t>("Int16");
+	sem->builtin_defineType<int32_t>("Int32");
+	sem->builtin_defineType<int64_t>("Int64");
+
+	sem->builtin_defineType<uint8_t>("UInt8");
+	sem->builtin_defineType<uint16_t>("UInt16");
+	sem->builtin_defineType<uint32_t>("UInt32");
+	sem->builtin_defineType<uint64_t>("UInt64");
+							
+	sem->builtin_defineType<float>("Float32");
+	sem->builtin_defineType<double>("Float64");
+							
+	sem->builtin_defineType<bool>("Bool");
+	sem->builtin_defineType<std::string>("String");
+
+	//
 	// Multimethods
 	//
 	sem->builtin_addMultiMethod("is-subtype");
@@ -141,6 +160,39 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 		auto ret = instance<Loop>::make(rs->read(sexpr, 1), rs->read(sexpr, 2));
 
+		return ret;
+	});
+
+	sem->builtin_addSpecialForm("type");
+	sem->builtin_specialFormReader("type",
+		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
+	{
+		auto ret = instance<TypeDescription>::make();
+		for (auto it = sexpr->cells.begin() + 1; it != sexpr->cells.end(); it++)
+		{
+			auto slot_cell = *it;
+			if (slot_cell.isType<Sexpr>())
+			{
+				auto cells = slot_cell.asType<Sexpr>();
+				if (cells->cells.size() != 2
+					|| !cells->cells[0].isType<Symbol>()
+					|| !cells->cells[1].isType<Symbol>())
+					throw stdext::exception("Malformed Slot Definition");
+
+
+				auto slotname = library::helper::symbol(cells->cells[0]);
+				if (slotname->isKeyword()) throw stdext::exception("Slot Extensions not implemented");
+
+				ret->push(instance<BindSite>::make(slotname, 
+					instance<Variable>::make(instance<>(), rs->read(sexpr, 1))));
+			}
+			else // Untyped Slot
+			{
+				auto symbol = library::helper::symbol(slot_cell);
+				ret->push(instance<BindSite>::make(symbol, instance<Variable>::make()));
+			}
+		}
+		
 		return ret;
 	});
 
@@ -359,6 +411,49 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 			return ast;
 
 		return instance<SubroutineClosure>::make(curSubframe, ast);
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrameSection> interp, instance<TypeDescription> ast) -> instance<>
+	{
+		/*auto curSubframe = interp->top();
+		if (!ast->hasFreeBindings() || curSubframe->getScope().isNull())
+			return ast;
+
+		return instance<SubroutineClosure>::make(curSubframe, ast);*/
+
+		auto typebind = ast->getBinding();
+
+		auto scope = SScope::findScope(typebind->getSite());
+		if (!scope.isType<CultSemantics>()) throw stdext::exception("We don't support dynamic type declaration");
+
+
+		auto module_ = interp->getEntryModule(0);
+		auto uri = module_->uri();
+		auto tname = typebind->getSymbol()->getDisplay();
+		
+		auto tfname = fmt::format("{1}", "", tname);
+		
+		auto graphNode = graph().getByIndex<GraphPropertyTypeName>(&tfname);
+
+		if (graphNode) {
+			//graphNode->
+		}
+		else
+		{
+			/*for(auto i = 0; i < ast->statementCount(); i++)
+			{
+				auto variable = ast->statementAst(i).asType<Variable>();
+				auto vtype = variable->typeAst();
+
+			}*/
+			// Success
+			auto node = graph().add<GraphNodeLispType>(ast.asInternalPointer());
+			graph().add<GraphPropertyTypeName>(node, new std::string(tfname));
+			//graph().add<GraphPropertyBuiltinModuleUri>(node, new std::string(uri));
+			//graph().add
+		}
+
+		return ast;
 	});
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrameSection> interp, instance<> ast) -> instance<>

@@ -27,6 +27,8 @@ namespace lisp
 		instance<SCultSemanticNode> _parent;
 		size_t _source_start, _source_end;
 
+
+		CRAFT_LISP_EXPORTED SCultSemanticNode();
 	public:
 		struct ast_error : stdext::exception
 		{
@@ -96,10 +98,12 @@ namespace lisp
 			child->setParent(craft_featuredInstance());
 			return child;
 		}
-
+		
 		inline static instance<SCultSemanticNode> _clone(instance<SCultSemanticNode> to_clone)
 		{
+			assert(to_clone);
 			instance<SCultSemanticNode> res = to_clone.getFeature<types::PClone>()->clone(to_clone);
+			
 			res->_source_start = to_clone->_source_start;
 			res->_source_end = to_clone->_source_end;
 

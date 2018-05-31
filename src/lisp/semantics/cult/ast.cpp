@@ -9,6 +9,12 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(craft::lisp::SCultSemanticNode) { _.defaults(); }
 
+SCultSemanticNode::SCultSemanticNode()
+{
+	_source_end = 0;
+	_source_start = 0;
+}
+
 instance<SCultSemanticNode> SCultSemanticNode::getParent() const
 {
 	return _parent;

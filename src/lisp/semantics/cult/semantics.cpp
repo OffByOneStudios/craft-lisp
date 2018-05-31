@@ -336,6 +336,13 @@ void CultSemantics::builtin_attachMultiMethod(std::string const& symbol_name, st
 	_ast.push_back(_astbind(bindsite));
 }
 
+void CultSemantics::builtin_defineConstant(std::string const& symbol_name, instance<> constantValue)
+{
+	auto symbol = Symbol::makeSymbol(symbol_name);
+	auto bindsite = instance<BindSite>::make(symbol, instance<Constant>::make(constantValue));
+	_ast.push_back(_astbind(bindsite));
+}
+
 void CultSemantics::builtin_eval(std::string const& contents)
 {
 

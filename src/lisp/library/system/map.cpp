@@ -119,6 +119,8 @@ void core::make_map_globals(instance<Module> ret)
 {
 	auto semantics = ret->require<CultSemantics>();
 
+	semantics->builtin_defineType<Map>("Map");
+
 	semantics->builtin_implementMultiMethod("map",
 		[](types::VarArgs<instance<>> args) -> instance<Map>
 	{
