@@ -194,7 +194,7 @@ void core::make_list_globals(instance<Module> ret)
 	});
 
 	semantics->builtin_implementMultiMethod("list/fmap",
-		[](instance<List> a, instance<Function> b) -> instance<List>
+		[](instance<List> a, instance<PSubroutine> b) -> instance<List>
 	{
 		auto res = instance<List>::make();
 
@@ -202,29 +202,7 @@ void core::make_list_globals(instance<Module> ret)
 
 		for (auto& i : a->data())
 		{
-			Execution::exec(b, { i, count });
-			(*count)++;
-		}
-
-		return res;
-	});
-
-	semantics->builtin_implementMultiMethod("list/fmap",
-		[](instance<List> a, instance<Function> b) -> instance<List>
-	{
-		auto res = instance<List>::make();
-
-		auto count = instance<int64_t>::make(0);
-
-		for (auto& i : a->data())
-		{
-			auto isIn = Execution::exec(b, { i, count });
-			if (isIn.typeId().isType<bool>())
-			{
-				bool f = *isIn.asType<bool>();
-				if (f) res->push(i);
-			}
-			else if (isIn)  res->push(i);
+			b->execute(b, { i, count });
 			(*count)++;
 		}
 

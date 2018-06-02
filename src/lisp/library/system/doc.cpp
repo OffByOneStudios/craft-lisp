@@ -19,12 +19,12 @@ void core::make_doc_globals(instance<Module> ret)
 	auto semantics = ret->require<CultSemantics>();
 
 
-	semantics->builtin_addSpecialForm("doc");
+	/*semantics->builtin_addSpecialForm("doc");
 	semantics->builtin_specialFormReader("doc",
 		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
 		
-	});
+	});*/
 
 	//lMM("doc", [](instance<Symbol> s, instance<std::string> kval) {
 	//	auto val = s->trimKeyword();
