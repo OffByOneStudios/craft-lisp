@@ -81,8 +81,8 @@ instance<Module> BuiltinModuleDescription::build(instance<Namespace> ns, instanc
 	return _builder(ns, loader);
 }
 
-CRAFT_INIT_PRIORITY BuiltinModuleDescription craft::lisp::BuiltinCultSystem("cult.system", library::make_module_builtin_cult_system);
-CRAFT_INIT_PRIORITY BuiltinModuleDescription craft::lisp::BuiltinCultCore("cult.core", library::make_module_builtin_cult_core);
+CRAFT_INIT_PRIORITY BuiltinModuleDescription craft::lisp::BuiltinCultSystem("cult/system", library::make_module_builtin_cult_system);
+CRAFT_INIT_PRIORITY BuiltinModuleDescription craft::lisp::BuiltinCultCore("cult/core", library::make_module_builtin_cult_core);
 
 
 CRAFT_DEFINE(FileLoader)

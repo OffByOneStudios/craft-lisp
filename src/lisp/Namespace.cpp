@@ -42,8 +42,8 @@ void Namespace::craft_setupInstance()
 	instance<Execution> exec = instance<Execution>::make(craft_instance());
 	exec->makeCurrent();
 
-	requireModule(instance<>(), "builtin:cult.system")->initialize();
-	requireModule(instance<>(), "builtin:cult.core")->initialize();
+	requireModule(instance<>(), "builtin:cult/system")->initialize();
+	requireModule(instance<>(), "builtin:cult/core")->initialize();
 }
 
 instance<Environment> Namespace::getEnvironment() const
