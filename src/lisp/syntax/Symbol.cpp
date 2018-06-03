@@ -58,6 +58,12 @@ std::string Symbol::getDisplay() const
 	return res;
 }
 
+instance<Symbol> Symbol::makeSymbol(std::vector<uint32_t> const& s)
+{
+	auto nsym = instance<Symbol>::makeThroughLambda([](auto p) { return new (p) Symbol(); });
+	nsym->_symbolseq = s;
+	return nsym;
+}
 
 instance<Symbol> Symbol::makeSymbol(std::string const& s)
 {

@@ -54,6 +54,7 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED std::string getDisplay() const;
 
+		static CRAFT_LISP_EXPORTED instance<Symbol> makeSymbol(std::vector<uint32_t> const&);
 		static CRAFT_LISP_EXPORTED instance<Symbol> makeSymbol(std::string const&);
 
 		CRAFT_LISP_EXPORTED instance<Symbol> trimKeyword() const;

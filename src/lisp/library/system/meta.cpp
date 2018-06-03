@@ -26,6 +26,22 @@ void core::make_meta_globals(instance<Module> ret)
 		return instance<types::Graph::Node>::makeFromPointerAndMemoryManager(graph().getByIndex<GraphPropertyCppName>(s->c_str()), &graph());
 	});
 
+	semantics->builtin_implementMultiMethod("new",
+		[](instance<types::Graph::Node> type, types::VarArgs<instance<>> args)
+	{
+		if (type->getInterface()->name == std::string("cult.type"))
+		{
+			auto slotcount = graph().getFirstPropValue<GraphPropertyCppSize>(type.get()) / 8;
+			auto res = instance<RuntimeSlots>::make(instance<>(), slotcount);
+			auto header = (types::InstanceHeader*)res.asInternalPointer();
+			header->typeId = type.get();
+
+			return res;
+		}
+		// TODO Use PConstructor
+		throw stdext::exception("Branch Not Implemented, {0}", (types::TypeId)type.get());
+	});
+
 	semantics->builtin_implementMultiMethod("dump",
 		[](instance<types::Graph::Node> s) -> instance<std::string>
 	{

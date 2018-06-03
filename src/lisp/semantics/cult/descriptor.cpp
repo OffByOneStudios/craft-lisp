@@ -87,11 +87,50 @@ Resolve::Resolve(instance<Symbol> symbol, Mode mode)
 {
 	_symbol = symbol;
 	_mode = mode;
+
+	assert(!symbol->isKeyword());
+
+	// '/' and '@' are one "resolution" from resolve's perspective
+	// '.' and ':' (non-keyword) seperate resolutions
+	auto size = symbol->size();
+	std::vector<uint32_t> parts;
+	for (auto i = 0; i < size; ++i)
+	{
+		auto sym = symbol->at(i);
+		if (Symbol::isPath(sym) &&
+			Symbol::toChar(sym) == '.' || Symbol::toChar(sym) == ':')
+		{
+			_chain.push_back(Symbol::makeSymbol(parts));
+			_ops.push_back(sym);
+			parts.clear();
+		}
+		else
+		{
+			parts.push_back(sym);
+		}
+	}
+	_chain.push_back(Symbol::makeSymbol(parts));
+
+	assert(_chain.size() > 0);
 }
 
 bool Resolve::isGetter()
 {
 	return _mode == Mode::ResolveAndGet;
+}
+
+size_t Resolve::size() const
+{
+	return _chain.size();
+}
+
+instance<Symbol> Resolve::at(size_t at) const
+{
+	return _chain.at(at);
+}
+uint32_t Resolve::op(size_t at) const
+{
+	return _ops.at(at);
 }
 
 instance<Symbol> Resolve::getSymbol() const
@@ -116,9 +155,9 @@ instance<> Resolve::getConstantValue() const
 
 void Resolve::bind()
 {
-	_binding = SScope::findScope(_parent)->lookup_recurse(_symbol);
+	_binding = SScope::findScope(_parent)->lookup_recurse(_chain[0]);
 	if (!_binding)
-		throw stdext::exception("{2}> Resolve {0} bad symbol {1}.", craft_instance(), _symbol->getDisplay(), sourceLocationToString());
+		throw stdext::exception("{2}> Resolve {0} bad symbol {1}.", craft_instance(), _chain[0]->getDisplay(), sourceLocationToString());
 }
 
 /******************************************************************************
@@ -164,10 +203,6 @@ void Assign::bind()
 {
 	_slot->bind();
 	_value->bind();
-
-	auto binding = _slot.asType<Resolve>()->getBinding();
-	if (!binding->getSite()->valueAst().isType<Variable>())
-		throw stdext::exception("{0}> Error, can only assign slots.", sourceLocationToString());
 }
 
 /******************************************************************************

@@ -45,11 +45,11 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::RuntimeSlotReference);
 	private:
-		instance<RuntimeSlots> _slots;
+		instance<> _slots;
 		size_t _index;
 
 	public:
-		CRAFT_LISP_EXPORTED RuntimeSlotReference(instance<RuntimeSlots> slots, size_t index);
+		CRAFT_LISP_EXPORTED RuntimeSlotReference(instance<> slots, size_t index);
 
 		CRAFT_LISP_EXPORTED instance<> getValue();
 		CRAFT_LISP_EXPORTED void setValue(instance<> value);

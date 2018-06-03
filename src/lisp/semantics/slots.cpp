@@ -57,21 +57,21 @@ void RuntimeSlots::extend(size_t resize)
 
 size_t RuntimeSlots::getSize(instance<>* inst)
 {
-	return inst->asType<RuntimeSlots>()->getSize();
+	return ((RuntimeSlots*)inst->get())->getSize();
 }
 instance<>* RuntimeSlots::getSlot(instance<>* inst, size_t index)
 {
-	return inst->asType<RuntimeSlots>()->getSlot(index);
+	return ((RuntimeSlots*)inst->get())->getSlot(index);
 }
 
 instance<> RuntimeSlots::getLastSlot(instance<>* inst)
 {
-	return inst->asType<RuntimeSlots>()->getLastSlot();
+	return ((RuntimeSlots*)inst->get())->getLastSlot();
 }
 
 void RuntimeSlots::extend(instance<>* inst, size_t size)
 {
-	inst->asType<RuntimeSlots>()->extend(size);
+	((RuntimeSlots*)inst->get())->extend(size);
 }
 
 /******************************************************************************
@@ -83,7 +83,7 @@ CRAFT_DEFINE(RuntimeSlotReference)
 	_.defaults();
 }
 
-RuntimeSlotReference::RuntimeSlotReference(instance<RuntimeSlots> slots, size_t index)
+RuntimeSlotReference::RuntimeSlotReference(instance<> slots, size_t index)
 {
 	_slots = slots;
 	_index = index;
@@ -91,9 +91,9 @@ RuntimeSlotReference::RuntimeSlotReference(instance<RuntimeSlots> slots, size_t 
 
 instance<> RuntimeSlotReference::getValue()
 {
-	return *_slots->getSlot((instance<>*)(&_slots), _index);
+	return *RuntimeSlots::getSlot(&_slots, _index);
 }
 void RuntimeSlotReference::setValue(instance<> value)
 {
-	*_slots->getSlot((instance<>*)(&_slots), _index) = value;
+	*RuntimeSlots::getSlot(&_slots, _index) = value;
 }

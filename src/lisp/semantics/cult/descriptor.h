@@ -68,12 +68,19 @@ namespace lisp
 		instance<Symbol> _symbol;
 		Mode _mode;
 
+		std::vector<instance<Symbol>> _chain;
+		std::vector<uint32_t> _ops;
 		instance<Binding> _binding;
 
 	public:
 		CRAFT_LISP_EXPORTED Resolve(instance<Symbol> binding, Mode mode = Mode::ResolveOnly);
 
 		CRAFT_LISP_EXPORTED bool isGetter();
+
+		// Size of symbols
+		CRAFT_LISP_EXPORTED size_t size() const;
+		CRAFT_LISP_EXPORTED instance<Symbol> at(size_t) const;
+		CRAFT_LISP_EXPORTED uint32_t op(size_t) const;
 
 		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 		CRAFT_LISP_EXPORTED instance<Binding> getBinding() const;

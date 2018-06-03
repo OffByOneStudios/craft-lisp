@@ -291,7 +291,28 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrameSection> interp, instance<Resolve> ast) -> instance<>
 	{
-		auto slot = interp->slot(ast->getBinding());
+		auto s0 = interp->slot(ast->getBinding());
+
+		// TODO use ops...
+		auto slot = s0;
+		instance<Symbol> lastSym = ast->at(0);
+		for (size_t i = 1; i < ast->size(); ++i)
+		{
+			auto sym = ast->at(i);
+			auto sv = slot->getValue();
+
+			if (!sv) throw stdext::exception("Null slot value `{0}` (for `{1}`).", lastSym->getDisplay(), ast->getSymbol()->getDisplay());
+			if (sv.typeId().node->getInterface()->name == std::string("cult.type"))
+			{
+				auto typeAst = instance<TypeDescription>::fromInternalPointer(sv.typeId().node->value);
+				auto bnext = typeAst->lookup(sym);
+				if (!bnext) throw stdext::exception("Slot `{0}` does not exist (for `{1}`).", sym->getDisplay(), ast->getSymbol()->getDisplay());
+				
+				slot = instance<RuntimeSlotReference>::make(sv, bnext->getIndex());
+			}
+
+			lastSym = sym;
+		}
 
 		if (ast->isGetter())
 		{
@@ -307,7 +328,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		auto destination = interp->interp_exec(ast->slotAst());
 
 		if (!destination.typeId().isType<RuntimeSlotReference>())
-			throw stdext::exception("Slot AST failed....");
+			throw stdext::exception("Can't assign to non-slot (`{0}`).", destination);
 
 		auto value = interp->interp_exec(ast->valueAst());
 
@@ -457,13 +478,14 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 
 			}*/
 			// Success
-			auto node = graph().add<GraphNodeLispType>(ast.asInternalPointer());
-			graph().add<GraphPropertyTypeName>(node, new std::string(tfname));
+			graphNode = graph().add<GraphNodeLispType>(ast.asInternalPointer());
+			graph().add<GraphPropertyTypeName>(graphNode, new std::string(tfname));
+			graph().add<GraphPropertyCppSize>(graphNode, 8 * ast->getSlotCount());
 			//graph().add<GraphPropertyBuiltinModuleUri>(node, new std::string(uri));
 			//graph().add
 		}
 
-		return ast;
+		return instance<Graph::Node>::makeFromPointerAndMemoryManager(graphNode, &graph());
 	});
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrameSection> interp, instance<> ast) -> instance<>
