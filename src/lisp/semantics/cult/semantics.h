@@ -154,7 +154,7 @@ namespace lisp
 
 		virtual instance<> read(instance<lisp::Module> module, ReadOptions const* opts) const override;
 
-		virtual instance<> lookup(instance<> semantics, std::string const&) const override;
+		virtual instance<> lookup(instance<> semantics, instance<Symbol>) const override;
 	};
 
 	/******************************************************************************

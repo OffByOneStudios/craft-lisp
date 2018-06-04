@@ -41,12 +41,7 @@ int main(int argc, char** argv)
 			auto live_module = ns->requireModule(instance<>(), fmt::format("file:{0}", f));
 			live_module->initialize();
 		}
-		catch (stdext::exception e)
-		{
-			global_env->log()->error(e.what());
-			return -1;
-		}
-		catch (std::exception e)
+		catch (std::exception const& e)
 		{
 			global_env->log()->error(e.what());
 			return -1;
@@ -67,17 +62,17 @@ int main(int argc, char** argv)
 			{
 				break;
 			}
-			catch (features::ReplParseException e)
+			catch (features::ReplParseException const& e)
 			{
 				std::cout << "Parse Error: " << e.what() << "\n";
 			}
-			catch (stdext::exception e)
+			catch (std::exception const& e)
 			{
 				std::cout << e.what() << "\n";
 			}
-			catch (std::exception e)
+			catch (...)
 			{
-				std::cout << "Unhandled Internal Exception: " << e.what() << "\n";
+				std::cout << "Unhandled Internal Exception... " << "\n";
 			}
 		}
 	}

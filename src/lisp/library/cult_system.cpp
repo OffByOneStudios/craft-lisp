@@ -494,10 +494,9 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	});
 
 	//
-	// Semantics - Llvm
+	// Semantics - compilers
 	//
-	// TODO, make this a multimethod
-
+	sem->builtin_addMultiMethod("compile");
 
 	//
 	// Validate, set state

@@ -35,6 +35,11 @@ namespace lisp
 		// This is an expensive last resort symbol lookup, you must understand the semantics to get more out of this
 		// Should try to provide instances with the following features if possible:
 		// * SGenericSubroutine
-		CRAFT_LISP_EXPORTED virtual instance<> lookup(instance<> semantics, std::string const&) const = 0;
+		CRAFT_LISP_EXPORTED virtual instance<> lookup(instance<> semantics, instance<Symbol>) const = 0;
+
+		inline instance<> lookup(instance<> semantics, std::string const& s) const
+		{
+			return lookup(semantics, Symbol::makeSymbol(s));
+		}
 	};
 }}

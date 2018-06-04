@@ -121,8 +121,9 @@ CRAFT_DEFINE(Binding)
 	_.defaults();
 }
 
-Binding::Binding(instance<SScope> scope, instance<Symbol> symbol, instance<BindSite> site)
+Binding::Binding(instance<SScope> scope, instance<Symbol> symbol, size_t index, instance<BindSite> site)
 {
+	_index = index;
 	_scope = scope;
 	_symbol = symbol;
 	_site = site;
@@ -146,11 +147,6 @@ instance<Symbol> Binding::getSymbol() const
 instance<BindSite> Binding::getSite() const
 {
 	return _site;
-}
-
-void Binding::setIndex(size_t i)
-{
-	_index = i;
 }
 
 void Binding::addMeta(std::string metaKey, instance<> value)

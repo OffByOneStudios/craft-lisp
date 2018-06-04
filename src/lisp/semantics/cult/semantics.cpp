@@ -289,11 +289,11 @@ instance<> CultSemanticsProvider::read(instance<lisp::Module> into, ReadOptions 
 	return building;
 }
 
-instance<> CultSemanticsProvider::lookup(instance<> semantics_, std::string const& s) const
+instance<> CultSemanticsProvider::lookup(instance<> semantics_, instance<Symbol> sym) const
 {
 	instance<CultSemantics> semantics = semantics_;
 
-	return semantics->lookup(Symbol::makeSymbol(s))->getSite()->valueAst();
+	return semantics->lookup(sym)->getSite()->valueAst();
 }
 
 /******************************************************************************

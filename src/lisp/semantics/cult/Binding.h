@@ -71,14 +71,12 @@ namespace lisp
 		std::map<std::string, instance<>> _meta;
 
 	public:
-		CRAFT_LISP_EXPORTED Binding(instance<SScope>, instance<Symbol>, instance<BindSite>);
+		CRAFT_LISP_EXPORTED Binding(instance<SScope>, instance<Symbol>, size_t index, instance<BindSite>);
 
 		CRAFT_LISP_EXPORTED size_t getIndex() const;
 		CRAFT_LISP_EXPORTED instance<SScope> getScope() const;
 		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 		CRAFT_LISP_EXPORTED instance<BindSite> getSite() const;
-
-		CRAFT_LISP_EXPORTED void setIndex(size_t);
 
 		CRAFT_LISP_EXPORTED instance<> getMeta(std::string metaKey, types::TypeId type = types::None) const;
 		CRAFT_LISP_EXPORTED void addMeta(std::string metaKey, instance<>);
@@ -163,39 +161,15 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_LEGACY_FEATURE_DECLARE(craft::lisp::SScope, "lisp.scope", types::FactoryAspectManager);
 
 	protected:
-		struct _SimpleSymbolTableBindings
-		{
-			std::map<size_t, size_t> table;
-			std::vector<instance<Binding>> bindings;
-		};
+		typedef SymbolTableIndexed<instance<Binding>> _SimpleSymbolTableBindings;
 
 		static inline instance<Binding> _simple_lookup(_SimpleSymbolTableBindings const& ref, instance<Symbol> symbol)
 		{
-			if (!symbol->isSimple())
-				return instance<>();
-
-			auto it = ref.table.find(symbol->at(0));
-			if (it == ref.table.end())
-				return instance<>();
-			return ref.bindings[it->second];
+			return ref.lookup(symbol);
 		}
-		static inline instance<Binding> _simple_define(instance<> _this, _SimpleSymbolTableBindings& ref, instance<Symbol> symbol, instance<BindSite> ast)
+		static inline instance<Binding> _simple_define(instance<SScope> this_, _SimpleSymbolTableBindings& ref, instance<Symbol> symbol, instance<BindSite> bindsite)
 		{
-			if (!symbol->isSimple())
-				throw stdext::exception("Symbol is not simple.");
-
-			auto key = symbol->at(0);
-			auto lb = ref.table.lower_bound(key);
-
-			if (lb != ref.table.end() && !(ref.table.key_comp()(key, lb->first)))
-				throw stdext::exception("Symbol already defined.");
-
-			auto res = instance<Binding>::make(_this, symbol, ast);
-			ref.bindings.push_back(res);
-			auto index = ref.bindings.size() - 1;
-			res->setIndex(index);
-			ref.table.insert(lb, { key, index });
-			return res;
+			return ref.define(symbol, [&](size_t index) { return instance<Binding>::make(this_, symbol, index, bindsite); });
 		}
 
 	public:

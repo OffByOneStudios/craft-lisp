@@ -1,11 +1,11 @@
 #pragma once
 #include "lisp/common.h"
 #include "lisp/lisp.h"
-#include "lisp/syntax/syntax.h"
 
 namespace craft {
 namespace lisp
 {
+	// TODO move to root
 	class Symbol
 		: public virtual craft::types::Object
 	{
@@ -97,5 +97,44 @@ namespace lisp
 		bool operator <=(Symbol const& other) { return this->operator<(other) || this->operator==(other); }
 		bool operator !=(Symbol const& other) { return !this->operator==(other); }
 		bool operator >=(Symbol const& other) { return !this->operator<(other) || this->operator==(other); }
+	};
+
+	// TODO move to a new file:
+	template <typename T>
+	struct SymbolTableIndexed
+	{
+		std::map<size_t, size_t> table;
+		std::vector<T> bindings;
+
+		inline T lookup(instance<Symbol> symbol) const
+		{
+			if (!symbol->isSimple())
+				return T();
+
+			auto it = table.find(symbol->at(0));
+			if (it == table.end())
+				return T();
+			return bindings[it->second];
+		}
+		template <class F>
+		inline T define(instance<Symbol> symbol, F&& builder)
+		{
+			if (!symbol->isSimple())
+				throw stdext::exception("Symbol is not simple.");
+
+			auto key = symbol->at(0);
+			auto lb = table.lower_bound(key);
+
+			if (lb != table.end() && !(table.key_comp()(key, lb->first)))
+				throw stdext::exception("Symbol already defined.");
+
+			size_t index = bindings.size();
+			T res = builder(index);
+
+			bindings.push_back(res);
+			table.insert(lb, { key, index });
+
+			return res;
+		}
 	};
 }}

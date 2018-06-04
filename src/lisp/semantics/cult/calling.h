@@ -81,6 +81,8 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED bool hasFreeBindings() const;
 
+		CRAFT_LISP_EXPORTED types::ExpressionStore subroutine_signature() const;
+
 		// SCultSemanticNode
 	public:
 		CRAFT_LISP_EXPORTED virtual void bind() override;
