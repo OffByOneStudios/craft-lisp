@@ -36,6 +36,13 @@ Mix lispier julia with more c++.
       * Improved performance when known.
       * Improved safety using assertions.
       * Improved power in dispatch when.
+  * Effects:
+    * Options:
+      * [Koka](https://koka-lang.github.io/koka/doc/kokaspec.html)
+    * Benefits:
+      * Improved performance when known.
+      * Improved safety using assertions.
+      * Improved functional analysis.
 
 ### Limitations
 
