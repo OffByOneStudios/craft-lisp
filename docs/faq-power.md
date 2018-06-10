@@ -1,5 +1,84 @@
 This faq aims to answer questions along the lines of "how do I solve X problem (commonly solved with Y)". The majority of the answers are going to be multimethods and type hints.
 
+#### Q: How can a type describe a required/expected set of behaviours (traits)?
+
+Define an explicit feature:
+
+```
+(cult/def-feature IExample
+    :explicit ; default
+    
+    ; The I short hand stands for both implementing type and self
+    ; TODO: I0 for zeroeth? or perhaps _0 or #0 or $0
+    (foo (I@IExample String))
+    ; The difference between (implementation implementation) dispatch and (implementation interface) dispatch
+    (bar (I IExample))
+)
+
+; -- Implement directly
+(cult/def-type Implementation
+    (:inherit IExample)
+    
+    ; if directly inhereted, it must be implemented before the type macro finishes
+    ; these will override multi methods
+    (:implement IExample
+        (foo (Implementation String) ...)
+        (bar (Implementation IExample) ...)
+    )
+    
+    ...
+)
+    
+; -- Implement out of band
+; these will override multi methods
+(cult/implement IExample Implementation
+    (foo (Implementation String) ...)
+    (bar (Implementation IExample) ...)
+)
+```
+
+#### Q: How can a type describe an existential set of behaviours (interfaces)?
+
+Define an implicit feature:
+
+```
+(cult/def-feature IExample
+    :implicit
+    
+    (foo (I@IExample String))
+    (bar (I IExample))
+    (zop ((Type I)))
+)
+
+; -- Implement directly (see previous)
+; -- Implement out of band (see previous)
+; -- Implement implictly
+(def-method foo ((a Implementation) (b String)) ...)
+(def-method bar ((a Implementation) (b IExample)) ...)
+(def-method zop ((_ (Type Implementation))) ...)
+; now it's implemented...
+```
+
+
+#### Q: How can a type provide behaviours?
+
+Define an abstract type and attach behaviours to it:
+
+```
+(cult/def-abstract AnExample)
+
+(def-method foo (AnExample String) ...)
+(def-method bar (AnExample IExample) ...)
+
+; If IExample was implicit, the below is enough to add the implementation
+; if it was explicit then AnExample would have to have inherited IExample (and hence it's interface constraints)
+(cult/attach Thing AnExample)
+; In the case of types does the following:
+;(cult/proclaim SomeClass (cult/append is-a EffectedClasses))
+;(cult/proclaim SomeClass (cult/prepend dispatch-order EffectedClasses))
+```
+
+
 #### Q: How can a concrete type inherit from more than one type (multiple inheritance)?
 
 Inherit from each type. This does three things:
@@ -14,11 +93,12 @@ Inherit from each type. This does three things:
     * Abstract types are a no-op because they are just implementations.
 
 ```
-; With a type declaration
-(def-type Example
+; -- With a type declaration
+(cult/def-type Example
     (:inherit AlphaClass BetaClass)
     
-    ...)
+    ...
+)
 ```
 
 #### Q: How can a type dispatch as more than one type (multiple inheritance)?
@@ -26,16 +106,17 @@ Inherit from each type. This does three things:
 Subtype from both types.
 
 ```
-; Out of line
-(proclaim Example (set is-a [HierarchyAlphaClass HierarchyBetaClass]))
-(proclaim Example (set dispatch-order [HierarchyAlphaClass HierarchyBetaClass])) ; must be set separately here
+; -- Out of line
+(cult/proclaim Example (cult/set is-a [HierarchyAlphaClass HierarchyBetaClass]))
+(cult/proclaim Example (cult/set dispatch-order [HierarchyAlphaClass HierarchyBetaClass])) ; must be set separately here
 
 
-; With a type declaration
+; -- With a type declaration
 (cult/def-type Example
     (:is-a AlphaClass BetaClass) ; sets dispatch-order for convenience, unless set separately
     
-    ...)
+    ...
+)
 ```
 
 * This will perform consistency checks: features will ensure the type implements them correctly, concretes will ensure the type has the correct structure (or that it has been entirely erased as necessary for the type ????? field reference overrides, function implementation overrides), abstracts don't have any checks, etc.
@@ -58,7 +139,7 @@ Refactor the involved types so the is-a dispatch list is correct if possible/pre
     ; The implementation should elide this call entirely as a dispatch hint.
     (super@ambiguous (BetaClass)))
 
-; Helper macro:
+; -- Helper macro:
 (cult/override ambiguous (DiamondishRoot) (BetaClass))
 ```
 
@@ -69,11 +150,11 @@ If you find yourself doing this more than once for a given type (or for multiple
 Avoid using this, it may seriously compromise dispatch (sanity, performance, safety), however:
 
 ```
-(def-method foo:my-implementation (...) ...) ; named implementations help
+(cult/def-method foo:my-implementation (...) ...) ; named implementations help
 
-(define -other-foo-implementation (dispatch foo (...)))
+(cult/define -other-foo-implementation (dispatch foo (...)))
 
-(proclaim foo (insert-before methods foo:my-implementation -other-foo-implementation))
+(cult/proclaim foo (insert-before methods foo:my-implementation -other-foo-implementation))
 ```
 
 In most cases this will probably be ignored anyway due types determining their dispatch order.
@@ -85,7 +166,7 @@ Use a custom multi-method executor object:
 
 ```
 ; This is a representation of the `cult/clos-executor`
-(define my-mm-executor
+(cult/define my-mm-executor
     (cult/executor ; this is a macro to help write executors
         (dispatch :around :virtual :covariant (:wrapping
                 (dispatch :before :all :covariant)
@@ -94,7 +175,7 @@ Use a custom multi-method executor object:
         ))
 ))
 
-(def-multi foo
+(cult/def-multi foo
     ; defaults to `cult/simple-executor` which just does a (dispatch :virtual :covariant)
     (:executor my-mm-executor)
     
@@ -107,13 +188,12 @@ Use a custom multi-method executor object:
 Define an abstract type to dispatch off of, and add it to the relevant types. Create a generic method disaptching to that abstract type and attach it to the relevant multi-methods.
 
 ```
-(def-abstract EffectedClasses)
-(proclaim SomeClass (append is-a EffectedClasses))
-(proclaim SomeClass (prepend dispatch-order EffectedClasses))
+(cult/def-abstract EffectedClasses)
+(cult/attach SomeClass EffectedClasses)
 
 ; if we only wanted to modify a single method, a normal `def-method` would suffice.
-(define -my-magic-method
-    (method
+(cult/define -my-magic-method
+    (cult/method
         (:type-vars B V)
         (:signature (a EffectedClasses) (b B) (args V :var-args))
         (:stage :before)
@@ -122,8 +202,8 @@ Define an abstract type to dispatch off of, and add it to the relevant types. Cr
             ...
         )
     ))
-(proclaim foo (insert-sorted methods -my-magic-method))
-(proclaim bar (insert-sorted methods -my-magic-method))
+(cult/proclaim foo (cult/insert-sorted methods -my-magic-method))
+(cult/proclaim bar (cult/insert-sorted methods -my-magic-method))
 
 ```
 
