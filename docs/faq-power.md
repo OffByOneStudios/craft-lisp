@@ -1,5 +1,46 @@
 This faq aims to answer questions along the lines of "how do I solve X problem (commonly solved with Y)". The majority of the answers are going to be multimethods and type hints.
 
+#### Q: How can a new type alias another type (typedef)?
+
+Use a define to alias a type at the symbol type.
+
+```
+(define NewType OldType)
+
+(define NewType (Union OldTypeA OldTypeB))
+
+(define NewType (GenericType TypeA))
+```
+
+#### Q: How can a new type alias another type with small modifications (inheritence)?
+
+Inherit the type, and override as required.
+
+```
+(cult/def-type NewType
+    (:inherit OldType)
+    
+    ...
+)
+```
+
+#### Q: How can a new type alias another type and control access entirely (composite)?
+
+Composite the type and forward as necessary (use forwarding features).
+
+```
+(cult/def-type NewType
+    (wrapped OldType)
+    
+    ; -- Implement directly
+    (:implement IFoo (:forward wrapped))
+    ...
+)
+
+; -- Implement out of band
+(:implement IBar NewType (:forward wrapped))
+```
+
 #### Q: How can a type describe a required/expected set of behaviours (traits)?
 
 Define an explicit feature:
