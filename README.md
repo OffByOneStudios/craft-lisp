@@ -1,2 +1,2 @@
-# CraftLisp
-A lisp that uses the craf type system. It's a present for Mason.
+# Cult
+A lisp that uses the craft type system.
