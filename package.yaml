@@ -1,6 +1,6 @@
 id: Lisp
-namespace: OffByOneStudios
-name: Speech Problems
+namespace: Cultlang
+name: Cult Semantics
 version: "1.0.0"
 repo: http://github.com/OffByOneStudios/craft-lisp
 entry-name: cult
