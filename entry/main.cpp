@@ -4,14 +4,13 @@
 #include <stack>
 #include <queue>
 
-#include "replxx/replxx.hxx"
+#include "replxx.hxx"
 #include "lisp/semantics/cult/cult.h"
 #include "lisp/library/system/prelude.h"
 #include "lisp/features/repl.h"
 
 using namespace craft;
 using namespace craft::lisp;
-
 
 
 int main(int argc, char** argv)
@@ -50,7 +49,7 @@ int main(int argc, char** argv)
 	else
 	{
 		features::LispRepl r;
-
+		
 		while (true)
 		{
 			try

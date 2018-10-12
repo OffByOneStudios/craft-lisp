@@ -3,7 +3,7 @@
 #include "lisp/lisp.h"
 
 
-#include "replxx/replxx.hxx"
+#include "replxx.hxx"
 
 namespace craft{
 namespace lisp {

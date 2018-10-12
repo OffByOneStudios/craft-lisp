@@ -13,6 +13,10 @@ using namespace craft::lisp::library::helper;
 #define bMM semantics->builtin_implementMultiMethod
 #define st "string"
 
+#ifndef ssize_t
+#define ssize_t int64_t
+#endif
+
 typedef instance<std::string> t_str;
 
 void core::make_string_globals(instance<Module> ret)

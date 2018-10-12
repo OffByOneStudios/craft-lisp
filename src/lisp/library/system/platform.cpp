@@ -16,7 +16,7 @@ void core::make_platform_globals(instance<Module> ret)
 	semantics->builtin_implementMultiMethod("platform/triplecross",
 		[]() -> instance<std::string>
 	{
-		return instance<std::string>::make(CRAFT_TRIPLE_CROSS);
+		return instance<std::string>::make("Unknown");
 	});
 
 }

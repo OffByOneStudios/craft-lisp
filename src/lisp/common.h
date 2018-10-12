@@ -37,6 +37,7 @@
 // Vendor
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 //#define SPDLOG_TRACE(logger, ...) logger->trace(__VA_ARGS__)
 
