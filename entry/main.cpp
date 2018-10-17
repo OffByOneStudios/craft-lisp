@@ -26,18 +26,9 @@ int main(int argc, char** argv)
 		}
 		instance<Environment> global_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"), _argv);
 		instance<Namespace> ns = global_env->ns_user;
-		std::string f;
 		try
 		{
-			f = fs::read<std::string>(path::normalize(argv[1]), fs::string_read).get();
-		}
-		catch (...)
-		{
-			global_env->log()->info("No Such File: {0}", argv[1]);
-		}
-		try
-		{
-			auto live_module = ns->requireModule(instance<>(), fmt::format("file:{0}", f));
+			auto live_module = ns->requireModule(instance<>(), fmt::format("file:{0}", path::normalize(argv[1])));
 			live_module->initialize();
 		}
 		catch (std::exception const& e)
