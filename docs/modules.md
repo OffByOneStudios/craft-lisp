@@ -21,6 +21,8 @@ This would then need a "namespace" mechanic (after reclaiming the name namespace
 
 Namespaces are the current name for containing the sequence of global state created by the load order of modules. They store the list of modules (e.g. the order they were loaded in) and are responsible for managing any global state.
 
+Importantly namespaces are orthogonal to modules. Modules represent the source of code. Namespaces represent the resulting state of code.
+
 ## Lifecycle
 
 When a new module is requested it will be returned by the namespace. If the module already exists it may have already been loaded. Modules have the following important steps to their state:
