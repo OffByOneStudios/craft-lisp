@@ -62,6 +62,10 @@ namespace lisp
 	public:
 		CRAFT_LISP_EXPORTED instance<Module> requireModule(instance<Module> requestingModule, std::string const& s, instance<> resolver_specific_extra = instance<>());
 
+		// Misc features
+	public:
+		CRAFT_LISP_EXPORTED void refreshBackends();
+
 		// Templated helpers
 	public:
 		

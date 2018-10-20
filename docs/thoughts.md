@@ -52,3 +52,15 @@ A way to easily hook an object up to a data structure and get events when certai
 Also, have a way to *replay* the events (removing add/remove pairs so only the adds get replayed) so that an object can be hooked up correctly automatically.
 
 Also, have a way to batch and time updates (e.g. so 200 adds in a row will be batched to a single (or couple) add-collection events... perhaps on a timer or with hints (e.g. to support UI)).
+
+## Inversion of Argument Choice:
+
+Allow function arguments to be defaulted based off of the potential call space of the multimethod. This optimization could be a bit like tail recursion (e.g. only applies inside the MM). For example:
+
+```
+(foo ALPHA X Y)
+(foo ALPHA GAMMA X Y)
+(foo BETA X Y)
+```
+
+And a call of `(foo init:(Intersect) x y)` would result in an aspected union object of type `(Intersect ALPHA GAMMA BETA)`.

@@ -26,19 +26,8 @@ void Namespace::craft_setupInstance()
 {
 	Object::craft_setupInstance();
 
-	for (auto type : PBackend::craft_s_featureManager()->supportedTypes())
-	{
-		auto backend = type.getFeature<PBackend>();
-
-		_backends[type] =
-		{
-			backend->init(craft_instance()),
-			backend,
-			type.hasFeature<PExecutor>() ? type.getFeature<PExecutor>() : nullptr,
-			type.hasFeature<PCompiler>() ? type.getFeature<PCompiler>() : nullptr,
-		};
-	}
-
+	refreshBackends();
+	
 	instance<Execution> exec = instance<Execution>::make(craft_instance());
 	exec->makeCurrent();
 
@@ -61,14 +50,33 @@ Namespace::_Backend Namespace::fallbackBackend() const
 	return _backends.at(cpptype<BootstrapInterpreter>::typeDesc());
 }
 
- instance<> Namespace::get(TypeId type)
- {
-	 auto it = _backends.find(type);
-	 if (it == _backends.end())
-		 throw bad_projection_error("Cannot get a projection to `{1}` from {0}", craft_instance(), type.toString(false));
+void Namespace::refreshBackends()
+{
+	for (auto type : PBackend::craft_s_featureManager()->supportedTypes())
+	{
+		if (_backends.find(type) != _backends.end())
+			continue;
 
-	 return it->second.inst;
- }
+		auto backend = type.getFeature<PBackend>();
+
+		_backends[type] =
+		{
+			backend->init(craft_instance()),
+			backend,
+			type.hasFeature<PExecutor>() ? type.getFeature<PExecutor>() : nullptr,
+			type.hasFeature<PCompiler>() ? type.getFeature<PCompiler>() : nullptr,
+		};
+	}
+}
+
+instance<> Namespace::get(TypeId type)
+{
+	auto it = _backends.find(type);
+	if (it == _backends.end())
+		throw bad_projection_error("Cannot get a projection to `{1}` from {0}", craft_instance(), type.toString(false));
+
+	return it->second.inst;
+}
 
 instance<> Namespace::parse(std::string contents, TypeId type, PSyntax::ParseOptions const* opts)
 {
