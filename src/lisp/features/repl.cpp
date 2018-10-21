@@ -150,7 +150,11 @@ instance<> LispRepl::invoke(instance<std::string> input, bool record)
 instance<> LispRepl::step()
 {
 	// display the prompt and retrieve input from the user
+	#ifndef _win32
+	auto cinp = _rx.input("Cult>");
+	#else
 	auto cinp = _rx.input("CμλΤ>");
+	#endif
 	if (cinp == nullptr) throw ReplExitException();
 
 
