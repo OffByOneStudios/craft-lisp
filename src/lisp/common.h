@@ -31,15 +31,20 @@
 #pragma warning( pop )
 #endif
 
-// Temporary...
-//#define SPDLOG_TRACE_ON
+#ifdef CULT_TRACE
+#define SPDLOG_TRACE_ON
+#endif
+#ifdef CULT_DEBUG
+#define SPDLOG_DEBUG_ON
+#endif
 
 // Vendor
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 #include "spdlog/sinks/stdout_color_sinks.h"
 
-//#define SPDLOG_TRACE(logger, ...) logger->trace(__VA_ARGS__)
+#undef SPDLOG_TRACE
+#define SPDLOG_TRACE(logger, ...) logger->trace(__VA_ARGS__)
 
 // Deps
 #include "util/all.h"

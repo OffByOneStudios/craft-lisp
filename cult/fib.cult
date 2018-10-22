@@ -1,18 +1,18 @@
 (define fib
-  (fn (n)
+  (function (n)
     (do
-      (define a (Variable 1))
-      (define b (Variable 1))
-      (define i (Variable 3))
-      (while (<= (get i) n)
+      (define a (variable 1))
+      (define b (variable 1))
+      (define i (variable 3))
+      (while (<= i n)
         (do
-          (define c (+ (get a) (get b)))
-          (set a (get b))
+          (define c (+ a b))
+          (set a b)
           (set b c)
-          (set i (+ (get i) 1))
+          (set i (+ i 1))
         ))
-      (get b)
+      b
     )))
 
 (define foo
-  (fn (a b) (+ a (+ b 10))))
+  (function (a b) (+ a (+ b 10))))

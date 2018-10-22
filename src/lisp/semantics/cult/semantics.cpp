@@ -163,7 +163,7 @@ instance<SScope> CultSemantics::getParentScope() const
 }
 size_t CultSemantics::getSlotCount() const
 {
-	return countStatements();
+	return _bindings.bindings.size();
 }
 
 instance<Binding> CultSemantics::lookup_local(instance<Symbol> symbol) const
@@ -246,8 +246,7 @@ size_t CultSemantics::append(instance<CultSemantics> sem)
 
 	for (auto other_imported_module : sem->_modules)
 	{
-		if (other_imported_module == _module ||
-			std::find(_modules.begin(), _modules.end(), other_imported_module) == _modules.end())
+		if (other_imported_module == _module)
 			continue;
 		importModule(other_imported_module);
 	}

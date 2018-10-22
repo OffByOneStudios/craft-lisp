@@ -268,7 +268,7 @@ instance<SScope> Block::getParentScope() const
 }
 size_t Block::getSlotCount() const
 {
-	return statementCount();
+	return _symbols.bindings.size();
 }
 
 instance<Binding> Block::lookup(instance<Symbol> symbol) const

@@ -75,5 +75,4 @@ void core::make_meta_globals(instance<Module> ret)
 #endif
 		types::load_dll(clean);
 	});
-
 }

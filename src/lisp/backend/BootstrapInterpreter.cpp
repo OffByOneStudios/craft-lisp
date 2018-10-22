@@ -231,7 +231,9 @@ instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, ty
 	auto statement_count = sem->countStatements();
 
 	instance<RuntimeSlots> slots = module->moduleValue();
-	if (slots && slots->getSize() != statement_count)
+	if (!slots)
+		slots = instance<RuntimeSlots>::make(sem, statement_count);
+	else if (slots->getSize() != statement_count)
 		slots->extend(statement_count);
 
 	auto frame = InterpreterFrameSection::ensureCurrent(craft_instance());
