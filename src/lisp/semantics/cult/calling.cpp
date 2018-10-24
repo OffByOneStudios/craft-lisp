@@ -226,7 +226,8 @@ void lisp::Function::bind()
 			auto bind = i->getBinding();
 			auto scope = bind->getScope();
 
-			if (scope.isType<CultSemantics>())
+			if (scope.isType<CultSemantics>()
+				|| (scope.isType<lisp::Function>() && scope.asType<lisp::Function>() == craft_instance()))
 				continue;
 
 			auto it = std::find_if(_visitStack.begin(), _visitStack.end(),
@@ -291,6 +292,10 @@ size_t lisp::Function::getSlotCount() const
 instance<Binding> lisp::Function::lookup(instance<Symbol> symbol) const
 {
 	return _simple_lookup(_symbols, symbol);
+}
+instance<Binding> lisp::Function::lookupSlot(size_t i) const
+{
+	return _symbols.bindings.at(i);
 }
 instance<Binding> lisp::Function::define(instance<Symbol> symbol, instance<BindSite> ast)
 {

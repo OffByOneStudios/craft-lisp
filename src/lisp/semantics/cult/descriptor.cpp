@@ -275,6 +275,10 @@ instance<Binding> Block::lookup(instance<Symbol> symbol) const
 {
 	return _simple_lookup(_symbols, symbol);
 }
+instance<Binding> Block::lookupSlot(size_t i) const
+{
+	return _symbols.bindings.at(i);
+}
 instance<Binding> Block::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
 	return _simple_define(craft_instance(), _symbols, symbol, ast);

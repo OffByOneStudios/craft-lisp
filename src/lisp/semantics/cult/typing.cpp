@@ -125,6 +125,10 @@ instance<Binding> TypeDescription::lookup(instance<Symbol> symbol) const
 {
 	return _simple_lookup(_symbols, symbol);
 }
+instance<Binding> TypeDescription::lookupSlot(size_t i) const
+{
+	return _symbols.bindings.at(i);
+}
 instance<Binding> TypeDescription::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
 	return _simple_define(craft_instance(), _symbols, symbol, ast);

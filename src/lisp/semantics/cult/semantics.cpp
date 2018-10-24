@@ -188,6 +188,10 @@ instance<Binding> CultSemantics::lookup(instance<Symbol> symbol) const
 	}
 	return res;
 }
+instance<Binding> CultSemantics::lookupSlot(size_t index) const
+{
+	return lookup(index);
+}
 instance<Binding> CultSemantics::define(instance<Symbol> symbol, instance<BindSite> ast)
 {
 	return _simple_define(craft_instance(), _bindings, symbol, ast);

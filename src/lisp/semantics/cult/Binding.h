@@ -40,6 +40,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED instance<> symbolAst() const;
 		CRAFT_LISP_EXPORTED instance<> valueAst() const;
 
+		CRAFT_LISP_EXPORTED instance<Binding> getBinding() const;
+
 		inline instance<Symbol> getStaticSymbol() const
 		{
 			return symbolAst().asType<Constant>()->getValue().asType<Symbol>();
@@ -179,6 +181,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual size_t getSlotCount() const = 0;
 
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const = 0;
+		CRAFT_LISP_EXPORTED virtual instance<Binding> lookupSlot(size_t) const = 0;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) = 0;
 
 		inline instance<Binding> lookup_recurse(instance<Symbol> sym)

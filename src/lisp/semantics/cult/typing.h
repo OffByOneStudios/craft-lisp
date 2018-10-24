@@ -103,6 +103,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual size_t TypeDescription::getSlotCount() const override;
 
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;
+		CRAFT_LISP_EXPORTED virtual instance<Binding> lookupSlot(size_t) const override;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> define(instance<Symbol> symbol, instance<BindSite> ast) override;
 	};
 

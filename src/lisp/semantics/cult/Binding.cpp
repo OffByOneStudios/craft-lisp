@@ -77,6 +77,11 @@ instance<> BindSite::valueAst() const
 	return _bindValue;
 }
 
+instance<Binding> BindSite::getBinding() const
+{
+	return _boundTo;
+}
+
 void BindSite::bind()
 {
 	_bindSymbol->bind();
