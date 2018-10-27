@@ -1,4 +1,4 @@
-Here we describe the core semantics of the cult language.
+Here we describe the core semantics of the cult language. The semantics are represented by the AST nodes that represent them.
 
 # Cult Semantics
 
@@ -59,7 +59,9 @@ Functions might also acquire their name through macros and the structures they a
 
 ### `type`
 
+### `Resolve`
 
+The resolve node is responsible for resolving symbols into objects. It may do this in reference to a runtime scope.
 
 ## Concepts
 
