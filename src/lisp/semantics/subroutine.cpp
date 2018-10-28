@@ -8,6 +8,17 @@ using namespace craft::lisp;
 
 CRAFT_DEFINE(PSubroutine) { _.defaults(); }
 
+instance<> PSubroutine::_cult_runtime_execute(instance<> subroutine, instance<>* args, size_t argc)
+{
+	if (!subroutine.hasFeature<PSubroutine>())
+	{
+		throw stdext::exception("{0} does not implement subroutine.");
+	}
+
+	auto sub = subroutine.asFeature<PSubroutine>();
+
+	return sub->execute(subroutine, {args, argc});
+}
 
 /******************************************************************************
 ** SubroutineClosure

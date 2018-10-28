@@ -145,5 +145,8 @@ namespace lisp
 		CRAFT_LISP_EXPORTED virtual void setBinding(instance<Binding>) override;
 
 		CRAFT_LISP_EXPORTED virtual void attach(instance<BindSite>) override;
+
+	public:
+		static CRAFT_LISP_EXPORTED instance<> _cult_runtime_dispatch(instance<> mm, instance<>* args, size_t argc);
 	};
 }}

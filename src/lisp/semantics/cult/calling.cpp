@@ -306,7 +306,8 @@ instance<Binding> lisp::Function::define(instance<Symbol> symbol, instance<BindS
 ** MultiMethod
 ******************************************************************************/
 namespace craft {
-namespace lisp {
+namespace lisp
+{
 	class MultiMethodSubroutineProvider
 		: public Implements<PSubroutine>::For<MultiMethod>
 	{
