@@ -20,9 +20,6 @@ namespace lisp
 		//
 		// TODO make this a multimethod: invoke(backend, object, call) -> result
 		CRAFT_LISP_EXPORTED virtual instance<> execute(instance<>, types::GenericInvoke const& call) const = 0;
-		
-		// llvm-internal: ___cult__PSubroutine__runtime_execute
-		static CRAFT_LISP_EXPORTED instance<> _cult_runtime_execute(instance<> subroutine, instance<>* args, size_t argc);
 	};
 
 	class SubroutineClosure
