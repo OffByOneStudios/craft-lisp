@@ -89,10 +89,37 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 	sem->builtin_specialFormReader("ns/import",
 		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
 	{
-		if (sexpr->cells.size() != 2 || !sexpr->cells[1].isType<std::string>())
-			throw stdext::exception("malformed: (require \"<uri>\")");
+		std::string name = "";
+		std::map<std::string, std::string> keys {
+			{":as", ""},
+			{":in", ""}	
+		};
 
-		return NamespaceManipulation::ImportNamespace(*sexpr->cells[1].asType<std::string>());
+		for(auto i = 1; i < sexpr->cells.size(); ++i)
+		{
+			auto cell = sexpr->cells[i];
+			if(cell.isType<std::string>() && name == "")
+				name = *cell.asType<std::string>();
+			
+			else if(cell.isType<Symbol>())
+			{
+				auto sym = cell.asType<Symbol>();
+				if(!sym->isKeyword()) throw stdext::exception("Unexpected Symbol in cell {0}", i);
+				auto sname = sym->getDisplay();
+
+				if(keys.find(sname) == keys.end()) throw stdext::exception("Invalid keyword {0} in cell {1}", sname, i);
+				if(sexpr->cells.size() == i + 1) throw stdext::exception("Unpaired Unary Keyword");
+
+				auto val = sexpr->cells[i + 1];
+				if(!val.isType<std::string>()) stdext::exception("Keyword {0} Expect Type string, got {1}", sname, val.typeId());
+				
+				keys[sname] = *val.asType<std::string>();
+				i++;
+			}
+			else throw stdext::exception("Unexpected value at cell {0}", i);
+		}
+		
+		return NamespaceManipulation::ImportNamespace(*sexpr->cells[1].asType<std::string>(), keys[":as"], keys[":in"]);
 	});
 
 	sem->builtin_addSpecialForm("ns/using");

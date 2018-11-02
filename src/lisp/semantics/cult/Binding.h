@@ -113,6 +113,7 @@ namespace lisp
 		Manipulation _mode;
 		std::string _primary;
 		std::string _as;
+		std::string _in;
 
 		// TODO symbol renaming/require/exclude rules
 
@@ -121,7 +122,7 @@ namespace lisp
 
 		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> SetNamespace(std::string const& namespace_name);
 		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> RequireNamespace(std::string const& namespace_name, std::string const& as = "");
-		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> ImportNamespace(std::string const& uri, std::string const& as = "");
+		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> ImportNamespace(std::string const& uri, std::string const& as = "", std::string const& in="");
 		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> UsingNamespace(std::string const& uri, std::string const& as = "");
 		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> IncludeNamespace(std::string const& uri, std::string const& as = "");
 		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> LoadNamespace(std::string const& uri, std::string const& as = "");
@@ -130,6 +131,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED std::string getModuleUri() const;
 		CRAFT_LISP_EXPORTED std::string getNamespaceName() const;
 		CRAFT_LISP_EXPORTED std::string getTargetName() const;
+		CRAFT_LISP_EXPORTED std::string getAliasName() const;
 
 		// SCultSemanticNode
 	public:

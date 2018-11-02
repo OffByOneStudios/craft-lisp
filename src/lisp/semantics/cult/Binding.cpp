@@ -184,7 +184,7 @@ CRAFT_DEFINE(NamespaceManipulation)
 		{
 			case NamespaceManipulation::Manipulation::Namespace: return NamespaceManipulation::SetNamespace(that->getNamespaceName());
 			case NamespaceManipulation::Manipulation::Require: return NamespaceManipulation::RequireNamespace(that->getNamespaceName(), that->getTargetName());
-			case NamespaceManipulation::Manipulation::Import: return NamespaceManipulation::ImportNamespace(that->getNamespaceName(), that->getTargetName());
+			case NamespaceManipulation::Manipulation::Import: return NamespaceManipulation::ImportNamespace(that->getNamespaceName(), that->getTargetName(), that->getAliasName());
 			case NamespaceManipulation::Manipulation::Using: return NamespaceManipulation::UsingNamespace(that->getNamespaceName(), that->getTargetName());
 			case NamespaceManipulation::Manipulation::Include: return NamespaceManipulation::IncludeNamespace(that->getNamespaceName(), that->getTargetName());
 			case NamespaceManipulation::Manipulation::Load: return NamespaceManipulation::LoadNamespace(that->getNamespaceName(), that->getTargetName());
@@ -220,12 +220,13 @@ instance<NamespaceManipulation> NamespaceManipulation::RequireNamespace(std::str
 	return ret;
 }
 
-instance<NamespaceManipulation> NamespaceManipulation::ImportNamespace(std::string const& namespace_name, std::string const& as)
+instance<NamespaceManipulation> NamespaceManipulation::ImportNamespace(std::string const& namespace_name, std::string const& as, std::string const& in)
 {
 	auto ret = instance<NamespaceManipulation>::make();
 	ret->_mode = Manipulation::Import;
 	ret->_primary = namespace_name;
 	ret->_as = as;
+	ret->_in = in;
 	return ret;
 }
 
@@ -275,6 +276,11 @@ std::string NamespaceManipulation::getNamespaceName() const
 std::string NamespaceManipulation::getTargetName() const
 {
 	return _as;
+}
+
+std::string NamespaceManipulation::getAliasName() const
+{
+	return _in;
 }
 
 void NamespaceManipulation::bind()
