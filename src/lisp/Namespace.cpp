@@ -31,8 +31,8 @@ void Namespace::craft_setupInstance()
 	instance<Execution> exec = instance<Execution>::make(craft_instance());
 	exec->makeCurrent();
 
-	requireModule(instance<>(), "builtin:cult/system")->initialize();
-	requireModule(instance<>(), "builtin:cult/core")->initialize();
+	importModule(instance<>(), "builtin:cult/system")->initialize();
+	importModule(instance<>(), "builtin:cult/core")->initialize();
 }
 
 instance<Environment> Namespace::getEnvironment() const
@@ -81,7 +81,7 @@ instance<> Namespace::get(TypeId type)
 instance<> Namespace::parse(std::string contents, TypeId type, PSyntax::ParseOptions const* opts)
 {
 	// context variable with: ParseOptions
-	instance<Module> module = requireModule(instance<>(), "anon:", instance<std::string>::make(contents));
+	instance<Module> module = importModule(instance<>(), "anon:", instance<std::string>::make(contents));
 
 	return module->get(type);
 }
@@ -116,7 +116,7 @@ void Namespace::compile(instance<Module> module, std::string path, instance<> co
 }
 
 
-instance<Module> Namespace::requireModule(instance<Module> requestingModule, std::string const& uri_, instance<> resolver_specific_extra)
+instance<Module> Namespace::importModule(instance<Module> requestingModule, std::string const& uri_, instance<> resolver_specific_extra)
 {
 	std::unique_lock<std::recursive_mutex> lock(_module_load_mutex);
 

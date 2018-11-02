@@ -85,24 +85,27 @@ namespace lisp
 	};
 
 	/******************************************************************************
-	** ScopeManipulation
+	** NamespaceManipulation
 	******************************************************************************/
 
 	/*
-	Represents the import of a module.
+	Represents the modification of the behavior of the define special form
 	*/
-	class ScopeManipulation
+	class NamespaceManipulation
 		: public virtual craft::types::Object
 		, public craft::types::Implements<SCultSemanticNode>
 	{
-		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::ScopeManipulation);
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::NamespaceManipulation);
 	public:
 		enum class Manipulation
 		{
 			None = 0,
-			SetNamespace = 1,
-			UsingNamespace = 2,
-			RequireModule = 1 << 9,
+			Namespace,
+			Require,
+			Import,
+			Using,
+			Include,
+			Load
 		};
 
 	private:
@@ -114,12 +117,14 @@ namespace lisp
 		// TODO symbol renaming/require/exclude rules
 
 	public:
-		CRAFT_LISP_EXPORTED ScopeManipulation();
+		CRAFT_LISP_EXPORTED NamespaceManipulation();
 
-		static CRAFT_LISP_EXPORTED instance<ScopeManipulation> SetNamespace(std::string const& namespace_name);
-		static CRAFT_LISP_EXPORTED instance<ScopeManipulation> UsingNamespace(std::string const& namespace_name, std::string const& as = "");
-
-		static CRAFT_LISP_EXPORTED instance<ScopeManipulation> Require(std::string const& uri, std::string const& as = "");
+		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> SetNamespace(std::string const& namespace_name);
+		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> RequireNamespace(std::string const& namespace_name, std::string const& as = "");
+		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> ImportNamespace(std::string const& uri, std::string const& as = "");
+		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> UsingNamespace(std::string const& uri, std::string const& as = "");
+		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> IncludeNamespace(std::string const& uri, std::string const& as = "");
+		static CRAFT_LISP_EXPORTED instance<NamespaceManipulation> LoadNamespace(std::string const& uri, std::string const& as = "");
 
 		CRAFT_LISP_EXPORTED Manipulation getManipulationKind() const;
 		CRAFT_LISP_EXPORTED std::string getModuleUri() const;

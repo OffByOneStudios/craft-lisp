@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 		instance<Namespace> ns = global_env->ns_user;
 		try
 		{
-			auto live_module = ns->requireModule(instance<>(), fmt::format("file:{0}", path::normalize(argv[1])));
+			auto live_module = ns->importModule(instance<>(), fmt::format("file:{0}", path::normalize(argv[1])));
 			live_module->initialize();
 		}
 		catch (std::exception const& e)

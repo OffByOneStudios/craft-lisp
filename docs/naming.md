@@ -103,8 +103,10 @@ Macros could help with this:
 A set of utilities for managing the environment's behavior with respect to certain operations (like require). They are:
 
 * `ns` A special form / macro which can be used as a header to do all of the below.
+* `ns/namespace` A `NamespaceManipulation` node to set the default namespace of of defines in the current module
 * `ns/require` A `NamespaceManipulation` node to require a module be loaded. This does not effect the symbol resolution for the current module. This means the required module does not have to actually be loaded for this module to be loaded.
 * `ns/import ` A `NamespaceManipulation` node to import a module into the current one. This requires the module. It also, by default, places the symbols in the imported module into the current one (but with private marked on all of them). This has additional arguments to place the symbols in a different name (e.g. `module/symbol`) or to place the module in a symbol (e.g. `module.symbol`). This has additional arguments to white list or black list symbols. This has additional arguments to manage the visibility of the imported symbols (e.g. to forward them through this module).
+* `ns/using` A `NamespaceManipulation` node which adds the given module or namespace to the resolution order for the current module
 * `ns/include` A `NamespaceManipulation` node which includes another module as if it's a direct part of the current one. It is a warning (unless overridden with an additional argument) for the included module to have `ns` family features. This always causes the module to be reimported as it's effectively attempting to pretend the source code was inserted directly.
 * `ns/load` A `NamespaceManipulation` node which calls for the runtime inclusion of another module. Unlike other `NamespaceManipulation` operations, this one causes side effects at runtime of the module's root level (notably invoking load machinery) where as the other nodes don't. This node can only place the module in a symbol (e.g. for `module.symbol` style resolution).
 

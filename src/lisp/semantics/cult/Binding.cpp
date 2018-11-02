@@ -176,15 +176,19 @@ instance<> Binding::getMeta(std::string metaKey, TypeId type) const
 ** Import
 ******************************************************************************/
 
-CRAFT_DEFINE(ScopeManipulation)
+CRAFT_DEFINE(NamespaceManipulation)
 {
-	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<ScopeManipulation> that)
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<NamespaceManipulation> that)
 	{
 		switch (that->getManipulationKind())
 		{
-			case ScopeManipulation::Manipulation::RequireModule: return ScopeManipulation::Require(that->getModuleUri(), that->getTargetName());
-			case ScopeManipulation::Manipulation::SetNamespace: return ScopeManipulation::SetNamespace(that->getNamespaceName());
-			case ScopeManipulation::Manipulation::UsingNamespace: return ScopeManipulation::UsingNamespace(that->getNamespaceName(), that->getTargetName());
+			case NamespaceManipulation::Manipulation::Namespace: return NamespaceManipulation::SetNamespace(that->getNamespaceName());
+			case NamespaceManipulation::Manipulation::Require: return NamespaceManipulation::RequireNamespace(that->getNamespaceName(), that->getTargetName());
+			case NamespaceManipulation::Manipulation::Import: return NamespaceManipulation::ImportNamespace(that->getNamespaceName(), that->getTargetName());
+			case NamespaceManipulation::Manipulation::Using: return NamespaceManipulation::UsingNamespace(that->getNamespaceName(), that->getTargetName());
+			case NamespaceManipulation::Manipulation::Include: return NamespaceManipulation::IncludeNamespace(that->getNamespaceName(), that->getTargetName());
+			case NamespaceManipulation::Manipulation::Load: return NamespaceManipulation::LoadNamespace(that->getNamespaceName(), that->getTargetName());
+			
 			default: throw stdext::exception("Unknown scope manipulation {0}", (int)that->getManipulationKind());
 		}
 	});
@@ -194,56 +198,86 @@ CRAFT_DEFINE(ScopeManipulation)
 	_.defaults();
 }
 
-ScopeManipulation::ScopeManipulation()
+NamespaceManipulation::NamespaceManipulation()
 {
 
 }
 
-instance<ScopeManipulation> ScopeManipulation::SetNamespace(std::string const& namespace_name)
+instance<NamespaceManipulation> NamespaceManipulation::SetNamespace(std::string const& namespace_name)
 {
-	auto ret = instance<ScopeManipulation>::make();
-	ret->_mode = Manipulation::SetNamespace;
+	auto ret = instance<NamespaceManipulation>::make();
+	ret->_mode = Manipulation::Namespace;
 	ret->_primary = namespace_name;
 	return ret;
 }
-instance<ScopeManipulation> ScopeManipulation::UsingNamespace(std::string const& namespace_name, std::string const& as)
-{
-	auto ret = instance<ScopeManipulation>::make();
-	ret->_mode = Manipulation::UsingNamespace;
-	ret->_primary = namespace_name;
-	ret->_as = as;
-	return ret;
-}
 
-instance<ScopeManipulation> ScopeManipulation::Require(std::string const& uri, std::string const& as)
+instance<NamespaceManipulation> NamespaceManipulation::RequireNamespace(std::string const& uri, std::string const& as)
 {
-	auto ret = instance<ScopeManipulation>::make();
-	ret->_mode = Manipulation::RequireModule;
+	auto ret = instance<NamespaceManipulation>::make();
+	ret->_mode = Manipulation::Require;
 	ret->_primary = uri;
 	ret->_as = as;
 	return ret;
 }
 
-ScopeManipulation::Manipulation ScopeManipulation::getManipulationKind() const
+instance<NamespaceManipulation> NamespaceManipulation::ImportNamespace(std::string const& namespace_name, std::string const& as)
+{
+	auto ret = instance<NamespaceManipulation>::make();
+	ret->_mode = Manipulation::Import;
+	ret->_primary = namespace_name;
+	ret->_as = as;
+	return ret;
+}
+
+instance<NamespaceManipulation> NamespaceManipulation::UsingNamespace(std::string const& namespace_name, std::string const& as)
+{
+	auto ret = instance<NamespaceManipulation>::make();
+	ret->_mode = Manipulation::Using;
+	ret->_primary = namespace_name;
+	ret->_as = as;
+	return ret;
+}
+
+instance<NamespaceManipulation> NamespaceManipulation::IncludeNamespace(std::string const& namespace_name, std::string const& as)
+{
+	auto ret = instance<NamespaceManipulation>::make();
+	ret->_mode = Manipulation::Include;
+	ret->_primary = namespace_name;
+	ret->_as = as;
+	return ret;
+}
+
+instance<NamespaceManipulation> NamespaceManipulation::LoadNamespace(std::string const& namespace_name, std::string const& as)
+{
+	auto ret = instance<NamespaceManipulation>::make();
+	ret->_mode = Manipulation::Load;
+	ret->_primary = namespace_name;
+	ret->_as = as;
+	return ret;
+}
+
+
+
+NamespaceManipulation::Manipulation NamespaceManipulation::getManipulationKind() const
 {
 	return _mode;
 }
-std::string ScopeManipulation::getModuleUri() const
+std::string NamespaceManipulation::getModuleUri() const
 {
-	assert(_mode == Manipulation::RequireModule);
+	assert(_mode == Manipulation::Require);
 	return _primary;
 }
-std::string ScopeManipulation::getNamespaceName() const
+std::string NamespaceManipulation::getNamespaceName() const
 {
-	assert(_mode == Manipulation::SetNamespace || _mode == Manipulation::UsingNamespace);
+	assert(_mode == Manipulation::Namespace || _mode == Manipulation::Import);
 	return _primary;
 }
-std::string ScopeManipulation::getTargetName() const
+std::string NamespaceManipulation::getTargetName() const
 {
 	return _as;
 }
 
-void ScopeManipulation::bind()
+void NamespaceManipulation::bind()
 {
 	auto parent_scope = SScope::findScope(_parent);
 	if (!parent_scope.isType<CultSemantics>())
@@ -253,9 +287,9 @@ void ScopeManipulation::bind()
 
 	switch (_mode)
 	{
-		case Manipulation::RequireModule:
+		case Manipulation::Import:
 		{
-			auto required_module = sem->getModule()->getNamespace()->requireModule(sem->getModule(), _primary); // TODO store reference somewhere for this node?
+			auto required_module = sem->getModule()->getNamespace()->importModule(sem->getModule(), _primary); // TODO store reference somewhere for this node?
 			required_module->initialize(); // TODO wait for initalization to complete
 			sem->importModule(required_module); // TODO move to runtime of this module
 		} break;
