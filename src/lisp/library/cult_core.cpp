@@ -24,6 +24,7 @@ instance<Module> library::make_module_builtin_cult_core(instance<Namespace> ns, 
 	ret->builtin_setSemantics(sem);
 
 	library::core::make_logic_globals(ret);
+	library::core::make_array_globals(ret);
 	library::core::make_cast_globals(ret);
 	library::core::make_arithmatic_globals(ret);
 	library::core::make_buffer_globals(ret);

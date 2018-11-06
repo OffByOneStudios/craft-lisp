@@ -549,6 +549,9 @@ instance<Module> library::make_module_builtin_cult_system(instance<Namespace> ns
 		return ast;
 	});
 
+	sem->builtin_implementMultiMethod("abort",  []() { abort();});
+	sem->builtin_implementMultiMethod("exit",  [](instance<int32_t> code) { exit(*code);});
+
 	//
 	// Semantics - compilers
 	//

@@ -85,6 +85,42 @@ namespace library
 		CRAFT_LISP_EXPORTED std::vector<instance<>> values();
 	};
 
+	class Array
+		: public virtual types::Object
+	{
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::Array);
+	protected:
+		size_t _typeSize;
+
+		types::TypeId _type;
+		std::vector<std::byte> _data;
+
+	public:
+		CRAFT_LISP_EXPORTED Array(types::TypeId t);
+		CRAFT_LISP_EXPORTED Array(types::TypeId t, instance<uint64_t> size);
+		CRAFT_LISP_EXPORTED Array(types::TypeId t, std::vector<instance<>> const& data);
+
+		CRAFT_LISP_EXPORTED types::TypeId type();
+
+		CRAFT_LISP_EXPORTED instance<int64_t> size();
+		CRAFT_LISP_EXPORTED instance<> at(instance<int64_t> i);
+		CRAFT_LISP_EXPORTED void set(instance<int64_t> i, instance<> v);
+		CRAFT_LISP_EXPORTED void insert(instance<int64_t> i, instance<> v);
+		
+		CRAFT_LISP_EXPORTED void erase(instance<int64_t> i);
+		CRAFT_LISP_EXPORTED void push(instance<> i);
+		CRAFT_LISP_EXPORTED void pop();
+
+		CRAFT_LISP_EXPORTED instance<uint64_t> dataSize();
+
+		// XXX POINTER PORTABILITY WARNING
+		CRAFT_LISP_EXPORTED instance<uint64_t> dataPtr();
+		//CRAFT_LISP_EXPORTED void append(std::vector<instance<>>);
+
+	
+
+	};
+
 }}}
 
 namespace json {

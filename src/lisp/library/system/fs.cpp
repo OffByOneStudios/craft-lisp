@@ -12,6 +12,9 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
+#include <filesystem>
+
+
 namespace _impl {
 #ifdef _WIN32
 	extern std::string GetLastErrorAsString();
@@ -75,11 +78,7 @@ void core::make_fs_globals(instance<Module> ret)
 	});
 
 	semantics->builtin_implementMultiMethod("fs/mkdir", [](instance<std::string> s) {
-#ifdef _WIN32
-		_mkdir(s->c_str());
-#else
-		mkdir(s->c_str(), S_IRWXU);
-#endif
+		std::filesystem::create_directories(*s);
 	});
 
 	semantics->builtin_implementMultiMethod("fs/read",
@@ -114,14 +113,6 @@ void core::make_fs_globals(instance<Module> ret)
 		outfile.close();
 	});
 
-
-	semantics->builtin_implementMultiMethod("fs/mv",
-		[](instance<std::string> a, instance<std::string> b)
-	{
-		auto f = path::normalize(*a);
-		auto t = path::normalize(*b);
-		if (rename(f.c_str(), t.c_str())) throw stdext::exception("{0}", "TODO Rename Failure");
-	});
 
 	semantics->builtin_implementMultiMethod("fs/mv",
 		[](instance<std::string> a, instance<std::string> b)

@@ -41,6 +41,7 @@ namespace lisp {
 
 		namespace core
 		{
+			void make_array_globals(instance<Module> m);
 			void make_string_globals(instance<Module> m);
 			void make_shim_globals(instance<Module> m);
 			void make_arithmatic_globals(instance<Module> m);
