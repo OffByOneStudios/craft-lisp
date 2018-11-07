@@ -56,9 +56,33 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 {
 	instance<SCultSemanticNode> node;
 
-	if (syntax.typeId().isType<Symbol>() && !syntax.asType<Symbol>()->isKeyword())
-		node = instance<Resolve>::make(syntax.asType<Symbol>(), Resolve::Mode::ResolveAndGet);
-	else if (syntax.typeId().isType<Sexpr>())
+	if (syntax.isType<Symbol>() && !syntax.asType<Symbol>()->isKeyword())
+	{
+		instance<Symbol> symbol = syntax;
+
+		// '.' seperates resolutions
+		std::vector<uint32_t> parts;
+		auto push_parts = [&]()
+		{
+			if (node)
+				node = instance<Member>::make(node, Symbol::makeSymbol(parts), Resolve::Mode::ResolveAndGet);
+			else
+				node = instance<Resolve>::make(Symbol::makeSymbol(parts), Resolve::Mode::ResolveAndGet);
+			parts.clear();
+		};
+		
+		auto const size = symbol->size();
+		for (auto i = 0; i < size; ++i)
+		{
+			auto sym = symbol->at(i);
+			if (Symbol::isPath(sym) && Symbol::toChar(sym) == '.')
+				push_parts();
+			else
+				parts.push_back(sym);
+		}
+		push_parts();
+	}
+	else if (syntax.isType<Sexpr>())
 	{
 		instance<Sexpr> expr = syntax;
 		auto size = expr->cells.size();
@@ -68,7 +92,7 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 
 		// -- Read Time Dispatch --
 		instance<> head = expr->cells[0];
-		if (head.typeId().isType<Symbol>())
+		if (head.isType<Symbol>())
 		{
 			instance<Binding> binding = lookup_recurse(head.asType<Symbol>()); // TODO: read state lookup of macros?
 			if (binding)

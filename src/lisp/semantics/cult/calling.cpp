@@ -130,6 +130,9 @@ CRAFT_DEFINE(lisp::Function)
 	_.use<SBindable>().byCasting();
 	_.use<SScope>().byCasting();
 
+	_.use<SObjectComposite>().byConfiguring<ObjectCompositer>()
+		->withOffset<Binding>("binding", offset_of(&lisp::Function::_binding));
+
 	_.defaults();
 }
 

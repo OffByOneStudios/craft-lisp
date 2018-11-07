@@ -347,36 +347,49 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrameSection> interp, instance<Resolve> ast) -> instance<>
 	{
-		auto s0 = interp->slot(ast->getBinding());
+		instance<RuntimeSlotReference> slot = interp->slot(ast->getBinding());
 
-		// TODO use ops...
-		auto slot = s0;
-		instance<Symbol> lastSym = ast->at(0);
-		for (size_t i = 1; i < ast->size(); ++i)
+		if (ast->isGetter())
 		{
-			auto sym = ast->at(i);
-			auto sv = slot->getValue();
+			// TODO call getter?
+			return slot->getValue();
+		}
 
-			if (!sv) throw stdext::exception("Null slot value `{0}` (for `{1}`).", lastSym->getDisplay(), ast->getSymbol()->getDisplay());
-			if (sv.typeId().node->getInterface()->name == std::string("cult.type"))
-			{
-				auto typeAst = instance<TypeDescription>::fromInternalPointer(sv.typeId().node->value);
-				auto bnext = typeAst->lookup(sym);
-				if (!bnext) throw stdext::exception("Slot `{0}` does not exist (for `{1}`).", sym->getDisplay(), ast->getSymbol()->getDisplay());
-				
-				slot = instance<RuntimeSlotReference>::make(sv, bnext->getIndex());
-			}
+		return slot;
+	});
+	sem->builtin_implementMultiMethod("exec",
+		[](instance<InterpreterFrameSection> interp, instance<Member> ast) -> instance<>
+	{
+		instance<> source = interp->interp_exec(ast->objectAst());
+		instance<RuntimeSlotReference> member;
 
-			lastSym = sym;
+		if (!source) throw stdext::exception("Null object (for member `{0}`).", ast->getSymbol()->getDisplay());
+		// TODO improve this to a single (ish) interface
+		else if (source.typeId().node->getInterface()->name == std::string("cult.type")) // Cult defined type
+		{
+			auto typeAst = instance<TypeDescription>::fromInternalPointer(source.typeId().node->value);
+			auto binding = typeAst->lookup(ast->getSymbol());
+			if (!binding) throw stdext::exception("Slot `{0}` does not exist on object `{1}`.", ast->getSymbol()->getDisplay(), source);
+			
+			member = instance<RuntimeSlotReference>::make(source, binding->getIndex());
+		}
+		else if (source.hasFeature<types::SObjectComposite>())
+		{
+			if (!ast->isGetter()) throw stdext::exception("Reference resolution not supported for SObjectComposite member resolution (for member `{0}` on `{1}`).", ast->getSymbol()->getDisplay(), source);
+
+			auto composite = source.asFeature<types::SObjectComposite>();
+			auto listing = composite->objectComposite_findListing(ast->getSymbol()->getDisplay());
+			auto res = composite->objectComposite_getInstance(listing);
+			return res;
 		}
 
 		if (ast->isGetter())
 		{
 			// TODO call getter
-			return slot->getValue();
+			return member->getValue();
 		}
 
-		return slot;
+		return member;
 	});
 	sem->builtin_implementMultiMethod("exec",
 		[](instance<InterpreterFrameSection> interp, instance<Assign> ast) -> instance<>

@@ -58,7 +58,9 @@ namespace lisp
 	{
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Resolve);
 	public:
-		enum class Mode // TODO make expected evaluation results inspectable to issue gets as necessary
+		// TODO make expected evaluation results inspectable to issue gets as necessary
+		// Also remove from member
+		enum class Mode
 		{
 			ResolveOnly = 0,
 			ResolveAndGet = 1,
@@ -68,8 +70,6 @@ namespace lisp
 		instance<Symbol> _symbol;
 		Mode _mode;
 
-		std::vector<instance<Symbol>> _chain;
-		std::vector<uint32_t> _ops;
 		instance<Binding> _binding;
 
 	public:
@@ -77,15 +77,43 @@ namespace lisp
 
 		CRAFT_LISP_EXPORTED bool isGetter();
 
-		// Size of symbols
-		CRAFT_LISP_EXPORTED size_t size() const;
-		CRAFT_LISP_EXPORTED instance<Symbol> at(size_t) const;
-		CRAFT_LISP_EXPORTED uint32_t op(size_t) const;
-
 		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 		CRAFT_LISP_EXPORTED instance<Binding> getBinding() const;
 
 		CRAFT_LISP_EXPORTED instance<> getConstantValue() const;
+
+		// SCultSemanticNode
+	public:
+		CRAFT_LISP_EXPORTED virtual void bind() override;
+	};
+
+
+	/******************************************************************************
+	** Member
+	******************************************************************************/
+
+	/*
+		Resolves the value of a symbol.
+	*/
+	class Member
+		: public virtual craft::types::Object
+		, public craft::types::Implements<SCultSemanticNode>
+	{
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Member);
+
+	private:
+		instance<SCultSemanticNode> _object;
+		instance<Symbol> _symbol;
+		Resolve::Mode _mode;
+
+	public:
+		CRAFT_LISP_EXPORTED Member(instance<SCultSemanticNode> object, instance<Symbol> member, Resolve::Mode mode = Resolve::Mode::ResolveOnly);
+		CRAFT_LISP_EXPORTED void craft_setupInstance();
+
+		CRAFT_LISP_EXPORTED bool isGetter();
+
+		CRAFT_LISP_EXPORTED instance<SCultSemanticNode> objectAst() const;
+		CRAFT_LISP_EXPORTED instance<Symbol> getSymbol() const;
 
 		// SCultSemanticNode
 	public:

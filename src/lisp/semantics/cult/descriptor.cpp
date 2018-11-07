@@ -89,48 +89,12 @@ Resolve::Resolve(instance<Symbol> symbol, Mode mode)
 	_mode = mode;
 
 	assert(!symbol->isKeyword());
-
-	// '/' and '@' are one "resolution" from resolve's perspective
-	// '.' and ':' (non-keyword) seperate resolutions
-	auto size = symbol->size();
-	std::vector<uint32_t> parts;
-	for (auto i = 0; i < size; ++i)
-	{
-		auto sym = symbol->at(i);
-		if (Symbol::isPath(sym) &&
-			Symbol::toChar(sym) == '.' || Symbol::toChar(sym) == ':')
-		{
-			_chain.push_back(Symbol::makeSymbol(parts));
-			_ops.push_back(sym);
-			parts.clear();
-		}
-		else
-		{
-			parts.push_back(sym);
-		}
-	}
-	_chain.push_back(Symbol::makeSymbol(parts));
-
-	assert(_chain.size() > 0);
+	assert(symbol->size() > 0);
 }
 
 bool Resolve::isGetter()
 {
 	return _mode == Mode::ResolveAndGet;
-}
-
-size_t Resolve::size() const
-{
-	return _chain.size();
-}
-
-instance<Symbol> Resolve::at(size_t at) const
-{
-	return _chain.at(at);
-}
-uint32_t Resolve::op(size_t at) const
-{
-	return _ops.at(at);
 }
 
 instance<Symbol> Resolve::getSymbol() const
@@ -155,9 +119,61 @@ instance<> Resolve::getConstantValue() const
 
 void Resolve::bind()
 {
-	_binding = SScope::findScope(_parent)->lookup_recurse(_chain[0]);
+	_binding = SScope::findScope(_parent)->lookup_recurse(_symbol);
 	if (!_binding)
-		throw stdext::exception("{2}> Resolve {0} bad symbol {1}.", craft_instance(), _chain[0]->getDisplay(), sourceLocationToString());
+		throw stdext::exception("{2}> Resolve {0} bad symbol {1}.", craft_instance(), _symbol, sourceLocationToString());
+}
+
+/******************************************************************************
+** Member
+******************************************************************************/
+
+CRAFT_DEFINE(Member)
+{
+	_.use<PClone>().singleton<FunctionalCopyConstructor>([](instance<Member> that)
+	{
+		return instance<Member>::make(_clone(that->objectAst()), that->getSymbol(), that->_mode);
+	});
+
+	_.use<SCultSemanticNode>().byCasting();
+
+	_.defaults();
+}
+
+Member::Member(instance<SCultSemanticNode> object, instance<Symbol> symbol, Resolve::Mode mode)
+{
+	_object = object;
+	_symbol = symbol;
+	_mode = mode;
+
+	assert(!symbol->isKeyword());
+	assert(symbol->size() > 0);
+}
+
+void Member::craft_setupInstance()
+{
+	Object::craft_setupInstance();
+
+	_ast(_object);
+}
+
+bool Member::isGetter()
+{
+	return _mode == Resolve::Mode::ResolveAndGet;
+}
+
+instance<SCultSemanticNode> Member::objectAst() const
+{
+	return _object;
+}
+instance<Symbol> Member::getSymbol() const
+{
+	return _symbol;
+}
+
+void Member::bind()
+{
+	_object->bind();
 }
 
 /******************************************************************************
