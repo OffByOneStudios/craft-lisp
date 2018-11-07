@@ -14,9 +14,9 @@ CRAFT_DEFINE(Execution)
 }
 
 
-Execution::Execution(instance<Namespace> ns)
+Execution::Execution(instance<Environment> env)
 {
-	_namespace = ns;
+	_env = env;
 }
 
 void Execution::makeCurrent()
@@ -34,9 +34,9 @@ void Execution::clearFromCurrent()
 	_tl_current = instance<>();
 }
 
-instance<Namespace> Execution::getNamespace() const
+instance<Environment> Execution::getEnvironment() const
 {
-	return _namespace;
+	return _env;
 }
 
 std::list<instance<SFrameSection>> const& Execution::stack() const

@@ -24,12 +24,12 @@ CRAFT_DEFINE(BuiltinLoader)
 	_.defaults();
 }
 
-std::string BuiltinLoader::resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra)
+std::string BuiltinLoader::resolve(instance<Environment> env, instance<Module> requester, std::string const& proto_string, instance<> extra)
 {
 	return proto_string;
 }
 
-instance<Module> BuiltinLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
+instance<Module> BuiltinLoader::load(instance<Environment> env, std::string const& proto_string, instance<> extra)
 {
 	auto ret = instance<BuiltinLoader>::makeThroughLambda([](auto p) { return new (p) BuiltinLoader(); });
 	ret->_builtinName = proto_string;
@@ -40,7 +40,7 @@ instance<Module> BuiltinLoader::load(instance<Namespace> ns, std::string const& 
 	{
 		auto sd = (cpp::static_desc*)builtin_descriptor->value;
 		ret->_desc = (BuiltinModuleDescription*)sd->repr;
-		ret->_module = ret->_desc->build(ns, ret);
+		ret->_module = ret->_desc->build(env, ret);
 
 		return ret->_module;
 	}
@@ -61,14 +61,14 @@ bool BuiltinLoader::prepSemantics(instance<> semantics)
 	return false;
 }
 
-instance<Module> BuiltinModuleDescription::build(instance<Namespace> ns, instance<> loader)
+instance<Module> BuiltinModuleDescription::build(instance<Environment> env, instance<> loader)
 {
 	if (_builder == nullptr)
 	{
 		if (_initer == nullptr)
 			throw stdext::exception("Builtin does not have builder or initer.");
 
-		auto ret = instance<Module>::make(ns, loader);
+		auto ret = instance<Module>::make(env, loader);
 
 		auto sem = instance<CultSemantics>::make(ret);
 		sem->readPrepDefaults();
@@ -78,7 +78,7 @@ instance<Module> BuiltinModuleDescription::build(instance<Namespace> ns, instanc
 
 		return ret;
 	}
-	return _builder(ns, loader);
+	return _builder(env, loader);
 }
 
 CRAFT_INIT_PRIORITY BuiltinModuleDescription craft::lisp::BuiltinCultSystem("cult/system", library::make_module_builtin_cult_system);
@@ -92,7 +92,7 @@ CRAFT_DEFINE(FileLoader)
 	_.defaults();
 }
 
-std::string FileLoader::resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra)
+std::string FileLoader::resolve(instance<Environment> env, instance<Module> requester, std::string const& proto_string, instance<> extra)
 {
 	if (requester)
 	{
@@ -105,19 +105,19 @@ std::string FileLoader::resolve(instance<Namespace> ns, instance<Module> request
 			if (path::exists(relativePath))
 				return relativePath;
 
-			SPDLOG_TRACE(ns->getEnvironment()->log(), "Relative path `{0}` not found using absolute path.", relativePath);
+			SPDLOG_TRACE(env->log(), "Relative path `{0}` not found using absolute path.", relativePath);
 		}
 	}
 
 	return path::absolute(proto_string);
 }
 
-instance<Module> FileLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
+instance<Module> FileLoader::load(instance<Environment> env, std::string const& proto_string, instance<> extra)
 {
 	auto ret = instance<FileLoader>::makeThroughLambda([](auto p) { return new (p) FileLoader(); });
 	ret->_filePath = path::normalize(path::absolute(proto_string));
 
-	return ret->_module = instance<Module>::make(ns, ret);
+	return ret->_module = instance<Module>::make(env, ret);
 }
 
 instance<> FileLoader::getContent()
@@ -146,17 +146,17 @@ CRAFT_DEFINE(ReplLoader)
 	_.defaults();
 }
 
-std::string ReplLoader::resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra)
+std::string ReplLoader::resolve(instance<Environment> env, instance<Module> requester, std::string const& proto_string, instance<> extra)
 {
 	return proto_string;
 }
 
-instance<Module> ReplLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
+instance<Module> ReplLoader::load(instance<Environment> env, std::string const& proto_string, instance<> extra)
 {
 	auto ret = instance<ReplLoader>::makeThroughLambda([](auto p) { return new (p) ReplLoader(); });
 	ret->_replName = proto_string;
 
-	return ret->_module = instance<Module>::make(ns, ret);
+	return ret->_module = instance<Module>::make(env, ret);
 }
 
 instance<> ReplLoader::getContent()
@@ -182,13 +182,13 @@ CRAFT_DEFINE(AnonLoader)
 	_.defaults();
 }
 
-std::string AnonLoader::resolve(instance<Namespace> ns, instance<Module> requester, std::string const& proto_string, instance<> extra)
+std::string AnonLoader::resolve(instance<Environment> env, instance<Module> requester, std::string const& proto_string, instance<> extra)
 {
 	// TODO move anon counting here
 	return proto_string;
 }
 
-instance<Module> AnonLoader::load(instance<Namespace> ns, std::string const& proto_string, instance<> extra)
+instance<Module> AnonLoader::load(instance<Environment> env, std::string const& proto_string, instance<> extra)
 {
 	if (!extra || !extra.isType<AnonLoader>())
 		throw stdext::exception("Anon loaders must be prebuilt.");
@@ -196,7 +196,7 @@ instance<Module> AnonLoader::load(instance<Namespace> ns, std::string const& pro
 	auto ret = extra.asType<AnonLoader>();
 	ret->_anonName = proto_string;
 
-	return ret->_module = instance<Module>::make(ns, extra);
+	return ret->_module = instance<Module>::make(env, extra);
 }
 
 void AnonLoader::setModule(instance<Module> module)

@@ -15,7 +15,6 @@ namespace features
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::features::LispRepl);
 
 		instance<Environment> _env;
-		instance<Namespace> _ns;
 		instance<Module> _live_module;
 		std::string _history_file;
 
@@ -24,8 +23,7 @@ namespace features
 
 		CRAFT_LISP_EXPORTED LispRepl(std::function<void(instance<Module>)> init = nullptr);
 
-		CRAFT_LISP_EXPORTED inline instance<Environment> getEnv() { return _env; }
-		CRAFT_LISP_EXPORTED inline instance<Namespace> getNamespace() { return _ns; }
+		CRAFT_LISP_EXPORTED inline instance<Environment> getEnviroment() { return _env; }
 		CRAFT_LISP_EXPORTED inline instance<Module> getModule() { return _live_module; }
 		
 		CRAFT_LISP_EXPORTED instance<> invoke(instance<std::string> s, bool record = false);

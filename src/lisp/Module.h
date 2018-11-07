@@ -42,7 +42,7 @@ namespace lisp
 		std::mutex _mutex;
 		State _state;
 
-		instance<Namespace> _ns;
+		instance<Environment> _env;
 		std::string _uri;
 
 		instance<> _loader; // module specific loader
@@ -62,10 +62,10 @@ namespace lisp
 		// Module management
 	public:
 
-		CRAFT_LISP_EXPORTED Module(instance<Namespace> ns, instance<> loader);
+		CRAFT_LISP_EXPORTED Module(instance<Environment> env, instance<> loader);
 		CRAFT_LISP_EXPORTED void craft_setupInstance();
 
-		CRAFT_LISP_EXPORTED instance<Namespace> getNamespace() const;
+		CRAFT_LISP_EXPORTED instance<Environment> getEnvironment() const;
 		CRAFT_LISP_EXPORTED instance<> getLoader() const;
 
 		CRAFT_LISP_EXPORTED State getState() const;

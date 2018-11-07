@@ -8,10 +8,9 @@ namespace lisp
 
 	class SFrameSection;
 
-	class Namespace;
+	class Environment;
 	class Module;
 	class Execution;
-	class Environment;
 
 	class Function;
 	class MultiMethod;
@@ -34,10 +33,9 @@ namespace lisp
 
 #include "loaders.h"
 
-#include "Namespace.h"
+#include "Environment.h"
 #include "Module.h"
 #include "Execution.h"
-#include "Environment.h"
 
 #include "lisp/syntax/syntax.h"
 #include "lisp/library/system/prelude.h"

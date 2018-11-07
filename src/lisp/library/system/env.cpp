@@ -108,7 +108,7 @@ void core::make_env_globals(instance<Module> ret)
 		[]() -> instance<List>
 	{
 		auto res = instance<List>::make();
-		auto argv = Execution::getCurrent()->getNamespace()->getEnvironment()->argv();
+		auto argv = Execution::getCurrent()->getEnvironment()->argv();
 
 		for (auto i : argv)
 		{

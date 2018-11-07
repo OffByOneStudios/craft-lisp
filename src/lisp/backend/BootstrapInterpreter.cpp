@@ -211,9 +211,9 @@ CRAFT_DEFINE(BootstrapInterpreter)
 	_.defaults();
 }
 
-BootstrapInterpreter::BootstrapInterpreter(instance<Namespace> lisp)
+BootstrapInterpreter::BootstrapInterpreter(instance<Environment> env)
 {
-	_lisp = lisp;
+	_env = env;
 }
 
 instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, types::GenericInvoke const& call) const
@@ -225,7 +225,7 @@ instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, ty
 	if (call.args.size() != 0)
 		throw stdext::exception("Cannot init {0}: expected 0 args.", module);
 
-	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
+	SPDLOG_TRACE(module->getEnvironment()->log(),
 		"BootstrapInterpreter::_special_init\t({0})", module);
 
 	auto statement_count = sem->countStatements();
@@ -257,7 +257,7 @@ instance<> BootstrapInterpreter::_special_append(instance<lisp::Module> module, 
 	if (call.args.size() != 1 && !call.args[0].isType<lisp::Module>())
 		throw stdext::exception("Cannot init {0}: expected 1 arg as a lisp::Module.", module);
 
-	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
+	SPDLOG_TRACE(module->getEnvironment()->log(),
 		"BootstrapInterpreter::_special_append\t({0}, {1})", module, call.args[0]);
 
 	instance<RuntimeSlots> slots = module->moduleValue();
@@ -291,7 +291,7 @@ instance<> BootstrapInterpreter::_special_merge(instance<lisp::Module> module, t
 	if (call.args.size() != 1 && !call.args[0].isType<lisp::Module>())
 		throw stdext::exception("Cannot init {0}: expected 1 arg as a lisp::Module.", module);
 
-	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
+	SPDLOG_TRACE(module->getEnvironment()->log(),
 		"BootstrapInterpreter::_special_merge\t({0}, {1})", module, call.args[0]);
 
 	instance<RuntimeSlots> slots = module->moduleValue();
@@ -314,7 +314,7 @@ instance<> BootstrapInterpreter::exec(instance<lisp::Module> module, std::string
 	auto semantics = module->require<CultSemantics>();
 	auto binding = semantics->lookup(Symbol::makeSymbol(entry));
 
-	SPDLOG_TRACE(module->getNamespace()->getEnvironment()->log(),
+	SPDLOG_TRACE(module->getEnvironment()->log(),
 		"BootstrapInterpreter::exec\t({0}, {1}, argc: {2})", module, entry, call.args.size());
 
 	if (!binding)
@@ -350,7 +350,7 @@ BootstrapInterpreterProvider::BootstrapInterpreterProvider()
 
 }
 
-instance<> BootstrapInterpreterProvider::init(instance<Namespace> ns) const
+instance<> BootstrapInterpreterProvider::init(instance<Environment> ns) const
 {
 	return instance<BootstrapInterpreter>::make(ns);
 }

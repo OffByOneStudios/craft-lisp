@@ -62,21 +62,15 @@ These are objects that are part of the system as a whole.
 
 ### Environment
 
-This is the root class for managing the host of the interpreter. Specifically, managing per process data (like static data) and holding the implementation's static data (like the list of interpreters).
-
-### Namespace
-
-(Should probably be named Interpreter or System)
-
-This is an instance of the language. It manages threads, current executions, currently loaded modules, etc.
+This is the root class for managing the host of the interpreter, it manages a list of modules.
 
 ### Module
 
-Part of the namespace's interface, this represents a collection of code in the system.
+Part of the environment's interface, this represents a collection of code in the system.
 
 ### Execution
 
-Part of the namespace's interface, this represents an execution. Provides a thread local interface to get the current execution. Namespaces and Executors must cooperate to ensure this is always correct.
+Part of the environment's interface, this represents an execution. Provides a thread local interface to get the current execution. Environments and Executors must cooperate to ensure this is always correct.
 
 ## Features
 
@@ -125,12 +119,12 @@ This describes the phases that code goes through to be executed. Between each ph
 External requests for execution of these phases should go through the namespace and the modules it provides.
 
 ```c++
-instance<lisp::Namespace> ns = env->ns_user;
+instance<lisp::Environment> env;
 
-ns->eval("(+ 3 4)"); // Uses the default UserModule: `user:*defualt*`
+env->eval("(+ 3 4)"); // Uses the default UserModule: `user:*defualt*`
 
-instance<lisp::Module> module = ns->requireModule("file:test.cult");
-instance<lisp::OpenModule> user_module = ns->makeModule("my-foo-module");
+instance<lisp::Module> module = env->requireModule("file:test.cult");
+instance<lisp::OpenModule> user_module = env->makeModule("my-foo-module");
 
 // -- Execution --
 instance<> res;
@@ -139,17 +133,17 @@ instance<> res;
 user_module->eval("(define test (fn (x) (concat (str x) \"testing\")))"); 
 
 // Call a function in the module
-res = ns->exec(module, "test"); 
-res = ns->exec(user_module, "test", lisp::GenericCall { instance<uint64_t>::make(15) });
+res = env->exec(module, "test"); 
+res = env->exec(user_module, "test", lisp::GenericCall { instance<uint64_t>::make(15) });
 
 // -- Compilation --
 instance<> compiler_options = PCompiler::deserialize_options(s);
 
 // Compiles the whole namespace - as described by options - to the given path
-ns->compile(path, compiler_options); // this is how exectuables are done
+env->compile(path, compiler_options); // this is how exectuables are done
 
 // Compiles the module - as described by options - to the given path
-ns->compile(module, path, compiler_options); // custom user caching/AoT, prefer built-in caching
+env->compile(module, path, compiler_options); // custom user caching/AoT, prefer built-in caching
 ```
 
 Internal requests should go through namespace as well:
@@ -159,19 +153,19 @@ Internal requests should go through namespace as well:
 PSyntax::ParseOptions parse_options;
 
 // Parsing (from string):
-instance<CultLispSyntax> source = ns->parse<CultLispSyntax>(some_string, &parse_options);
-instance<> source = ns->parse(some_string, cpptype<CultLispSyntax>::typeDesc(), &parse_options);
+instance<CultLispSyntax> source = env->parse<CultLispSyntax>(some_string, &parse_options);
+instance<> source = env->parse(some_string, cpptype<CultLispSyntax>::typeDesc(), &parse_options);
 
 // -- Reading --
 PSyntax::ReadOptions read_options;
 
 // Reading (from string):
-instance<CultSemantics> semantics = ns->read<CultSemantics>(some_string, &parse_options, &read_options);
-instance<> semantics = ns->read(some_string, cpptype<CultSemantics>::typeDesc(), &parse_options, &read_options);
+instance<CultSemantics> semantics = env->read<CultSemantics>(some_string, &parse_options, &read_options);
+instance<> semantics = env->read(some_string, cpptype<CultSemantics>::typeDesc(), &parse_options, &read_options);
 
 // Reading (from syntax):
-instance<CultSemantics> semantics = ns->read<CultSemantics>(source, &read_options);
-instance<> semantics = ns->read(source, cpptype<CultSemantics>::typeDesc(), &read_options);
+instance<CultSemantics> semantics = env->read<CultSemantics>(source, &read_options);
+instance<> semantics = env->read(source, cpptype<CultSemantics>::typeDesc(), &read_options);
 
 // -- Execution --
 // Execution uses the same interface as external code. This allows the language to know if it
@@ -193,8 +187,8 @@ assert(func_sem./*isType*/hasFeature<SCultSubroutine>());
 func_sem = module->require<CultSemantics>()->get(function_name);
 
 // Get the handle from the backend
-auto func_backend_handle = ns->get<LlvmBackend>()->get(func_sem);
-auto module_backend_handle = ns->get<LlvmBackend>()->get(module);
+auto func_backend_handle = env->get<LlvmBackend>()->get(func_sem);
+auto module_backend_handle = env->get<LlvmBackend>()->get(module);
 
 // -- Execution --
 // These will setup the current Execution correctly.

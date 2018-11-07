@@ -15,9 +15,9 @@ CRAFT_DEFINE(Module)
 }
 
 
-Module::Module(instance<Namespace> ns, instance<> loader)
+Module::Module(instance<Environment> env, instance<> loader)
 {
-	_ns = ns;
+	_env = env;
 	_loader = loader;
 	_uri = _loader.getFeature<PModuleLoader>()->getUri(_loader);
 
@@ -36,9 +36,9 @@ std::string Module::uri() const
 	return _uri;
 }
 
-instance<Namespace> Module::getNamespace() const
+instance<Environment> Module::getEnvironment() const
 {
-	return _ns;
+	return _env;
 }
 
 instance<> Module::getLoader() const
@@ -119,7 +119,7 @@ bool Module::update(bool force)
 
 	if (!force)
 	{
-		getNamespace()->getEnvironment()->log()->warn("Detecting updates isn't implemented yet; detect yourself and call with force.");
+		getEnvironment()->log()->warn("Detecting updates isn't implemented yet; detect yourself and call with force.");
 	}
 
 	if (needsUpdate)
@@ -202,7 +202,7 @@ instance<> Module::require(types::TypeId type)
 
 instance<> Module::exec(std::string method, types::GenericInvoke const& call)
 {
-	return _ns->exec(craft_instance(), method, call);
+	return _env->exec(craft_instance(), method, call);
 }
 
 instance<> Module::eval(std::string const& code)

@@ -12,7 +12,7 @@ namespace lisp
 
 	public:
 		// Creates a new backend for the given namespace
-		CRAFT_LISP_EXPORTED virtual instance<> init(instance<Namespace>) const = 0;
+		CRAFT_LISP_EXPORTED virtual instance<> init(instance<Environment>) const = 0;
 	};
 
 }}

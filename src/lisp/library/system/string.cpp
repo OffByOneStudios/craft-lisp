@@ -101,29 +101,29 @@ void core::make_string_globals(instance<Module> ret)
 			str = Execution::exec_fromCurrentModule("format", invoke).asType<std::string>();
 		}
 
-		auto ns = Execution::getCurrent()->getNamespace();
+		auto env = Execution::getCurrent()->getEnvironment();
 
 		spdlog::level::level_enum level = spdlog::level::level_enum::off;
 		if (sym->isKeyword())
 		{
-			auto critical = ns->symbolStore.intern("critical");
+			auto critical = env->symbolStore.intern("critical");
 			if (critical == sym->at(1)) level = spdlog::level::level_enum::critical;
-			auto error = ns->symbolStore.intern("error");
+			auto error = env->symbolStore.intern("error");
 			if (error == sym->at(1)) level = spdlog::level::level_enum::err;
-			auto warning = ns->symbolStore.intern("warning");
+			auto warning = env->symbolStore.intern("warning");
 			if (warning == sym->at(1)) level = spdlog::level::level_enum::warn;
-			auto info = ns->symbolStore.intern("info");
+			auto info = env->symbolStore.intern("info");
 			if (info == sym->at(1)) level = spdlog::level::level_enum::info;
-			auto debug = ns->symbolStore.intern("debug");
+			auto debug = env->symbolStore.intern("debug");
 			if (debug == sym->at(1)) level = spdlog::level::level_enum::debug;
-			auto trace = ns->symbolStore.intern("trace");
+			auto trace = env->symbolStore.intern("trace");
 			if (trace == sym->at(1)) level = spdlog::level::level_enum::trace;
 		}
 
 		if (level == spdlog::level::level_enum::off)
 			throw stdext::exception("Unknown level {0}", sym->getDisplay());
 
-		ns->getEnvironment()->log()->log(level, str->c_str());
+		env->log()->log(level, str->c_str());
 	});
 
 	bMM("log", [](instance<Symbol> sym, instance<> thing)

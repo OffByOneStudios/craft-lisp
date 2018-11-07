@@ -10,18 +10,8 @@ Modules have strong names using a URI scheme. Custom handlers can be added to th
 * "file:D:\Data\hello.cult" Would resolve to an absolute file.
 * "file:hello.cult" Would resolve to a file local to the current file.
 * "file:./test/hello.cult" Would resolve to a file relative to the current file's directory.
-
-### Future Design
-
-It would be nice if the language had a way to load folders of files automatically. Namely through a "project" file which then configured what to load (and how) through a macro.
-
-This would then need a "namespace" mechanic (after reclaiming the name namespace perhaps) for doing C#/C++ style namespacing.
-
-## Namespaces
-
-Namespaces are the current name for containing the sequence of global state created by the load order of modules. They store the list of modules (e.g. the order they were loaded in) and are responsible for managing any global state.
-
-Importantly namespaces are orthogonal to modules. Modules represent the source of code. Namespaces represent the resulting state of code.
+* "packman:Organization/Package" Would use a package manager to resolve to a specific package.
+* "namespace:foo/bar" Would resolve to the "meta" module containing all the symbols in the given namespace.
 
 ## Lifecycle
 

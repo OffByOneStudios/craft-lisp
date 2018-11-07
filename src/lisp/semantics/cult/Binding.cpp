@@ -295,7 +295,7 @@ void NamespaceManipulation::bind()
 	{
 		case Manipulation::Import:
 		{
-			auto required_module = sem->getModule()->getNamespace()->importModule(sem->getModule(), _primary); // TODO store reference somewhere for this node?
+			auto required_module = sem->getModule()->getEnvironment()->importModule(sem->getModule(), _primary); // TODO store reference somewhere for this node?
 			required_module->initialize(); // TODO wait for initalization to complete
 			sem->importModule(required_module); // TODO move to runtime of this module
 		} break;

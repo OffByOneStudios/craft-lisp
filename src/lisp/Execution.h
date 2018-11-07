@@ -11,7 +11,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Execution);
 	private:
 
-		instance<Namespace> _namespace;
+		instance<Environment> _env;
 
 		std::list<instance<SFrameSection>> _stack;
 
@@ -20,7 +20,7 @@ namespace lisp
 		// Lifecycle
 	public:
 
-		CRAFT_LISP_EXPORTED Execution(instance<Namespace> ns);
+		CRAFT_LISP_EXPORTED Execution(instance<Environment> env);
 
 		CRAFT_LISP_EXPORTED void makeCurrent();
 		CRAFT_LISP_EXPORTED static instance<Execution> getCurrent();
@@ -28,7 +28,7 @@ namespace lisp
 
 		// Instance members
 	public:
-		CRAFT_LISP_EXPORTED instance<Namespace> getNamespace() const;
+		CRAFT_LISP_EXPORTED instance<Environment> getEnvironment() const;
 
 		CRAFT_LISP_EXPORTED std::list<instance<SFrameSection>> const& stack() const;
 		CRAFT_LISP_EXPORTED void push_frame(instance<SFrameSection> _push);

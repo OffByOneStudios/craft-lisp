@@ -39,7 +39,7 @@ bool Symbol::isSimple() const
 
 std::string Symbol::getDisplay() const
 {
-	auto& symbol_store = Execution::getCurrent()->getNamespace()->symbolStore;
+	auto& symbol_store = Execution::getCurrent()->getEnvironment()->symbolStore;
 	auto size = _symbolseq.size();
 
 	if (size == 1 && !isPath(_symbolseq[0]))
@@ -67,7 +67,7 @@ instance<Symbol> Symbol::makeSymbol(std::vector<uint32_t> const& s)
 
 instance<Symbol> Symbol::makeSymbol(std::string const& s)
 {
-	auto& symbol_store = Execution::getCurrent()->getNamespace()->symbolStore;
+	auto& symbol_store = Execution::getCurrent()->getEnvironment()->symbolStore;
 
 	auto const c_lookup_str = ":.@"; // "/:.@"
 	auto const c_lookup_str_end = c_lookup_str + 3;

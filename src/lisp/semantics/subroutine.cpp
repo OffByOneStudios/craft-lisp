@@ -40,7 +40,7 @@ namespace lisp {
 			instance<SubroutineClosure> cl = _;
 
 			// TODO make this generic
-			auto frame = InterpreterFrameSection::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
+			auto frame = InterpreterFrameSection::ensureCurrent(Execution::getCurrent()->getEnvironment()->get<BootstrapInterpreter>());
 
 			return frame->interp_call(cl->subroutine, call, cl->scope_frame.asType<InterpreterFrame>());
 		}

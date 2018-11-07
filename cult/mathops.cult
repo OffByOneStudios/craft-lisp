@@ -113,7 +113,7 @@
   )
 )
 
-(print "void system::make_math_globals(instance<Module>& ret, instance<Namespace>& ns) {")
+(print "void system::make_math_globals(instance<Module>& ret, instance<Environment>& ns) {")
 (print "		auto env = ns->environment();")
 (print (join castMulti))
 (print (join ringMulti))

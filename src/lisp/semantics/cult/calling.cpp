@@ -101,7 +101,7 @@ namespace lisp {
 			instance<Function> fn = _;
 
 			// TODO make this generic
-			auto frame = InterpreterFrameSection::ensureCurrent(Execution::getCurrent()->getNamespace()->get<BootstrapInterpreter>());
+			auto frame = InterpreterFrameSection::ensureCurrent(Execution::getCurrent()->getEnvironment()->get<BootstrapInterpreter>());
 
 			return frame->interp_call(fn, call);
 		}

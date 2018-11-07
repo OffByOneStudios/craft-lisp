@@ -127,7 +127,7 @@ namespace lisp
 		friend class InterpreterFrame;
 		friend class InterpreterFrameSection;
 
-		instance<Namespace> _lisp;
+		instance<Environment> _env;
 		instance<MultiMethod> _fn_system_exec;
 
 	public:
@@ -142,7 +142,7 @@ namespace lisp
 
 	public:
 
-		CRAFT_LISP_EXPORTED BootstrapInterpreter(instance<Namespace> lisp);
+		CRAFT_LISP_EXPORTED BootstrapInterpreter(instance<Environment> env);
 
 		CRAFT_LISP_EXPORTED instance<> exec(instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const&);
 
@@ -160,7 +160,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED BootstrapInterpreterProvider();
 
 	public:
-		virtual instance<> init(instance<Namespace> env) const override;
+		virtual instance<> init(instance<Environment> env) const override;
 
 		virtual instance<> exec(instance<> backend, instance<lisp::Module> module, std::string const& entry, types::GenericInvoke const&) const override;
 	};

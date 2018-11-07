@@ -28,7 +28,7 @@ CultSemantics::CultSemantics(instance<lisp::Module> forModule)
 
 void CultSemantics::rebuildModulesCache()
 {
-	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
+	SPDLOG_TRACE(_module->getEnvironment()->log(),
 		"CultSemantics::rebuildModulesCache");
 	std::set<instance<Module>> result_set;
 	std::list<instance<Module>> working_list;
@@ -108,12 +108,12 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 
 void CultSemantics::readPrepDefaults()
 {
-	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
+	SPDLOG_TRACE(_module->getEnvironment()->log(),
 		"CultSemantics::readPrepDefaults\t({0})", _module);
 
 	// These are implict, and must be made available by these execution engine.
-	importModule(_module->getNamespace()->importModule(_module, "builtin:cult/system"));
-	importModule(_module->getNamespace()->importModule(_module, "builtin:cult/core"));
+	importModule(_module->getEnvironment()->importModule(_module, "builtin:cult/system"));
+	importModule(_module->getEnvironment()->importModule(_module, "builtin:cult/core"));
 }
 
 void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOptions const* opts)
@@ -129,7 +129,7 @@ void CultSemantics::read(instance<CultLispSyntax> syntax, PSemantics::ReadOption
 	_bindings.table.clear();
 	_source = syntax;
 
-	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
+	SPDLOG_TRACE(_module->getEnvironment()->log(),
 		"CultSemantics::read\t({0})", _module);
 
 	for (auto syntax : syntax->getRootForms())
@@ -203,7 +203,7 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 	// TODO search for namespace prefix
 
 	auto const size = search.size();
-	auto const& symbols = _module->getNamespace()->symbolStore;
+	auto const& symbols = _module->getEnvironment()->symbolStore;
 
 	std::vector<instance<Binding>> res;
 	for (auto& it : _bindings.table)
@@ -229,7 +229,7 @@ std::vector<instance<Binding>> CultSemantics::search(std::string const & search)
 
 void CultSemantics::importModule(instance<Module> m)
 {
-	SPDLOG_TRACE(_module->getNamespace()->getEnvironment()->log(),
+	SPDLOG_TRACE(_module->getEnvironment()->log(),
 		"CultSemantics::importModule\t({0}, {1})", _module, m);
 
 	if (std::find(_modules.begin(), _modules.end(), m) != _modules.end())

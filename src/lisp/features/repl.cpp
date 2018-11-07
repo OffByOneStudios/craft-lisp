@@ -50,9 +50,8 @@ LispRepl::LispRepl(std::function<void(instance<Module>)> init)
 	logger->set_level(spdlog::level::trace);
 
 	_env = instance<Environment>::make(logger);
-	_ns = _env->ns_user;
 
-	_live_module = _env->ns_user->importModule(instance<>(), "repl:console");
+	_live_module = _env->importModule(instance<>(), "repl:console");
 	if (init) init(_live_module);
 	_live_module->initialize();
 
@@ -132,7 +131,7 @@ instance<> LispRepl::invoke(instance<std::string> input, bool record)
 		auto statement_loader = instance<AnonLoader>::make();
 		statement_loader->setContent(input);
 		statement_loader->setModule(_live_module);
-		statement = _ns->importModule(_live_module, "anon:repl", statement_loader);
+		statement = _env->importModule(_live_module, "anon:repl", statement_loader);
 	}
 	catch (std::exception const& ex)
 	{

@@ -24,16 +24,17 @@ int main(int argc, char** argv)
 		{
 			_argv.push_back(instance<std::string>::make(argv[i]));
 		}
-		instance<Environment> global_env = instance<Environment>::make(spdlog::stdout_color_mt("environment"), _argv);
-		instance<Namespace> ns = global_env->ns_user;
+
+		instance<Environment> env = instance<Environment>::make(spdlog::stdout_color_mt("environment"), _argv);
+
 		try
 		{
-			auto live_module = ns->importModule(instance<>(), fmt::format("file:{0}", path::normalize(argv[1])));
+			auto live_module = env->importModule(instance<>(), fmt::format("file:{0}", path::normalize(argv[1])));
 			live_module->initialize();
 		}
 		catch (std::exception const& e)
 		{
-			global_env->log()->error(e.what());
+			env->log()->error(e.what());
 			return -1;
 		}
 	}
