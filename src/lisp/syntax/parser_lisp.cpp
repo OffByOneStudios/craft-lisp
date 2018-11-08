@@ -270,6 +270,8 @@ namespace lisp_grammar
 			{
 				auto suf = s.substr(ind);
 				if (suf == "") ps.top()->cells.push_back(craft::types::cpptype<double>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "f") ps.top()->cells.push_back(craft::types::cpptype<float>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
+				else if (suf == "d") ps.top()->cells.push_back(craft::types::cpptype<double>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else if (suf == "f32") ps.top()->cells.push_back(craft::types::cpptype<float>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else if (suf == "f64") ps.top()->cells.push_back(craft::types::cpptype<double>::typeDesc().getFeature<PParse>()->parse(s.substr(0, ind)));
 				else throw stdext::exception("No Such Float Literal Suffix: {0}", suf);

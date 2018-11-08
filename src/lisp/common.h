@@ -43,8 +43,10 @@
 #include <spdlog/fmt/ostr.h>
 #include "spdlog/sinks/stdout_color_sinks.h"
 
+#ifdef CULT_TRACE
 #undef SPDLOG_TRACE
 #define SPDLOG_TRACE(logger, ...) logger->trace(__VA_ARGS__)
+#endif
 
 // Deps
 #include "util/all.h"

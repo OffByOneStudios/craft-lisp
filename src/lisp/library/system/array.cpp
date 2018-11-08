@@ -41,6 +41,10 @@ Array::Array(types::TypeId t, std::vector<instance<>> const& data)
 }
 
 
+types::TypeId Array::type()
+{
+	return _type;
+}
 
 instance<int64_t> Array::size()
 {
