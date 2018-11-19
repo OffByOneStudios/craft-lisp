@@ -20,7 +20,7 @@ CRAFT_DEFINE(CallSite)
 		auto count = that->argCount();
 		std::vector<instance<SCultSemanticNode>> args;
 		args.reserve(count);
-		for (auto i = 0; i < count; ++i)
+		for (size_t i =0; i < count; ++i)
 			args.push_back(SCultSemanticNode::_clone(that->argAst(i)));
 
 		return instance<CallSite>::make(_clone(that->calleeAst()), args);
@@ -120,7 +120,7 @@ CRAFT_DEFINE(lisp::Function)
 
 		auto count = that->argCount();
 		//clone->preSize(count);
-		for (auto i = 0; i < count; ++i)
+		for (size_t i =0; i < count; ++i)
 			clone->pushArg(_clone(that->argAst(i)));
 
 		return clone;
@@ -171,7 +171,7 @@ types::ExpressionStore lisp::Function::subroutine_signature() const
 {
 	auto rc = argCount();
 	std::vector<IExpression*> args;
-	for (auto i = 0; i < rc; ++i)
+	for (size_t i =0; i < rc; ++i)
 	{
 		auto a = argAst(i);
 		if (!(a && a.isType<BindSite>())) throw stdext::exception("Malformed Argument");

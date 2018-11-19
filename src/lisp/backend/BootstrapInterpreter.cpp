@@ -155,14 +155,15 @@ instance<> InterpreterFrameSection::interp_call(instance<> fn, types::GenericInv
 	if (fn.isType<Function>())
 	{
 		auto fnast = fn.asType<Function>();
-		InterpreterFrameSection::Push _hold(craft_instance(), fnast, chain);
+		auto inst_ = craft_instance();
+		InterpreterFrameSection::Push _hold(inst_, fnast, chain);
 
 		if (call.args.size() != fnast->argCount())
 			throw stdext::exception("Interpreter asked to execute function with mismatched arguments ({0} calling {1}).", call.args.size(), fnast->argCount());
 
 		auto rtv = _hold.frame()->getValue();
 		auto count = fnast->argCount();
-		for (auto i = 0; i < count; ++i)
+		for (size_t i = 0; i < count; ++i)
 		{
 			// TODO bindsites manip here instead maybe?
 			// TODO argument AST node?
@@ -241,7 +242,7 @@ instance<> BootstrapInterpreter::_special_init(instance<lisp::Module> module, ty
 
 	module->_value = slots = _hold.frame()->getValue();
 
-	for (auto stmt_i = 0; stmt_i < statement_count; ++stmt_i)
+	for (size_t stmt_i = 0; stmt_i < statement_count; ++stmt_i)
 	{
 		*slots->getSlot(stmt_i) = frame->interp_exec(sem->getStatement(stmt_i));
 	}
@@ -299,7 +300,8 @@ instance<> BootstrapInterpreter::_special_merge(instance<lisp::Module> module, t
 	auto merge_module = call.args[0].asType<lisp::Module>();
 	auto merge_sem = merge_module->require<CultSemantics>();
 
-	auto merge_list = sem->append(merge_sem);
+	// TODO Is this merge_list supposed to be used?
+	/*auto merge_list =*/ sem->append(merge_sem);
 
 	auto frame = InterpreterFrameSection::ensureCurrent(craft_instance());
 	InterpreterFrameSection::Push _hold(frame, sem, slots);

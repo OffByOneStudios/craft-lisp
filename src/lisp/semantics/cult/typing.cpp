@@ -57,7 +57,7 @@ CRAFT_DEFINE(TypeDescription)
 
 		auto count = that->statementCount();
 		clone->preSize(count);
-		for (auto i = 0; i < count; ++i)
+		for (size_t i =0; i < count; ++i)
 			clone->push(_clone(that->statementAst(i)));
 
 		return clone;

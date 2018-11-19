@@ -100,7 +100,7 @@ namespace lisp
 		// SScope
 	public:
 		CRAFT_LISP_EXPORTED virtual instance<SScope> getParentScope() const override;
-		CRAFT_LISP_EXPORTED virtual size_t TypeDescription::getSlotCount() const override;
+		CRAFT_LISP_EXPORTED virtual size_t getSlotCount() const override;
 
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookup(instance<Symbol>) const override;
 		CRAFT_LISP_EXPORTED virtual instance<Binding> lookupSlot(size_t) const override;

@@ -72,7 +72,7 @@ instance<SCultSemanticNode> CultSemantics::read_cultLisp(ReadState* rs, instance
 		};
 		
 		auto const size = symbol->size();
-		for (auto i = 0; i < size; ++i)
+		for (size_t i =0; i < size; ++i)
 		{
 			auto sym = symbol->at(i);
 			if (Symbol::isPath(sym) && Symbol::toChar(sym) == '.')

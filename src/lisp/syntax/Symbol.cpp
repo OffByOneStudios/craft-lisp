@@ -76,7 +76,7 @@ instance<Symbol> Symbol::makeSymbol(std::string const& s)
 	auto size = s.size();
 	auto nsym = instance<Symbol>::makeThroughLambda([](auto p) { return new (p) Symbol(); });
 	auto last_i = 0;
-	for (auto i = 0; i < size; ++i)
+	for (size_t i =0; i < size; ++i)
 	{
 		auto l = std::find(c_lookup_str, c_lookup_str_end, s[i]);
 		if (l == c_lookup_str_end)

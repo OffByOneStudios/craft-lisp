@@ -95,7 +95,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 			{":in", ""}	
 		};
 
-		for(auto i = 1; i < sexpr->cells.size(); ++i)
+		for(size_t i = 1; i < sexpr->cells.size(); ++i)
 		{
 			auto cell = sexpr->cells[i];
 			if(cell.isType<std::string>() && name == "")
@@ -155,8 +155,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 	sem->builtin_addSpecialForm("define");
 	sem->builtin_specialFormReader("define",
 		[](CultSemantics::ReadState* rs, instance<Sexpr> sexpr) -> instance<SCultSemanticNode>
-		{
-			bool force = false;
+		{			
 			if (sexpr->cells.size() != 3)
 				throw stdext::exception("malformed: (define <symbol> <expr>)");
 
@@ -181,7 +180,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 
 		auto size = sexpr->cells.size();
 		ret->preSize(size - 1);
-		for (auto i = 1; i < size; i++)
+		for (size_t i = 1; i < size; i++)
 		{
 			ret->push(rs->read(sexpr, i));
 		}
@@ -197,7 +196,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 
 		auto size = sexpr->cells.size();
 		ret->preSize(size / 2);
-		for (auto i = 1; i + 1 < size; i += 2)
+		for (size_t i = 1; i + 1 < size; i += 2)
 		{
 			ret->push(rs->read(sexpr, i), rs->read(sexpr, i + 1));
 		}
@@ -292,7 +291,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 		auto body_block = instance<Block>::make();
 		auto size = sexpr->cells.size();
 		body_block->preSize(size - 2);
-		for (auto i = 2; i < size; i++)
+		for (size_t i = 2; i < size; i++)
 		{
 			body_block->push(rs->read(sexpr, i));
 		}
@@ -437,7 +436,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 
 		auto count = ast->argCount();
 		GenericInvoke invoke(count);
-		for (auto i = 0; i < count; i++)
+		for (size_t i = 0; i < count; i++)
 		{
 			invoke.args.push_back(interp->interp_exec(ast->argAst(i)));
 		}
@@ -468,7 +467,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 
 		auto count = ast->statementCount();
 		instance<> last_res;
-		for (auto i = 0; i < count; i++)
+		for (size_t i = 0; i < count; i++)
 		{
 			last_res = interp->interp_exec(ast->statementAst(i));
 		}
@@ -480,7 +479,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 	{
 		auto truth = interp->getBackend().asType<BootstrapInterpreter>()->builtin_truth;
 		auto count = ast->branchCount();
-		for (auto i = 0; i < count; i++)
+		for (size_t i = 0; i < count; i++)
 		{
 			auto cond = interp->interp_exec(ast->branchConditionAst(i));
 			if (*interp->interp_call(truth, { cond }).asType<bool>())
@@ -540,7 +539,7 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 		}
 		else
 		{
-			/*for(auto i = 0; i < ast->statementCount(); i++)
+			/*for(size_t i =0; i < ast->statementCount(); i++)
 			{
 				auto variable = ast->statementAst(i).asType<Variable>();
 				auto vtype = variable->typeAst();
@@ -561,9 +560,9 @@ instance<Module> library::make_module_builtin_cult_system(instance<Environment> 
 	{
 		return ast;
 	});
-
-	sem->builtin_implementMultiMethod("abort",  []() { abort();});
-	sem->builtin_implementMultiMethod("exit",  [](instance<int32_t> code) { exit(*code);});
+ 
+	sem->builtin_implementMultiMethod("abort",  []() { abort(); return instance<>();});
+	sem->builtin_implementMultiMethod("exit",  [](instance<int32_t> code) { exit(*code); return instance<>();});
 
 	//
 	// Semantics - compilers

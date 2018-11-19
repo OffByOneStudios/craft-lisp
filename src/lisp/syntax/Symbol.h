@@ -62,7 +62,7 @@ namespace lisp
 
 		inline bool operator==(Symbol const& other) const {
 			if (_symbolseq.size() != other._symbolseq.size()) return false;
-			for (auto i = 0; i < _symbolseq.size(); i++)
+			for (size_t i =0; i < _symbolseq.size(); i++)
 			{
 				if (_symbolseq[i] != other._symbolseq[i]) return false;
 			}
@@ -73,7 +73,7 @@ namespace lisp
 		inline bool operator<(Symbol const& other) const {
 			if (other._symbolseq.size() > _symbolseq.size()) return false;
 			else if (other._symbolseq.size() < _symbolseq.size()) return true;
-			for (auto i = 0; i < _symbolseq.size(); i++)
+			for (size_t i =0; i < _symbolseq.size(); i++)
 			{
 				if (_symbolseq[i] < other._symbolseq[i]) return true;
 			}
@@ -85,7 +85,7 @@ namespace lisp
 		inline bool operator>(Symbol const& other) const {
 			if (other._symbolseq.size() > _symbolseq.size()) return true;
 			else if (other._symbolseq.size() < _symbolseq.size()) return false;
-			for (auto i = 0; i < _symbolseq.size(); i++)
+			for (size_t i =0; i < _symbolseq.size(); i++)
 			{
 				if (_symbolseq[i] > other._symbolseq[i]) return true;
 			}

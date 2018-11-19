@@ -26,7 +26,7 @@ Array::Array(types::TypeId t, std::vector<instance<>> const& data)
 { 
     _type = t;
     _typeSize = types::system().graph().getFirstPropValue<types::GraphPropertyCppSize>(t);
-    for(auto i = 0; i < data.size(); ++i)
+    for(size_t i =0; i < data.size(); ++i)
     {
         if(data[i].typeId() != t)
             throw stdext::exception("Elements of array must be of the same type");
@@ -34,7 +34,7 @@ Array::Array(types::TypeId t, std::vector<instance<>> const& data)
     
     _data.resize(data.size() * _typeSize);
     auto _dPtr = (uint8_t*)_data.data();
-    for(auto i = 0; i < data.size(); ++i)
+    for(size_t i =0; i < data.size(); ++i)
     {
         memcpy(_dPtr + (i * _typeSize), data[i].get(), _typeSize);
     }
@@ -137,7 +137,7 @@ CRAFT_DEFINE(Array)
 		std::ostringstream res;
 		auto s = *l->size();
 		res << "[";
-		for (auto i = 0; i < s; i++)
+		for (size_t i =0; i < s; i++)
 		{
 			auto it = l->at(instance<int64_t>::make(i));
 			if (it.get() == nullptr) res << "null";

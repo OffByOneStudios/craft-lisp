@@ -69,9 +69,9 @@ void core::make_meta_globals(instance<Module> ret)
 #ifdef  _WIN32
 		auto clean = *s + ".dll";
 #elif	__APPLE__
-		auto clean = "lib + *s + ".dylib";
+		auto clean = "lib" + *s + ".dylib";
 #else
-		auto clean = "lib + *s + ".so";
+		auto clean = "lib" + *s + ".so";
 #endif
 		types::load_dll(clean);
 	});

@@ -53,7 +53,7 @@ PSyntax::SourceLocation CultLispSyntax::getSourceLocation(size_t const& start_po
 
 	size_t start_line_count = 0;
 	size_t start_col_offset = 0;
-	for (auto i = 0; i < start_pos; ++i)
+	for (size_t i =0; i < start_pos; ++i)
 	{
 		if (_source[i] == '\n')
 		{

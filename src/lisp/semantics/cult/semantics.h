@@ -107,7 +107,7 @@ namespace lisp
 		template<typename T>
 		inline void builtin_defineType(std::string const& symbol_name)
 		{
-			builtin_defineConstant(symbol_name, instance<types::Graph::Node>::makeFromPointerAndMemoryManager(types::cpptype<T>::typeDesc().asId(), &graph()));
+			builtin_defineConstant(symbol_name, instance<types::Graph::Node>::makeFromPointerAndMemoryManager(types::cpptype<T>::typeDesc().asId(), &types::graph()));
 		}
 
 		CRAFT_LISP_EXPORTED void builtin_eval(std::string const& contents);

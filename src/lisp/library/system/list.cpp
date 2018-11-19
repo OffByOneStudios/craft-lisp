@@ -91,7 +91,7 @@ CRAFT_DEFINE(List)
 		std::ostringstream res;
 		auto s = *l->size();
 		res << "[";
-		for (auto i = 0; i < s; i++)
+		for (size_t i =0; i < s; i++)
 		{
 			auto it = l->at(instance<int64_t>::make(i));
 			if (it.get() == nullptr) res << "null";
