@@ -121,6 +121,31 @@ namespace library
 
 	};
 
+	
+	class File
+		: public virtual types::Object
+	{
+		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::File);
+	public:
+		class Iterator
+			: public virtual types::Object
+		{
+			CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::library::File::Iterator);
+		public:
+			
+		};
+
+	protected:
+		size_t _typeSize;
+
+		types::TypeId _type;
+		std::vector<std::byte> _data;
+
+	public:
+		CRAFT_LISP_EXPORTED File(std::string filename);
+
+	};
+
 }}}
 
 namespace json {
