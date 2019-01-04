@@ -178,7 +178,7 @@ void core::make_map_globals(instance<Module> ret)
 
 		for (auto& i : a->data())
 		{
-			Execution::exec(b, { i.first, i.second, count });
+			res->push(Execution::exec(b, { i.first, i.second, count }));
 			(*count)++;
 		}
 

@@ -152,14 +152,14 @@ void core::make_string_globals(instance<Module> ret)
 	bMM(st"/join",
 		[](instance<List> a, t_str b) -> t_str
 	{
-		std::cout << *Execution::exec_fromCurrentModule(st, { a }).asType<std::string>();
+		//std::cout << *Execution::exec_fromCurrentModule(st, { a }).asType<std::string>();
 
 		std::ostringstream res;
 
 		auto count = 0;
 		for (auto& i : a->data())
 		{
-			std::cout << *Execution::exec_fromCurrentModule(st, { i }).asType<std::string>();
+			res << *Execution::exec_fromCurrentModule(st, { i }).asType<std::string>();
 			if (count != (*a->size()) - 1) res << *b;
 			count++;
 		}

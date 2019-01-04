@@ -177,6 +177,28 @@ void core::make_list_globals(instance<Module> ret)
 		a->reverse();
 	});
 
+	semantics->builtin_implementMultiMethod("list/flat",
+		[](instance<List> a) -> instance<List>
+	{
+		auto res = instance<List>::make();
+		for(auto i : a->data())
+		{
+			if(i.isType<List>())
+			{
+				for(auto j : i.asType<List>()->data())
+				{
+					res->push(j);
+				}
+			}
+			else
+			{
+				res->push(i);
+			}
+		}
+		return res;
+	});
+
+
 	semantics->builtin_implementMultiMethod("list/fmap",
 		[](instance<List> a, instance<Function> b) -> instance<List>
 	{
@@ -186,7 +208,7 @@ void core::make_list_globals(instance<Module> ret)
 
 		for (auto& i : a->data())
 		{
-			Execution::exec(b, { i, count });
+			res->push(Execution::exec(b, { i, count }));
 			(*count)++;
 		}
 
@@ -202,7 +224,7 @@ void core::make_list_globals(instance<Module> ret)
 
 		for (auto& i : a->data())
 		{
-			b->execute(b, { i, count });
+			res->push(b->execute(b, { i, count }));
 			(*count)++;
 		}
 
