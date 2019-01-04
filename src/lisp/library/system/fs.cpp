@@ -17,7 +17,7 @@ using namespace craft::lisp::library::helper;
 namespace sfs = std::experimental::filesystem;
 #else
 #include <filesystem>
-namespace sfs = std::::filesystem;
+namespace sfs = std::filesystem;
 #endif
 
 

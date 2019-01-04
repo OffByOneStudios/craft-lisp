@@ -14,7 +14,7 @@ using namespace craft::lisp;
 namespace sfs = std::experimental::filesystem;
 #else
 #include <filesystem>
-namespace sfs = std::::filesystem;
+namespace sfs = std::filesystem;
 #endif
 
 
@@ -33,23 +33,23 @@ CRAFT_DEFINE(BuiltinLoader)
 
 bool isLiteralImport(std::string proto_string)
 {
-	return ((proto_string[0] == '.' && proto_string[1] == '/') || path::is_absolute(sfs::path(proto_string)));
+	return ((proto_string[0] == '.' && proto_string[1] == '/') || sfs::path(proto_string).is_absolute());
 }
 
 
-std::string resolveImportDirectory(instance<Environment> e)
+sfs::path resolveImportDirectory(instance<Environment> e)
 {
-	return sfs::canonical(sfs::path(path::dir(e->executablePath())) /= sfs::path("..")).generic_string();
+	return sfs::canonical(sfs::path(path::dir(e->executablePath())) /= sfs::path(".."));
 }
 
-std::string cleanDllName(std::string dllName)
+sfs::path cleanDllName(sfs::path dllName)
 {
 	#ifdef  _WIN32
-		auto clean = dllName + ".dll";
+		auto clean = dllName.replace_extension(".dll");
 	#elif	__APPLE__
-		auto clean = "lib" + dllName + ".dylib";
+		auto clean = sfs::path("lib") += dllName += ".dylib";
 	#else
-		auto clean = "lib" + dllName + ".so";
+		auto clean = sfs::path("lib") += dllName += ".so";
 	#endif
 	return clean;
 }
@@ -64,22 +64,23 @@ std::string BuiltinLoader::resolve(instance<Environment> env, instance<Module> r
 		if (reqLoader.isType<FileLoader>())
 		{
 			instance<FileLoader> reqFileLoader = reqLoader;
-			auto relativePath = path::normalize(path::join(path::dir(reqFileLoader->_filePath), proto_string));
-
-			if (path::exists(relativePath))
+			auto relativePath = sfs::path(reqFileLoader->_filePath).remove_filename() /= sfs::path(proto_string);
+			
+			if (sfs::exists(relativePath))
 			{
-				types::load_dll(path::join(path::dir(relativePath), cleanDllName(path::filename(relativePath))));
-				return relativePath;
+				auto target = relativePath /= cleanDllName(sfs::path(relativePath).filename());
+				types::load_dll(target.string());
 			}
 			SPDLOG_TRACE(env->log(), "Relative path `{0}` not found using absolute path.", relativePath);
 		}
 	}
 	else
 	{
-		auto base = path::join(resolveImportDirectory(env), proto_string);
-		if(sfs::exists(sfs::path(base)))
+		auto base = resolveImportDirectory(env) /= sfs::path(proto_string);
+		if(sfs::exists(base))
 		{
-			types::load_dll(path::join(base, cleanDllName(path::filename(proto_string))));
+			auto target = base /= cleanDllName(sfs::path(proto_string).filename());
+			types::load_dll(target.string());
 		}
 	}
 	return proto_string;
@@ -156,24 +157,26 @@ std::string FileLoader::resolve(instance<Environment> env, instance<Module> requ
 		if (reqLoader.isType<FileLoader>())
 		{
 			instance<FileLoader> reqFileLoader = reqLoader;
-			auto relativePath = path::normalize(path::join(path::dir(reqFileLoader->_filePath), proto_string));
+			auto relativePath = sfs::path(reqFileLoader->_filePath).remove_filename() /= sfs::path(proto_string);
 
-			if (path::exists(relativePath))
-				return relativePath;
+			if (sfs::exists(relativePath))
+			{
+				return path::normalize(relativePath.string());
+			}
 
 			SPDLOG_TRACE(env->log(), "Relative path `{0}` not found using absolute path.", relativePath);
 		}
 	}
 	else
 	{
-		auto base = path::join(resolveImportDirectory(env), proto_string);
-		if(sfs::exists(sfs::path(base)))
+		auto base = resolveImportDirectory(env) /= sfs::path(proto_string);
+		if(sfs::exists(base))
 		{
-			return path::absolute(base);
+			return path::normalize(base.string());
 		}
 	}
 
-	return path::absolute(proto_string);
+	return path::absolute(path::normalize(proto_string));
 }
 
 instance<Module> FileLoader::load(instance<Environment> env, std::string const& proto_string, instance<> extra)
