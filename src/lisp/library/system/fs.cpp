@@ -12,7 +12,15 @@ using namespace craft::lisp;
 using namespace craft::lisp::library;
 using namespace craft::lisp::library::helper;
 
+#ifdef __GNUC__
+#include <experimental/filesystem>
+namespace sfs = std::experimental::filesystem;
+#else
 #include <filesystem>
+namespace sfs = std::::filesystem;
+#endif
+
+
 
 
 namespace _impl {
@@ -78,7 +86,7 @@ void core::make_fs_globals(instance<Module> ret)
 	});
 
 	semantics->builtin_implementMultiMethod("fs/mkdir", [](instance<std::string> s) {
-		std::filesystem::create_directories(*s);
+		sfs::create_directories(*s);
 	});
 
 	semantics->builtin_implementMultiMethod("fs/read",

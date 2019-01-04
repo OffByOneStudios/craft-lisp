@@ -6,6 +6,18 @@
 //#include "lisp/backend/llvm/llvm_internal.h"
 #include "lisp/library/libraries.h"
 
+
+#include <stdlib.h>
+#include <iostream>
+#ifdef __linux__ 
+	#include <experimental/filesystem>
+	namespace cfs = std::experimental::filesystem;
+#else
+	#include <filesystem>
+	namespace cfs = std::filesystem;
+		// windows code goes here
+#endif
+
 using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
@@ -28,7 +40,8 @@ void Environment::craft_setupInstance()
 	Object::craft_setupInstance();
 
 	refreshBackends();
-	
+	initializePath();
+
 	instance<Execution> exec = instance<Execution>::make(craft_instance());
 	exec->makeCurrent();
 
@@ -39,6 +52,12 @@ void Environment::craft_setupInstance()
 std::shared_ptr<spdlog::logger> Environment::log()
 {
 	return _logger;
+}
+
+std::string Environment::executablePath()
+{
+
+	return _executablePath;
 }
 
 std::vector<craft::instance<std::string>> Environment::argv()
@@ -73,6 +92,22 @@ void Environment::refreshBackends()
 			type.hasFeature<PCompiler>() ? type.getFeature<PCompiler>() : nullptr,
 		};
 	}
+}
+
+void Environment::initializePath()
+{
+	char buf[4096];
+
+	#ifdef __linux__ 
+		::readlink("/proc/self/exe", buf, 4096);
+	#elif _WIN32
+		GetModuleFileName(NULL, buf, 4096);
+			// windows code goes here
+	#else
+		#warning "Environment::initializePath: Unknown Platform."
+	#endif
+	_executablePath = std::string(buf);
+
 }
 
 instance<> Environment::get(TypeId type)

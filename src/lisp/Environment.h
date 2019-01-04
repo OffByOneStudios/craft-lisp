@@ -11,6 +11,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::Environment);
 	private:
 		std::shared_ptr<spdlog::logger> _logger;
+		std::string _executablePath;
 		std::vector<instance<std::string>> _argv;
 
 		std::recursive_mutex _module_load_mutex;
@@ -48,6 +49,8 @@ namespace lisp
 	
 		// Global Logger
 		CRAFT_LISP_EXPORTED std::shared_ptr<spdlog::logger> log();
+		// Location of cult Executable
+		CRAFT_LISP_EXPORTED std::string executablePath();
 		// Global Argv
 		CRAFT_LISP_EXPORTED std::vector<instance<std::string>> argv();
 
@@ -72,6 +75,7 @@ namespace lisp
 		// Misc features
 	public:
 		CRAFT_LISP_EXPORTED void refreshBackends();
+		CRAFT_LISP_EXPORTED void initializePath();
 
 		// Templated helpers
 	public:

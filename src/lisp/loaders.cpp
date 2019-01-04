@@ -9,13 +9,19 @@ using namespace craft;
 using namespace craft::types;
 using namespace craft::lisp;
 
+#ifdef __GNUC__
+#include <experimental/filesystem>
+namespace sfs = std::experimental::filesystem;
+#else
+#include <filesystem>
+namespace sfs = std::::filesystem;
+#endif
+
 
 CRAFT_DEFINE(PModuleLoader)
 {
 	_.defaults();
 }
-
-
 
 CRAFT_DEFINE(BuiltinLoader)
 {
@@ -24,8 +30,58 @@ CRAFT_DEFINE(BuiltinLoader)
 	_.defaults();
 }
 
+
+bool isLiteralImport(std::string proto_string)
+{
+	return ((proto_string[0] == '.' && proto_string[1] == '/') || path::is_absolute(sfs::path(proto_string)));
+}
+
+
+std::string resolveImportDirectory(instance<Environment> e)
+{
+	return sfs::canonical(sfs::path(path::dir(e->executablePath())) /= sfs::path("..")).generic_string();
+}
+
+std::string cleanDllName(std::string dllName)
+{
+	#ifdef  _WIN32
+		auto clean = dllName + ".dll";
+	#elif	__APPLE__
+		auto clean = "lib" + dllName + ".dylib";
+	#else
+		auto clean = "lib" + dllName + ".so";
+	#endif
+	return clean;
+}
+
+
 std::string BuiltinLoader::resolve(instance<Environment> env, instance<Module> requester, std::string const& proto_string, instance<> extra)
 {
+	env->log()->info(proto_string);
+	if (requester && isLiteralImport(proto_string))
+	{
+		auto reqLoader = requester->getLoader();
+		if (reqLoader.isType<FileLoader>())
+		{
+			instance<FileLoader> reqFileLoader = reqLoader;
+			auto relativePath = path::normalize(path::join(path::dir(reqFileLoader->_filePath), proto_string));
+
+			if (path::exists(relativePath))
+			{
+				types::load_dll(path::join(path::dir(relativePath), cleanDllName(path::filename(relativePath))));
+				return relativePath;
+			}
+			SPDLOG_TRACE(env->log(), "Relative path `{0}` not found using absolute path.", relativePath);
+		}
+	}
+	else
+	{
+		auto base = path::join(resolveImportDirectory(env), proto_string);
+		if(sfs::exists(sfs::path(base)))
+		{
+			types::load_dll(path::join(base, cleanDllName(path::filename(proto_string))));
+		}
+	}
 	return proto_string;
 }
 
@@ -94,7 +150,7 @@ CRAFT_DEFINE(FileLoader)
 
 std::string FileLoader::resolve(instance<Environment> env, instance<Module> requester, std::string const& proto_string, instance<> extra)
 {
-	if (requester)
+	if (requester && isLiteralImport(proto_string))
 	{
 		auto reqLoader = requester->getLoader();
 		if (reqLoader.isType<FileLoader>())
@@ -106,6 +162,14 @@ std::string FileLoader::resolve(instance<Environment> env, instance<Module> requ
 				return relativePath;
 
 			SPDLOG_TRACE(env->log(), "Relative path `{0}` not found using absolute path.", relativePath);
+		}
+	}
+	else
+	{
+		auto base = path::join(resolveImportDirectory(env), proto_string);
+		if(sfs::exists(sfs::path(base)))
+		{
+			return path::absolute(base);
 		}
 	}
 

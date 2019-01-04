@@ -170,6 +170,7 @@ namespace lisp
 		CRAFT_LISP_EXPORTED CRAFT_OBJECT_DECLARE(craft::lisp::FileLoader);
 
 	public:
+		friend class BuiltinLoader;
 		static constexpr char c_provider_index[] = "file";
 
 	private:
