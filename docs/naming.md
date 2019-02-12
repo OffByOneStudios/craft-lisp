@@ -115,8 +115,8 @@ The above should be instrumented through the `CultSemantics` object providing a 
 The default environment is effectively:
 
 ```
-(ns/using `namespace:cult.system`)
-(ns/using `namespace:cult.core` :as 'cult')
+(ns/using "namespace:cult.system")
+(ns/using "namespace:cult.core" :as cult)
 ```
 
 This will allow us to provide for package managers (3.) and sets of files (7.) while improving resolution of global manipulation of short names (1., 5.).
