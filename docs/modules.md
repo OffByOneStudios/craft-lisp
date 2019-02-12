@@ -6,12 +6,12 @@ The author hopes that modules may eventually be immutable, this has some difficu
 
 Modules have strong names using a URI scheme. Custom handlers can be added to the URI scheme (including, for example, module systems and package managers). Below are some examples:
 
-* "builtin:system.cult" Would resolve to cult's system.
-* "file:D:\Data\hello.cult" Would resolve to an absolute file.
+* "builtin:system.cult" Would resolve to the system's cult implementation.
+* "file:D:\\Data\\hello.cult" Would resolve to an absolute file.
 * "file:hello.cult" Would resolve to a file local to the current file.
 * "file:./test/hello.cult" Would resolve to a file relative to the current file's directory.
-* "packman:Organization/Package" Would use a package manager to resolve to a specific package.
-* "namespace:foo/bar" Would resolve to the "meta" module containing all the symbols in the given namespace.
+* "packman:Organization/Package >v0.1.3" Would use a package manager to resolve to a specific package, with optional version matcher.
+* "namespace:foo/bar" Would resolve to the synthetic module containing all the symbols in the given namespace.
 
 ## Lifecycle
 
