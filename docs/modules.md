@@ -12,7 +12,8 @@ Modules have strong names using a URI scheme. Custom handlers can be added to th
 * `"file:./test/hello.cult"` Would resolve to a file relative to the current file's directory.
 * `"packman:Organization/Package >15.1.3"` Would use a package manager to resolve to a specific package, with optional version matcher.
   * Optionally the loader is wrapped in a multimethod so it can be invoked with an arbitrary number of arguments of arbitrary type. For example the above devloves to:
-    ``` (cult/load "packman" "Organization/Package" (packman/Match :greater-than v:15.1.3))
+    ```
+    (cult/load "packman" "Organization/Package" (packman/Match :greater-than v:15.1.3))
     ```
 * `"namespace:foo/bar"` Would resolve to the synthetic module containing all the symbols in the given namespace.
 
