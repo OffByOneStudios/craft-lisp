@@ -115,6 +115,9 @@ The above should be instrumented through the `CultSemantics` object providing a 
 The default environment is effectively:
 
 ```
+(ns/require "builtin:types")
+(ns/require "builtin:lisp")
+
 (ns/using "namespace:cult.system")
 (ns/using "namespace:cult.core" :as cult)
 ```
