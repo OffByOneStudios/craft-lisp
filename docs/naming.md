@@ -123,14 +123,14 @@ This will allow us to provide for package managers (3.) and sets of files (7.) w
 
 #### A Note on `/`
 
-The slash `/` symbol is not an operator like `.` is. It is a convention as a way to provide a "path" within a namespace, sometimes called a refinement.
+The slash `/` symbol is not an operator/special-syntax like `.` is. It is a convention as a way to provide a "path" within a namespace - sometimes called a refinement - and has no special parsing rules associated with it (outside of tooling relying on convention and default arguments to some methods).
 
 This is often used by modules to place symbols they imported into their own area for the purposes of development. Cult in specific uses this to separate concepts, even though they are all part of the same namespace, package, and final export list, they are from different modules. This is especially important for cult as it is often automatically used and may use some common names which are better prefixed with their purpose.
 
-Notably, if something which provides a `/` name changes, the module will have to be marked to be rebuilt/imported (unless it resulted in no significant changes). This is because the root level of the object is ran at load time and is allowed to introspect the state of the system, additionally macros may have been changed (or the multi-methods they rely on). However if something that provides a `.` name changes it will not have to reimport the module (though things like a Jit may have made assumptions based off of the state *at the time* and may need to update their function cache).
+Notably, if something which provides a `/` name changes, the module will have to be marked to be rebuilt/imported (unless it resulted in no significant changes). This is because the root level of the object is ran at load time and is allowed to introspect the state of the system, additionally macros may have been changed (or the multi-methods they rely on). However if something that provides a `.` name changes it will not have to reimport the module (though things like a Jit may have made assumptions based off of the state *at the time they were invoked* (e.g. post-load) and may need to update their function cache).
 
 ### Semantic Objects
 
-Objects in the system, especially those at the root level of `CultSemantics` (like multimethods and types), should be thought of as semantic objects. For example that a multimethod defined in `ns:cult.system` by the name of `+` represents the concept of addition as defined by cult, where as a multimethod define in `ns:com.foobar.maze` could mean something completely different.
+Objects in the system, especially those at the root level of `CultSemantics` (like multimethods and types), should be thought of as semantic objects. For example that a multimethod defined in `ns:cult.system` by the name of `+` represents the concept of addition as defined by cult, where as a multimethod defined in `ns:com.foobar.maze` by the name of `+` could mean something completely different as defined by that namespace.
 
-This distinction has some consequences. For example whether we want to overload `+` or resolve a different object for `+`. Or perhaps merge them into a new object.
+This distinction has some consequences. For example when defining a new object `+` in a module: whether we want to overload (e.g. extend) `+`, resolve to a different object for `+` (e.g. create a new name / shadow the name), or perhaps merge two distinct definitions into one.
