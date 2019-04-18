@@ -1,0 +1,1 @@
+The purpose of this folder is to describe various syntaxes supported by the cult system, where they come from, and how.
