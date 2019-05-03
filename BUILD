@@ -1,7 +1,7 @@
 load("//build_tools:macros.bzl", "header_generator", "dll_generator", "entrypoint_generator")
 
 header_generator(  
-  deps = ["//util", "//types:headers", "@pegtl//:pegtl"]
+  deps = ["//types:headers", "@pegtl//:pegtl"]
 )
 
 dll_generator(
